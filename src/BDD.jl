@@ -11,7 +11,9 @@ struct Scenario
 end
 
 function parsescenario(text::String) :: OKParseResult{Scenario}
-    OKParseResult{Scenario}(Scenario("This is a description"))
+    lines = split(text, "\n")
+    description_match = match(r"Scenario: (.+)", lines[1])
+    OKParseResult{Scenario}(Scenario(description_match.captures[1]))
 end
 
 end # module
