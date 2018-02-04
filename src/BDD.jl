@@ -21,7 +21,8 @@ struct Feature
 end
 
 function parsefeature(text::String) :: OKParseResult{Feature}
-    OKParseResult{Feature}(Feature("This is a feature"))
+    description_match = match(r"Feature: (.+)", text)
+    OKParseResult{Feature}(Feature(description_match.captures[1]))
 end
 
 end # module
