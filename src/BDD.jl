@@ -16,4 +16,12 @@ function parsescenario(text::String) :: OKParseResult{Scenario}
     OKParseResult{Scenario}(Scenario(description_match.captures[1]))
 end
 
+struct Feature
+    description::String
+end
+
+function parsefeature(text::String) :: OKParseResult{Feature}
+    OKParseResult{Feature}(Feature("This is a feature"))
+end
+
 end # module
