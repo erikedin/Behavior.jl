@@ -18,11 +18,14 @@ end
 
 struct Feature
     description::String
+    scenarios::Vector{Scenario}
 end
 
 function parsefeature(text::String) :: OKParseResult{Feature}
     description_match = match(r"Feature: (.+)", text)
-    OKParseResult{Feature}(Feature(description_match.captures[1]))
+    OKParseResult{Feature}(
+        Feature(description_match.captures[1],
+            [Scenario("Some description")]))
 end
 
 end # module
