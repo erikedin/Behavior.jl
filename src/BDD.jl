@@ -25,9 +25,9 @@ end
 function parsefeature(text::String) :: OKParseResult{Feature}
     description_match = match(r"Feature: (.+)", text)
 
-    tag_match = match(r"(@.*)", text)
+    tag_match = matchall(r"(@\w+)", text)
     feature_tags = if tag_match != nothing
-        [tag_match.captures[1]]
+        tag_match
     else
         []
     end
