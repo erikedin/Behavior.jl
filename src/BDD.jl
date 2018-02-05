@@ -19,10 +19,18 @@ end
 struct Feature
     description::String
     scenarios::Vector{Scenario}
+    tags::Vector{String}
 end
 
 function parsefeature(text::String) :: OKParseResult{Feature}
     description_match = match(r"Feature: (.+)", text)
+
+    tag_match = match(r"(@.*)", text)
+    feature_tags = if tag_match != nothing
+        [tag_match.captures[1]]
+    else
+        []
+    end
 
     scenarios = []
     lines = split(text, "\n")
@@ -34,7 +42,9 @@ function parsefeature(text::String) :: OKParseResult{Feature}
     end
 
     OKParseResult{Feature}(
-        Feature(description_match.captures[1], scenarios))
+        Feature(description_match.captures[1], scenarios, feature_tags))
 end
+
+hastag(feature::Feature, tag::String) = tag in feature.tags
 
 end # module
