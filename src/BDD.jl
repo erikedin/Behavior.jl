@@ -27,8 +27,9 @@ function parsefeature(text::String) :: OKParseResult{Feature}
     scenarios = []
     lines = split(text, "\n")
     for l in lines
-        if match(r"Scenario: (?<description>.+)", l) != nothing
-            push!(scenarios, Scenario(""))
+        scenario_match = match(r"Scenario: (?<description>.+)", l)
+        if scenario_match != nothing
+            push!(scenarios, Scenario(scenario_match[:description]))
         end
     end
 

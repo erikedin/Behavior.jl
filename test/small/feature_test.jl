@@ -56,5 +56,37 @@ using BDD: parsefeature, issuccessful
             @test issuccessful(result)
             @test length(result.value.scenarios) == 2
         end
+
+        @testset "Feature has one scenario; The description is read from the scenario" begin
+            text = """
+            Feature: This feature has one scenario
+
+                Scenario: This is one scenario
+                    Given a precondition
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result)
+            @test result.value.scenarios[1].description == "This is one scenario"
+        end
+
+        @testset "Feature has two scenarios; two scenarios are parsed" begin
+            text = """
+            Feature: This feature has one scenario
+
+                Scenario: This is one scenario
+                    Given a precondition
+
+                Scenario: This is a second scenario
+                    Given a precondition
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result)
+            @test result.value.scenarios[1].description == "This is one scenario"
+            @test result.value.scenarios[2].description == "This is a second scenario"
+        end
     end
 end
