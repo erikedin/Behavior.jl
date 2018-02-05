@@ -8,12 +8,13 @@ issuccessful(::OKParseResult{T}) where {T} = true
 
 struct Scenario
     description::String
+    tags::Vector{String}
 end
 
 function parsescenario(text::String) :: OKParseResult{Scenario}
     lines = split(text, "\n")
     description_match = match(r"Scenario: (.+)", lines[1])
-    OKParseResult{Scenario}(Scenario(description_match.captures[1]))
+    OKParseResult{Scenario}(Scenario(description_match.captures[1], []))
 end
 
 struct Feature
@@ -37,7 +38,8 @@ function parsefeature(text::String) :: OKParseResult{Feature}
     for l in lines
         scenario_match = match(r"Scenario: (?<description>.+)", l)
         if scenario_match != nothing
-            push!(scenarios, Scenario(scenario_match[:description]))
+            scenario = Scenario(scenario_match[:description], feature_tags)
+            push!(scenarios, scenario)
         end
     end
 
@@ -46,5 +48,6 @@ function parsefeature(text::String) :: OKParseResult{Feature}
 end
 
 hastag(feature::Feature, tag::String) = tag in feature.tags
+hastag(scenario::Scenario, tag::String) = tag in scenario.tags
 
 end # module
