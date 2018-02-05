@@ -23,9 +23,17 @@ end
 
 function parsefeature(text::String) :: OKParseResult{Feature}
     description_match = match(r"Feature: (.+)", text)
+
+    scenarios = []
+    lines = split(text, "\n")
+    for l in lines
+        if match(r"Scenario: (?<description>.+)", l) != nothing
+            push!(scenarios, Scenario(""))
+        end
+    end
+
     OKParseResult{Feature}(
-        Feature(description_match.captures[1],
-            [Scenario("Some description")]))
+        Feature(description_match.captures[1], scenarios))
 end
 
 end # module
