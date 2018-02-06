@@ -1,10 +1,19 @@
 module BDD
 
-struct OKParseResult{T}
+abstract type ParseResult{T} end
+
+struct OKParseResult{T} <: ParseResult{T}
     value::T
 end
 
+struct BadParseResult{T} <: ParseResult{T}
+    reason::Symbol
+    expected::Symbol
+    actual::Symbol
+end
+
 issuccessful(::OKParseResult{T}) where {T} = true
+issuccessful(::BadParseResult{T}) where {T} = false
 
 struct Scenario
     description::String
@@ -33,7 +42,7 @@ function pushtags!(state::TagState, tags::Vector{SubString{String}})
     append!(state.tags, tags)
 end
 
-function parsefeature(text::String) :: OKParseResult{Feature}
+function parsefeature(text::String) :: ParseResult{Feature}
     feature_description = ""
     feature_tags = []
 
@@ -55,6 +64,10 @@ function parsefeature(text::String) :: OKParseResult{Feature}
 
         scenario_match = match(r"Scenario: (?<description>.+)", l)
         if scenario_match != nothing
+            if feature_description == ""
+                return BadParseResult{Feature}(:unexpected_construct, :feature, :scenario)
+            end
+
             scenario_tags = taketags!(tagstate)
             scenario = Scenario(scenario_match[:description], scenario_tags)
             push!(scenarios, scenario)

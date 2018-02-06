@@ -89,4 +89,25 @@ using BDD: parsefeature, issuccessful
             @test result.value.scenarios[2].description == "This is a second scenario"
         end
     end
+
+    @testset "Malformed features" begin
+        @testset "Scenario found before feature; Parse fails with feature expected" begin
+            text = """
+                Scenario: This is one scenario
+                    Given a precondition
+
+            Feature: This feature has one scenario
+
+                Scenario: This is a second scenario
+                    Given a precondition
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result) == false
+            @test result.reason == :unexpected_construct
+            @test result.expected == :feature
+            @test result.actual == :scenario
+        end
+    end
 end
