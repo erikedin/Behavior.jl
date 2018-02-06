@@ -29,10 +29,19 @@ function parsefeature(text::String) :: OKParseResult{Feature}
 
     scenarios = []
     lines = split(text, "\n")
+    scenario_tags = []
     for l in lines
+        tag_match = matchall(r"(@\w+)", l)
+        if !isempty(tag_match)
+            scenario_tags = tag_match
+        end
+        if ismatch(r"Feature: (.+)", l)
+            scenario_tags = []
+        end
+
         scenario_match = match(r"Scenario: (?<description>.+)", l)
         if scenario_match != nothing
-            scenario = Scenario(scenario_match[:description], feature_tags)
+            scenario = Scenario(scenario_match[:description], scenario_tags)
             push!(scenarios, scenario)
         end
     end

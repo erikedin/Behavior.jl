@@ -1,5 +1,5 @@
 using Base.Test
-using BDD: hastag
+using BDD: hastag, parsefeature, issuccessful
 
 @testset "Tags" begin
     @testset "Feature tags" begin
@@ -67,6 +67,21 @@ using BDD: hastag
 
             result = parsefeature(text)
             
+            @test issuccessful(result)
+            @test hastag(result.value.scenarios[1], "@tag1") == false
+        end
+
+        @testset "Feature has tag1, but no the scenario; The parsed scenario does not have tag1" begin
+            text = """
+            @tag1
+            Feature: Some description
+
+                Scenario: Some description
+                    Given a precondition
+            """
+
+            result = parsefeature(text)
+
             @test issuccessful(result)
             @test hastag(result.value.scenarios[1], "@tag1") == false
         end
