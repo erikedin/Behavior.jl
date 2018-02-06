@@ -11,12 +11,6 @@ struct Scenario
     tags::Vector{String}
 end
 
-function parsescenario(text::String) :: OKParseResult{Scenario}
-    lines = split(text, "\n")
-    description_match = match(r"Scenario: (.+)", lines[1])
-    OKParseResult{Scenario}(Scenario(description_match.captures[1], []))
-end
-
 struct Feature
     description::String
     scenarios::Vector{Scenario}
