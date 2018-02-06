@@ -22,6 +22,7 @@ end
 
 struct Feature
     description::String
+    long_description::String
     scenarios::Vector{Scenario}
     tags::Vector{String}
 end
@@ -50,6 +51,7 @@ function parsefeature(text::String) :: ParseResult{Feature}
     lines = split(text, "\n")
     scenario_tags = []
     tagstate = TagState()
+    long_description = ""
     for l in lines
         tag_match = matchall(r"(@\w+)", l)
         if !isempty(tag_match)
@@ -72,10 +74,14 @@ function parsefeature(text::String) :: ParseResult{Feature}
             scenario = Scenario(scenario_match[:description], scenario_tags)
             push!(scenarios, scenario)
         end
+
+        if isempty(tag_match) && description_match == nothing && scenario_match == nothing
+           long_description = string(long_description, "\n", l) 
+        end
     end
 
     OKParseResult{Feature}(
-        Feature(feature_description, scenarios, feature_tags))
+        Feature(feature_description, long_description, scenarios, feature_tags))
 end
 
 hastag(feature::Feature, tag::String) = tag in feature.tags

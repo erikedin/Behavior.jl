@@ -23,6 +23,20 @@ using BDD: parsefeature, issuccessful
             @test issuccessful(result)
             @test result.value.description == "This is another feature"
         end
+
+        @testset "Read long feature description" begin
+            text = """
+            Feature: This is another feature
+              This is the long description.
+              It contains several lines.
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result)
+            @test contains(result.value.long_description, "This is the long description.")
+            @test contains(result.value.long_description, "It contains several lines")
+        end
     end
 
     @testset "Read scenarios" begin
