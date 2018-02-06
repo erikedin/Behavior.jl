@@ -17,37 +17,52 @@ struct Feature
     tags::Vector{String}
 end
 
-function parsefeature(text::String) :: OKParseResult{Feature}
-    description_match = match(r"Feature: (.+)", text)
+mutable struct TagState
+    tags::Vector{String}
 
-    tag_match = matchall(r"(@\w+)", text)
-    feature_tags = if tag_match != nothing
-        tag_match
-    else
-        []
-    end
+    TagState() = new([])
+end
+
+function taketags!(state::TagState)
+    tmp = state.tags
+    state.tags = []
+    tmp
+end
+
+function pushtags!(state::TagState, tags::Vector{SubString{String}})
+    append!(state.tags, tags)
+end
+
+function parsefeature(text::String) :: OKParseResult{Feature}
+    feature_description = ""
+    feature_tags = []
 
     scenarios = []
     lines = split(text, "\n")
     scenario_tags = []
+    tagstate = TagState()
     for l in lines
         tag_match = matchall(r"(@\w+)", l)
         if !isempty(tag_match)
-            scenario_tags = tag_match
+            pushtags!(tagstate, tag_match)
         end
-        if ismatch(r"Feature: (.+)", l)
-            scenario_tags = []
+
+        description_match = match(r"Feature: (?<feature_description>.+)", l)
+        if description_match != nothing
+            feature_description = description_match[:feature_description]
+            feature_tags = taketags!(tagstate)
         end
 
         scenario_match = match(r"Scenario: (?<description>.+)", l)
         if scenario_match != nothing
+            scenario_tags = taketags!(tagstate)
             scenario = Scenario(scenario_match[:description], scenario_tags)
             push!(scenarios, scenario)
         end
     end
 
     OKParseResult{Feature}(
-        Feature(description_match.captures[1], scenarios, feature_tags))
+        Feature(feature_description, scenarios, feature_tags))
 end
 
 hastag(feature::Feature, tag::String) = tag in feature.tags
