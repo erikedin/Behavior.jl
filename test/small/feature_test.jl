@@ -118,6 +118,36 @@ using BDD: parsefeature, issuccessful
             @test result.value.scenarios[1].description == "This is one scenario"
             @test result.value.scenarios[2].description == "This is a second scenario"
         end
+
+        @testset "Scenario with three steps; The parsed scenario has three steps" begin
+            text = """
+            Feature: This feature has one scenario
+
+                Scenario: This is one scenario
+                    Given a precondition
+                    When an action is performed
+                    Then some postcondition holds
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result)
+            @test length(result.value.scenarios[1].steps) == 3
+        end
+
+        @testset "Scenario with one step; The parsed scenario has one step" begin
+            text = """
+            Feature: This feature has one scenario
+
+                Scenario: This is one scenario
+                    Given a precondition
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result)
+            @test length(result.value.scenarios[1].steps) == 1
+        end
     end
 
     @testset "Malformed features" begin

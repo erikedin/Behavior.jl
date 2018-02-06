@@ -18,6 +18,7 @@ issuccessful(::BadParseResult{T}) where {T} = false
 struct Scenario
     description::String
     tags::Vector{String}
+    steps::Vector{String}
 end
 
 struct Feature
@@ -49,7 +50,9 @@ function parsefeature(text::String) :: ParseResult{Feature}
 
     scenarios = []
     lines = split(text, "\n")
+    scenario_description = ""
     scenario_tags = []
+    scenario_steps = []
     tagstate = TagState()
     long_description = ""
     for l in lines
@@ -71,14 +74,24 @@ function parsefeature(text::String) :: ParseResult{Feature}
             end
 
             scenario_tags = taketags!(tagstate)
-            scenario = Scenario(scenario_match[:description], scenario_tags)
-            push!(scenarios, scenario)
+            scenario_description = scenario_match[:description]
         end
 
-        if isempty(tag_match) && description_match == nothing && scenario_match == nothing &&
-                isempty(scenarios)
-           long_description = string(long_description, "\n", l) 
+        if isempty(tag_match) && description_match == nothing && scenario_match == nothing
+            if scenario_description == ""
+                long_description = string(long_description, "\n", l)
+            elseif strip(l) == ""
+                scenario = Scenario(scenario_description, scenario_tags, scenario_steps)
+                push!(scenarios, scenario)
+                scenario_description = ""
+            else
+                push!(scenario_steps, l)
+            end
         end
+    end
+    if scenario_description != ""
+        scenario = Scenario(scenario_description, scenario_tags, scenario_steps)
+        push!(scenarios, scenario)
     end
 
     OKParseResult{Feature}(
