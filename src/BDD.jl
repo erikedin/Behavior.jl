@@ -75,7 +75,8 @@ function parsefeature(text::String) :: ParseResult{Feature}
             push!(scenarios, scenario)
         end
 
-        if isempty(tag_match) && description_match == nothing && scenario_match == nothing
+        if isempty(tag_match) && description_match == nothing && scenario_match == nothing &&
+                isempty(scenarios)
            long_description = string(long_description, "\n", l) 
         end
     end

@@ -37,6 +37,22 @@ using BDD: parsefeature, issuccessful
             @test contains(result.value.long_description, "This is the long description.")
             @test contains(result.value.long_description, "It contains several lines")
         end
+
+        @testset "Scenarios are not part of the feature description" begin
+            text = """
+            Feature: This is another feature
+                This is the long description.
+                It contains several lines.
+
+                Scenario: Some scenario
+                    Given a precondition
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result)
+            @test contains(result.value.long_description, "Given a precondition") == false
+        end
     end
 
     @testset "Read scenarios" begin
