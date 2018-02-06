@@ -10,7 +10,8 @@ using BDD: parsefeature, issuccessful
             result = parsefeature(text)
 
             @test issuccessful(result)
-            @test result.value.description == "This is a feature"
+            feature = result.value
+            @test feature.header.description == "This is a feature"
         end
 
         @testset "Read another feature description; Description matches input" begin
@@ -21,7 +22,8 @@ using BDD: parsefeature, issuccessful
             result = parsefeature(text)
 
             @test issuccessful(result)
-            @test result.value.description == "This is another feature"
+            feature = result.value
+            @test feature.header.description == "This is another feature"
         end
 
         @testset "Read long feature description" begin
@@ -34,8 +36,9 @@ using BDD: parsefeature, issuccessful
             result = parsefeature(text)
 
             @test issuccessful(result)
-            @test contains(result.value.long_description, "This is the long description.")
-            @test contains(result.value.long_description, "It contains several lines")
+            feature = result.value
+            @test "This is the long description." in feature.header.long_description
+            @test "It contains several lines." in feature.header.long_description
         end
 
         @testset "Scenarios are not part of the feature description" begin
@@ -51,7 +54,8 @@ using BDD: parsefeature, issuccessful
             result = parsefeature(text)
 
             @test issuccessful(result)
-            @test contains(result.value.long_description, "Given a precondition") == false
+            feature = result.value
+            @test ("Given a precondition" in feature.header.long_description) == false
         end
     end
 
@@ -67,7 +71,8 @@ using BDD: parsefeature, issuccessful
             result = parsefeature(text)
 
             @test issuccessful(result)
-            @test length(result.value.scenarios) == 1        
+            feature = result.value
+            @test length(feature.scenarios) == 1
         end
 
         @testset "Feature has two scenarios; two scenarios are parsed" begin
@@ -84,7 +89,8 @@ using BDD: parsefeature, issuccessful
             result = parsefeature(text)
 
             @test issuccessful(result)
-            @test length(result.value.scenarios) == 2
+            feature = result.value
+            @test length(feature.scenarios) == 2
         end
 
         @testset "Feature has one scenario; The description is read from the scenario" begin
@@ -98,7 +104,8 @@ using BDD: parsefeature, issuccessful
             result = parsefeature(text)
 
             @test issuccessful(result)
-            @test result.value.scenarios[1].description == "This is one scenario"
+            feature = result.value
+            @test feature.scenarios[1].description == "This is one scenario"
         end
 
         @testset "Feature has two scenarios; two scenarios are parsed" begin
@@ -115,8 +122,9 @@ using BDD: parsefeature, issuccessful
             result = parsefeature(text)
 
             @test issuccessful(result)
-            @test result.value.scenarios[1].description == "This is one scenario"
-            @test result.value.scenarios[2].description == "This is a second scenario"
+            feature = result.value
+            @test feature.scenarios[1].description == "This is one scenario"
+            @test feature.scenarios[2].description == "This is a second scenario"
         end
 
         @testset "Scenario with three steps; The parsed scenario has three steps" begin
@@ -132,7 +140,8 @@ using BDD: parsefeature, issuccessful
             result = parsefeature(text)
 
             @test issuccessful(result)
-            @test length(result.value.scenarios[1].steps) == 3
+            feature = result.value
+            @test length(feature.scenarios[1].steps) == 3
         end
 
         @testset "Scenario with one step; The parsed scenario has one step" begin
@@ -146,7 +155,8 @@ using BDD: parsefeature, issuccessful
             result = parsefeature(text)
 
             @test issuccessful(result)
-            @test length(result.value.scenarios[1].steps) == 1
+            feature = result.value
+            @test length(feature.scenarios[1].steps) == 1
         end
     end
 
