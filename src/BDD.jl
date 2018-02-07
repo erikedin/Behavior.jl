@@ -18,7 +18,9 @@ issuccessful(::OKParseResult{T}) where {T} = true
 issuccessful(::BadParseResult{T}) where {T} = false
 
 abstract type ScenarioStep end
-==(a::ScenarioStep, b::ScenarioStep) = a.text == b.text
+function ==(a::T, b::T) where {T <: ScenarioStep}
+    a.text == b.text
+end
 
 struct Given <: ScenarioStep
     text::String
@@ -132,8 +134,18 @@ function parsescenario(byline::ByLineParser)
             consume!(byline)
             return OKParseResult{Scenario}(Scenario(description, tags, steps))
         end
-        step_match = match(r"(?:Given|When|Then|And) (?<step_definition>.+)", byline.current)
-        step = Given(step_match[:step_definition])
+        step_match = match(r"(?<step_type>Given|When|Then|And) (?<step_definition>.+)", byline.current)
+        step_type = step_match[:step_type]
+        step_definition = step_match[:step_definition]
+        if step_type == "Given"
+            step = Given(step_definition)
+        elseif step_type == "When"
+            step = When(step_definition)
+        elseif step_type == "Then"
+            step = Then(step_definition)
+        elseif step_type == "And"
+            step = Given(step_definition)
+        end
         push!(steps, step)
         consume!(byline)
     end

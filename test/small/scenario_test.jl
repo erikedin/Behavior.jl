@@ -16,7 +16,7 @@ using BDD: issuccessful, parsescenario, Given, When, Then
         @test scenario.steps == BDD.ScenarioStep[Given("a precondition")]
     end
 
-    @testset "Scenario has a Given step; the parsed scenario has a Given struct" begin
+    @testset "Scenario has a When step; the parsed scenario has a When struct" begin
         text = """
         Scenario: Some description
             When some action
@@ -31,7 +31,7 @@ using BDD: issuccessful, parsescenario, Given, When, Then
         @test scenario.steps == BDD.ScenarioStep[When("some action")]
     end
 
-    @testset "Scenario has a Given step; the parsed scenario has a Given struct" begin
+    @testset "Scenario has a Then step; the parsed scenario has a Then struct" begin
         text = """
         Scenario: Some description
             Then a postcondition
