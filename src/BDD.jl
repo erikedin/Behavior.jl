@@ -18,10 +18,17 @@ issuccessful(::OKParseResult{T}) where {T} = true
 issuccessful(::BadParseResult{T}) where {T} = false
 
 abstract type ScenarioStep end
+==(a::ScenarioStep, b::ScenarioStep) = a.text == b.text
+
 struct Given <: ScenarioStep
     text::String
 end
-==(a::Given, b::Given) = a.text == b.text
+struct When <: ScenarioStep
+    text::String
+end
+struct Then <: ScenarioStep
+    text::String
+end
 
 struct Scenario
     description::String
