@@ -1,5 +1,7 @@
 module BDD
 
+import Base.==
+
 abstract type ParseResult{T} end
 
 struct OKParseResult{T} <: ParseResult{T}
@@ -15,10 +17,16 @@ end
 issuccessful(::OKParseResult{T}) where {T} = true
 issuccessful(::BadParseResult{T}) where {T} = false
 
+abstract type ScenarioStep end
+struct Given <: ScenarioStep
+    text::String
+end
+==(a::Given, b::Given) = a.text == b.text
+
 struct Scenario
     description::String
     tags::Vector{String}
-    steps::Vector{String}
+    steps::Vector{ScenarioStep}
 end
 
 struct FeatureHeader
@@ -117,7 +125,8 @@ function parsescenario(byline::ByLineParser)
             consume!(byline)
             return OKParseResult{Scenario}(Scenario(description, tags, steps))
         end
-        step = byline.current
+        step_match = match(r"(?:Given|When|Then) (?<step_definition>.+)", byline.current)
+        step = Given(step_match[:step_definition])
         push!(steps, step)
         consume!(byline)
     end
