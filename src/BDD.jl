@@ -32,22 +32,6 @@ struct Feature
     scenarios::Vector{Scenario}
 end
 
-mutable struct TagState
-    tags::Vector{String}
-
-    TagState() = new([])
-end
-
-function taketags!(state::TagState)
-    tmp = state.tags
-    state.tags = []
-    tmp
-end
-
-function pushtags!(state::TagState, tags::Vector{SubString{String}})
-    append!(state.tags, tags)
-end
-
 mutable struct ByLineParser
     current::String
     rest::Vector{String}
@@ -120,60 +104,43 @@ function parsefeatureheader(byline::ByLineParser) :: ParseResult{FeatureHeader}
     return OKParseResult{FeatureHeader}(feature_header)
 end
 
+function parsescenario(byline::ByLineParser)
+    tags = parsetags(byline)
+
+    scenario_match = match(r"Scenario: (?<description>.+)", byline.current)
+    description = scenario_match[:description]
+    consume!(byline)
+    steps = []
+
+    while !isempty(byline)
+        if iscurrentlineempty(byline)
+            consume!(byline)
+            return OKParseResult{Scenario}(Scenario(description, tags, steps))
+        end
+        step = byline.current
+        push!(steps, step)
+        consume!(byline)
+    end
+
+    BadParseResult{Scenario}(:unexpected_end, :scenario_steps, :eof)
+end
+
 function parsefeature(text::String) :: ParseResult{Feature}
     byline = ByLineParser(text)
 
-    feature_description = ""
     feature_header_result = parsefeatureheader(byline)
     if !issuccessful(feature_header_result)
         return BadParseResult{Feature}(feature_header_result.reason,
                                        feature_header_result.expected,
                                        feature_header_result.actual)
     end
+
     scenarios = []
-    lines = split(text, "\n")
-    scenario_description = ""
-    scenario_tags = []
-    scenario_steps = []
-    tagstate = TagState()
-    long_description = ""
-    for l in lines
-        tag_match = matchall(r"(@\w+)", l)
-        if !isempty(tag_match)
-            pushtags!(tagstate, tag_match)
+    while !isempty(byline)
+        scenario_parse_result = parsescenario(byline)
+        if issuccessful(scenario_parse_result)
+            push!(scenarios, scenario_parse_result.value)
         end
-
-        description_match = match(r"Feature: (?<feature_description>.+)", l)
-        if description_match != nothing
-            feature_description = description_match[:feature_description]
-            feature_tags = taketags!(tagstate)
-        end
-
-        scenario_match = match(r"Scenario: (?<description>.+)", l)
-        if scenario_match != nothing
-            if feature_description == ""
-                return BadParseResult{Feature}(:unexpected_construct, :feature, :scenario)
-            end
-
-            scenario_tags = taketags!(tagstate)
-            scenario_description = scenario_match[:description]
-        end
-
-        if isempty(tag_match) && description_match == nothing && scenario_match == nothing
-            if scenario_description == ""
-                long_description = string(long_description, "\n", l)
-            elseif strip(l) == ""
-                scenario = Scenario(scenario_description, scenario_tags, scenario_steps)
-                push!(scenarios, scenario)
-                scenario_description = ""
-            else
-                push!(scenario_steps, l)
-            end
-        end
-    end
-    if scenario_description != ""
-        scenario = Scenario(scenario_description, scenario_tags, scenario_steps)
-        push!(scenarios, scenario)
     end
 
     OKParseResult{Feature}(

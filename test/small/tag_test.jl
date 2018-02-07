@@ -10,9 +10,10 @@ using BDD: hastag, parsefeature, issuccessful
             """
 
             result = parsefeature(text)
-            
+
             @test issuccessful(result)
-            @test hastag(result.value, "@tag1")
+            feature = result.value
+            @test hastag(feature, "@tag1")
         end
 
         @testset "Feature without tags; The parsed feature does not have @tag1" begin
@@ -52,9 +53,10 @@ using BDD: hastag, parsefeature, issuccessful
             """
 
             result = parsefeature(text)
-            
+
             @test issuccessful(result)
-            @test hastag(result.value.scenarios[1], "@tag1")
+            feature = result.value
+            @test hastag(feature.scenarios[1], "@tag1")
         end
 
         @testset "Scenario has no tags; The parsed scenario does not have tag1" begin
@@ -66,7 +68,7 @@ using BDD: hastag, parsefeature, issuccessful
             """
 
             result = parsefeature(text)
-            
+
             @test issuccessful(result)
             @test hastag(result.value.scenarios[1], "@tag1") == false
         end
