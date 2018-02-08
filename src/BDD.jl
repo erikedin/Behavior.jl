@@ -56,13 +56,9 @@ mutable struct ByLineParser
 
     function ByLineParser(text::String)
         lines = split(text, "\n")
-        if !isempty(lines)
-            current = lines[1]
-            rest = lines[2:end]
-            new(current, rest, false)
-        else
-            new(current, rest, true)
-        end
+        current = lines[1]
+        rest = lines[2:end]
+        new(current, rest, false)
     end
 end
 
@@ -132,7 +128,7 @@ function parsescenario(byline::ByLineParser)
     while !isempty(byline)
         if iscurrentlineempty(byline)
             consume!(byline)
-            return OKParseResult{Scenario}(Scenario(description, tags, steps))
+            break
         end
         step_match = match(r"(?<step_type>Given|When|Then|And) (?<step_definition>.+)", byline.current)
         step_type = step_match[:step_type]
@@ -153,7 +149,7 @@ function parsescenario(byline::ByLineParser)
         consume!(byline)
     end
 
-    BadParseResult{Scenario}(:unexpected_end, :scenario_steps, :eof)
+    OKParseResult{Scenario}(Scenario(description, tags, steps))
 end
 
 function parsefeature(text::String) :: ParseResult{Feature}

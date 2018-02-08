@@ -97,4 +97,15 @@ using BDD: issuccessful, parsescenario, Given, When, Then
                                                  Then("another postcondition")]
     end
 
+    @testset "Scenario is not terminated by newline; EOF is also an OK termination" begin
+        text = """
+        Scenario: Some description
+            Then some postcondition
+            And another postcondition"""
+
+        byline = BDD.ByLineParser(text)
+        result = parsescenario(byline)
+
+        @test issuccessful(result)
+    end
 end
