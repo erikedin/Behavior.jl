@@ -139,12 +139,15 @@ function parsescenario(byline::ByLineParser)
         step_definition = step_match[:step_definition]
         if step_type == "Given"
             step = Given(step_definition)
+            last_specific_type = Given
         elseif step_type == "When"
             step = When(step_definition)
+            last_specific_type = When
         elseif step_type == "Then"
             step = Then(step_definition)
+            last_specific_type = Then
         elseif step_type == "And"
-            step = Given(step_definition)
+            step = last_specific_type(step_definition)
         end
         push!(steps, step)
         consume!(byline)

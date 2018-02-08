@@ -62,4 +62,39 @@ using BDD: issuccessful, parsescenario, Given, When, Then
         @test scenario.steps == BDD.ScenarioStep[Given("a precondition"),
                                                  Given("another precondition")]
     end
+
+    @testset "Scenario has an And following a When; the And step becomes a When" begin
+        text = """
+        Scenario: Some description
+            When some action
+             And another action
+        """
+
+        byline = BDD.ByLineParser(text)
+        result = parsescenario(byline)
+
+        @test issuccessful(result)
+        scenario = result.value
+
+        @test scenario.steps == BDD.ScenarioStep[When("some action"),
+                                                 When("another action")]
+    end
+
+    @testset "Scenario has an And following a Then; the And step becomes a Then" begin
+        text = """
+        Scenario: Some description
+            Then some postcondition
+             And another postcondition
+        """
+
+        byline = BDD.ByLineParser(text)
+        result = parsescenario(byline)
+
+        @test issuccessful(result)
+        scenario = result.value
+
+        @test scenario.steps == BDD.ScenarioStep[Then("some postcondition"),
+                                                 Then("another postcondition")]
+    end
+
 end
