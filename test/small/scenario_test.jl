@@ -156,5 +156,51 @@ using BDD: issuccessful, parsescenario, Given, When, Then
             @test result.expected == :NotGiven
             @test result.actual == :Given
         end
+
+        @testset "When after Then; Expected Then" begin
+            text = """
+            Scenario: Some description
+                Then some postcondition
+                When some action
+            """
+
+            byline = BDD.ByLineParser(text)
+            result = parsescenario(byline)
+
+            @test !issuccessful(result)
+            @test result.reason == :bad_step_order
+            @test result.expected == :NotWhen
+            @test result.actual == :When
+        end
+
+        @testset "Invalid step definition NotAStep; Expected a valid step definition" begin
+            text = """
+            Scenario: Some description
+                NotAStep some more text
+            """
+
+            byline = BDD.ByLineParser(text)
+            result = parsescenario(byline)
+
+            @test !issuccessful(result)
+            @test result.reason == :invalid_step
+            @test result.expected == :step_definition
+            @test result.actual == :invalid_step_definition
+        end
+
+        @testset "A step definition without text; Expected a valid step definition" begin
+            text = """
+            Scenario: Some description
+                Given
+            """
+
+            byline = BDD.ByLineParser(text)
+            result = parsescenario(byline)
+
+            @test !issuccessful(result)
+            @test result.reason == :invalid_step
+            @test result.expected == :step_definition
+            @test result.actual == :invalid_step_definition
+        end
     end
 end

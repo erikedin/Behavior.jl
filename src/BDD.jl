@@ -132,6 +132,9 @@ function parsescenario(byline::ByLineParser)
             break
         end
         step_match = match(r"(?<step_type>Given|When|Then|And) (?<step_definition>.+)", byline.current)
+        if step_match == nothing
+            return BadParseResult{Scenario}(:invalid_step, :step_definition, :invalid_step_definition)
+        end
         step_type = step_match[:step_type]
         step_definition = step_match[:step_definition]
         if step_type == "Given"
@@ -140,6 +143,9 @@ function parsescenario(byline::ByLineParser)
             end
             step = Given(step_definition)
         elseif step_type == "When"
+            if !(When in allowed_step_types)
+                return BadParseResult{Scenario}(:bad_step_order, :NotWhen, :When)
+            end
             step = When(step_definition)
             delete!(allowed_step_types, Given)
         elseif step_type == "Then"
