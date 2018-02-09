@@ -158,6 +158,26 @@ using BDD: parsefeature, issuccessful
             feature = result.value
             @test length(feature.scenarios[1].steps) == 1
         end
+
+        @testset "Feature has a scenario outline; The feature scenarios list has one element" begin
+            text = """
+            Feature: This feature has one scenario
+
+                Scenario Outline: This is one scenario outline
+                    Given a precondition with field <Foo>
+
+                Example:
+                    | Foo |
+                    | 1   |
+                    | 2   |
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result)
+            feature = result.value
+            @test length(feature.scenarios) == 1
+        end
     end
 
     @testset "Malformed features" begin

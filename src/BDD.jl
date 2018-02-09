@@ -32,11 +32,14 @@ struct Then <: ScenarioStep
     text::String
 end
 
-struct Scenario
+abstract type AbstractScenario end
+struct Scenario <: AbstractScenario
     description::String
     tags::Vector{String}
     steps::Vector{ScenarioStep}
 end
+
+struct ScenarioOutline <: AbstractScenario end
 
 struct FeatureHeader
     description::String
@@ -46,7 +49,7 @@ end
 
 struct Feature
     header::FeatureHeader
-    scenarios::Vector{Scenario}
+    scenarios::Vector{AbstractScenario}
 end
 
 mutable struct ByLineParser
@@ -117,10 +120,26 @@ function parsefeatureheader(byline::ByLineParser) :: ParseResult{FeatureHeader}
     return OKParseResult{FeatureHeader}(feature_header)
 end
 
+
+
 function parsescenario(byline::ByLineParser)
     tags = parsetags(byline)
 
     scenario_match = match(r"Scenario: (?<description>.+)", byline.current)
+    scenario_outline_match = match(r"Scenario Outline: (?<description>.+)", byline.current)
+    if scenario_outline_match != nothing
+        # Parse scenario outline steps
+        while !iscurrentlineempty(byline)
+            consume!(byline)
+        end
+        # An empty line is the boundary between the scenario outline and the examples
+        consume!(byline)
+        # Parse the examples
+        while !iscurrentlineempty(byline)
+            consume!(byline)
+        end
+        return OKParseResult{ScenarioOutline}(ScenarioOutline())
+    end
     description = scenario_match[:description]
     consume!(byline)
     steps = []
@@ -178,6 +197,10 @@ function parsefeature(text::String) :: ParseResult{Feature}
 
     scenarios = []
     while !isempty(byline)
+        if iscurrentlineempty(byline)
+            consume!(byline)
+            continue
+        end
         scenario_parse_result = parsescenario(byline)
         if issuccessful(scenario_parse_result)
             push!(scenarios, scenario_parse_result.value)
