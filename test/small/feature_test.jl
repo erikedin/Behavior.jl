@@ -180,6 +180,31 @@ using BDD: parsefeature, issuccessful
         end
     end
 
+    @testset "Robustness" begin
+        @testset "Many empty lines before scenario; Empty lines are ignored" begin
+            text = """
+            Feature: This feature has many empty lines between scenarios
+
+
+
+
+                Scenario: This is one scenario
+                    Given a precondition
+
+
+
+                Scenario: This is another scenario
+                    Given a precondition
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result)
+            feature = result.value
+            @test length(feature.scenarios) == 2
+        end
+    end
+
     @testset "Malformed features" begin
         @testset "Scenario found before feature; Parse fails with feature expected" begin
             text = """
