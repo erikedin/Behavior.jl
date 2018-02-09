@@ -124,6 +124,7 @@ function parsescenario(byline::ByLineParser)
     description = scenario_match[:description]
     consume!(byline)
     steps = []
+    allowed_step_types = Set([Given, When, Then])
 
     while !isempty(byline)
         if iscurrentlineempty(byline)
@@ -134,15 +135,22 @@ function parsescenario(byline::ByLineParser)
         step_type = step_match[:step_type]
         step_definition = step_match[:step_definition]
         if step_type == "Given"
+            if !(Given in allowed_step_types)
+                return BadParseResult{Scenario}(:bad_step_order, :NotGiven, :Given)
+            end
             step = Given(step_definition)
-            last_specific_type = Given
         elseif step_type == "When"
             step = When(step_definition)
-            last_specific_type = When
+            delete!(allowed_step_types, Given)
         elseif step_type == "Then"
             step = Then(step_definition)
-            last_specific_type = Then
+            delete!(allowed_step_types, Given)
+            delete!(allowed_step_types, When)
         elseif step_type == "And"
+            if isempty(steps)
+                return BadParseResult{Scenario}(:leading_and, :specific_step, :and_step)
+            end
+            last_specific_type = typeof(steps[end])
             step = last_specific_type(step_definition)
         end
         push!(steps, step)
