@@ -24,12 +24,21 @@ end
 
 struct Given <: ScenarioStep
     text::String
+    block_text::String
+
+    Given(text::AbstractString; block_text = "") = new(text, block_text)
 end
 struct When <: ScenarioStep
     text::String
+    block_text::String
+
+    When(text::AbstractString; block_text="") = new(text, block_text)
 end
 struct Then <: ScenarioStep
     text::String
+    block_text::String
+
+    Then(text::AbstractString; block_text="") = new(text, block_text)
 end
 
 abstract type AbstractScenario end
@@ -126,6 +135,20 @@ function parsefeatureheader(byline::ByLineParser) :: ParseResult{FeatureHeader}
     return OKParseResult{FeatureHeader}(feature_header)
 end
 
+function parseblocktext(byline::ByLineParser)
+    consume!(byline)
+    block_text_lines = []
+    while !isempty(byline)
+        line = byline.current
+        consume!(byline)
+        if ismatch(r"\"\"\"", line)
+            break
+        end
+        push!(block_text_lines, strip(line))
+    end
+    return OKParseResult{String}(join(block_text_lines, "\n"))
+end
+
 function parsescenariosteps(byline::ByLineParser)
     steps = []
     allowed_step_types = Set([Given, When, Then])
@@ -136,9 +159,18 @@ function parsescenariosteps(byline::ByLineParser)
             break
         end
         step_match = match(r"(?<step_type>Given|When|Then|And) (?<step_definition>.+)", byline.current)
-        if step_match == nothing
+        block_text_start_match = match(r"\"\"\"", byline.current)
+        if step_match == nothing && block_text_start_match == nothing
             return BadParseResult{Vector{ScenarioStep}}(:invalid_step, :step_definition, :invalid_step_definition)
         end
+
+        if block_text_start_match != nothing
+            block_text_result = parseblocktext(byline)
+            prev_step_type = typeof(steps[end])
+            steps[end] = prev_step_type(steps[end].text; block_text=block_text_result.value)
+            continue
+        end
+
         step_type = step_match[:step_type]
         step_definition = step_match[:step_definition]
         if step_type == "Given"

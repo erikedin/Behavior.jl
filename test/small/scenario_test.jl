@@ -203,4 +203,86 @@ using BDD: issuccessful, parsescenario, Given, When, Then
             @test result.actual == :invalid_step_definition
         end
     end
+
+    @testset "Block text" begin
+        @testset "Block text in a Given; Block text is present in step" begin
+            text = """
+            Scenario: Some description
+                Given some precondition
+                \"\"\"
+                This is block text.
+                There are two lines.
+                \"\"\"
+            """
+
+            byline = BDD.ByLineParser(text)
+            result = parsescenario(byline)
+
+            @test issuccessful(result)
+            scenario = result.value
+
+            @test scenario.steps[1].block_text == """
+            This is block text.
+            There are two lines."""
+        end
+
+        @testset "Another block text in a Given; Block text is present in step" begin
+            text = """
+            Scenario: Some description
+                Given some precondition
+                \"\"\"
+                This is another block text.
+                There are three lines.
+                This is the last line.
+                \"\"\"
+            """
+
+            byline = BDD.ByLineParser(text)
+            result = parsescenario(byline)
+
+            @test issuccessful(result)
+            scenario = result.value
+
+            @test scenario.steps[1].block_text == """
+            This is another block text.
+            There are three lines.
+            This is the last line."""
+        end
+
+        @testset "Block text in a When step; Block text is present in step" begin
+            text = """
+            Scenario: Some description
+                When some action
+                \"\"\"
+                This is block text.
+                \"\"\"
+            """
+
+            byline = BDD.ByLineParser(text)
+            result = parsescenario(byline)
+
+            @test issuccessful(result)
+            scenario = result.value
+
+            @test scenario.steps[1] == When("some action"; block_text="""This is block text.""")
+        end
+
+        @testset "Block text in a Then step; Block text is present in step" begin
+            text = """
+            Scenario: Some description
+                Then some postcondition
+                \"\"\"
+                This is block text.
+                \"\"\"
+            """
+
+            byline = BDD.ByLineParser(text)
+            result = parsescenario(byline)
+
+            @test issuccessful(result)
+            scenario = result.value
+
+            @test scenario.steps[1] == Then("some postcondition"; block_text="""This is block text.""")
+        end
+    end
 end
