@@ -226,7 +226,9 @@ function parsescenario(byline::ByLineParser)
         # Parse the examples
         examples = Array{String,2}(length(placeholders), 0)
         while !iscurrentlineempty(byline)
-            example = matchall(r"(\w+)", byline.current)
+            example = split(strip(byline.current), "|")
+            filter!(x -> !isempty(x), example)
+            example = map(strip, example)
             consume!(byline)
             examples = [examples example]
         end

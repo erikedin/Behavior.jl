@@ -137,6 +137,26 @@ using BDD.Gherkin: parsescenario, issuccessful, Given, When, Then, ByLineParser,
             @test scenario.examples[:,1] == ["1", "2", "3"]
             @test scenario.examples[:,2] == ["4", "5", "6"]
         end
+
+        @testset "Examples with spaces; Examples are split on | not on spaces" begin
+            text = """
+            Scenario Outline: This is one scenario outline
+                Given a precondition with placeholder <Foo>
+
+            Examples:
+                | Foo       |
+                | word      |
+                | two words |
+            """
+            byline = ByLineParser(text)
+
+            result = parsescenario(byline)
+
+            @test issuccessful(result)
+            scenario = result.value
+            @test scenario.examples[:,1] == ["word"]
+            @test scenario.examples[:,2] == ["two words"]
+        end
     end
 
     @testset "Malformed Scenario Outlines" begin
