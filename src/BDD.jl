@@ -192,12 +192,12 @@ function parsescenario(byline::ByLineParser)
         consume!(byline)
 
         # Parse the examples
-        n_examples = 0
+        examples = Array{String,2}(length(placeholders), 0)
         while !iscurrentlineempty(byline)
+            example = matchall(r"(\w+)", byline.current)
             consume!(byline)
-            n_examples += 1
+            examples = [examples example]
         end
-        examples = Array{String,2}(n_examples,length(placeholders))
         return OKParseResult{ScenarioOutline}(
             ScenarioOutline(description, tags, steps, placeholders, examples))
    end

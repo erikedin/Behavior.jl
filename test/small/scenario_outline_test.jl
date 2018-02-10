@@ -79,7 +79,7 @@ using BDD: parsescenario, issuccessful, Given, When, Then
             @test scenario.placeholders == ["Foo", "Bar", "Baz"]
         end
 
-        @testset "Two examples with three placeholders are provided; Examples array is 2x3" begin
+        @testset "Two examples with three placeholders are provided; Examples array is 3x2" begin
             text = """
             Scenario Outline: This is one scenario outline
                 Given a precondition with placeholders <Foo>, <Bar>, <Baz>
@@ -95,10 +95,10 @@ using BDD: parsescenario, issuccessful, Given, When, Then
 
             @test issuccessful(result)
             scenario = result.value
-            @test size(scenario.examples) == (2,3)
+            @test size(scenario.examples) == (3,2)
         end
 
-        @testset "Three examples with four placeholders are provided; Examples array is 3x4" begin
+        @testset "Three examples with four placeholders are provided; Examples array is 4x3" begin
             text = """
             Scenario Outline: This is one scenario outline
                 Given a precondition with placeholders <Foo>, <Bar>, <Baz>, <Quux>
@@ -115,7 +115,27 @@ using BDD: parsescenario, issuccessful, Given, When, Then
 
             @test issuccessful(result)
             scenario = result.value
-            @test size(scenario.examples) == (3,4)
+            @test size(scenario.examples) == (4,3)
+        end
+
+        @testset "Two examples with three placeholders are provided; Examples array has all values" begin
+            text = """
+            Scenario Outline: This is one scenario outline
+                Given a precondition with placeholders <Foo>, <Bar>, <Baz>
+
+            Examples:
+                | Foo | Bar | Baz |
+                | 1   | 2   | 3   |
+                | 4   | 5   | 6   |
+            """
+            byline = BDD.ByLineParser(text)
+
+            result = parsescenario(byline)
+
+            @test issuccessful(result)
+            scenario = result.value
+            @test scenario.examples[:,1] == ["1", "2", "3"]
+            @test scenario.examples[:,2] == ["4", "5", "6"]
         end
     end
 end
