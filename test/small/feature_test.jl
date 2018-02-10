@@ -178,6 +178,29 @@ using BDD: parsefeature, issuccessful
             feature = result.value
             @test length(feature.scenarios) == 1
         end
+
+        @testset "Feature has a scenario outline and a normal scenario; Two scenarios are parsed" begin
+            text = """
+            Feature: This feature has one scenario
+
+                Scenario Outline: This is one scenario outline
+                    Given a precondition with field <Foo>
+
+                Example:
+                    | Foo |
+                    | 1   |
+                    | 2   |
+
+                Scenario: A normal scenario
+                    Given some precondition
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result)
+            feature = result.value
+            @test length(feature.scenarios) == 2
+        end
     end
 
     @testset "Robustness" begin

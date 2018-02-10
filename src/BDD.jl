@@ -39,7 +39,11 @@ struct Scenario <: AbstractScenario
     steps::Vector{ScenarioStep}
 end
 
-struct ScenarioOutline <: AbstractScenario end
+struct ScenarioOutline <: AbstractScenario
+    description::String
+    tags::Vector{String}
+    steps::Vector{ScenarioStep}
+end
 
 struct FeatureHeader
     description::String
@@ -120,28 +124,7 @@ function parsefeatureheader(byline::ByLineParser) :: ParseResult{FeatureHeader}
     return OKParseResult{FeatureHeader}(feature_header)
 end
 
-
-
-function parsescenario(byline::ByLineParser)
-    tags = parsetags(byline)
-
-    scenario_match = match(r"Scenario: (?<description>.+)", byline.current)
-    scenario_outline_match = match(r"Scenario Outline: (?<description>.+)", byline.current)
-    if scenario_outline_match != nothing
-        # Parse scenario outline steps
-        while !iscurrentlineempty(byline)
-            consume!(byline)
-        end
-        # An empty line is the boundary between the scenario outline and the examples
-        consume!(byline)
-        # Parse the examples
-        while !iscurrentlineempty(byline)
-            consume!(byline)
-        end
-        return OKParseResult{ScenarioOutline}(ScenarioOutline())
-    end
-    description = scenario_match[:description]
-    consume!(byline)
+function parsescenariosteps(byline::ByLineParser)
     steps = []
     allowed_step_types = Set([Given, When, Then])
 
@@ -152,18 +135,18 @@ function parsescenario(byline::ByLineParser)
         end
         step_match = match(r"(?<step_type>Given|When|Then|And) (?<step_definition>.+)", byline.current)
         if step_match == nothing
-            return BadParseResult{Scenario}(:invalid_step, :step_definition, :invalid_step_definition)
+            return BadParseResult{Vector{ScenarioStep}}(:invalid_step, :step_definition, :invalid_step_definition)
         end
         step_type = step_match[:step_type]
         step_definition = step_match[:step_definition]
         if step_type == "Given"
             if !(Given in allowed_step_types)
-                return BadParseResult{Scenario}(:bad_step_order, :NotGiven, :Given)
+                return BadParseResult{Vector{ScenarioStep}}(:bad_step_order, :NotGiven, :Given)
             end
             step = Given(step_definition)
         elseif step_type == "When"
             if !(When in allowed_step_types)
-                return BadParseResult{Scenario}(:bad_step_order, :NotWhen, :When)
+                return BadParseResult{Vector{ScenarioStep}}(:bad_step_order, :NotWhen, :When)
             end
             step = When(step_definition)
             delete!(allowed_step_types, Given)
@@ -173,7 +156,7 @@ function parsescenario(byline::ByLineParser)
             delete!(allowed_step_types, When)
         elseif step_type == "And"
             if isempty(steps)
-                return BadParseResult{Scenario}(:leading_and, :specific_step, :and_step)
+                return BadParseResult{Vector{ScenarioStep}}(:leading_and, :specific_step, :and_step)
             end
             last_specific_type = typeof(steps[end])
             step = last_specific_type(step_definition)
@@ -181,6 +164,40 @@ function parsescenario(byline::ByLineParser)
         push!(steps, step)
         consume!(byline)
     end
+    return OKParseResult{Vector{ScenarioStep}}(steps)
+end
+
+function parsescenario(byline::ByLineParser)
+    tags = parsetags(byline)
+
+    scenario_outline_match = match(r"Scenario Outline: (?<description>.+)", byline.current)
+    if scenario_outline_match != nothing
+        description = scenario_outline_match[:description]
+        consume!(byline)
+
+        # Parse scenario outline steps
+        steps_result = parsescenariosteps(byline)
+        if !issuccessful(steps_result)
+            return steps_result
+        end
+        steps = steps_result.value
+
+        # Parse the examples
+        while !iscurrentlineempty(byline)
+            consume!(byline)
+        end
+        return OKParseResult{ScenarioOutline}(ScenarioOutline(description, tags, steps))
+    end
+
+    scenario_match = match(r"Scenario: (?<description>.+)", byline.current)
+    description = scenario_match[:description]
+    consume!(byline)
+
+    steps_result = parsescenariosteps(byline)
+    if !issuccessful(steps_result)
+        return steps_result
+    end
+    steps = steps_result.value
 
     OKParseResult{Scenario}(Scenario(description, tags, steps))
 end
