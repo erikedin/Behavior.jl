@@ -1,6 +1,6 @@
 using BDD: issuccessful, parsescenario, Given, When, Then
 
-@testset "Scenario" begin
+@testset "Scenario        " begin
     @testset "Scenario has a Given step; the parsed scenario has a Given struct" begin
         text = """
         Scenario: Some description

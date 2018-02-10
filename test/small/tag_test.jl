@@ -1,7 +1,7 @@
 using Base.Test
 using BDD: hastag, parsefeature, issuccessful
 
-@testset "Tags" begin
+@testset "Tags            " begin
     @testset "Feature tags" begin
         @testset "@tag1 is applied to a feature; The parsed feature has @tag1" begin
             text = """
