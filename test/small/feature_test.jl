@@ -166,7 +166,7 @@ using BDD: parsefeature, issuccessful
                 Scenario Outline: This is one scenario outline
                     Given a precondition with field <Foo>
 
-                Example:
+                Examples:
                     | Foo |
                     | 1   |
                     | 2   |
@@ -186,7 +186,7 @@ using BDD: parsefeature, issuccessful
                 Scenario Outline: This is one scenario outline
                     Given a precondition with field <Foo>
 
-                Example:
+                Examples:
                     | Foo |
                     | 1   |
                     | 2   |

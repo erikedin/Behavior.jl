@@ -43,6 +43,8 @@ struct ScenarioOutline <: AbstractScenario
     description::String
     tags::Vector{String}
     steps::Vector{ScenarioStep}
+    placeholders::Vector{String}
+    examples::AbstractArray
 end
 
 struct FeatureHeader
@@ -182,12 +184,23 @@ function parsescenario(byline::ByLineParser)
         end
         steps = steps_result.value
 
+        # Consume the Example: line
+        consume!(byline)
+
+        # Consume the placeholders line
+        placeholders = matchall(r"(\w+)", byline.current)
+        consume!(byline)
+
         # Parse the examples
+        n_examples = 0
         while !iscurrentlineempty(byline)
             consume!(byline)
+            n_examples += 1
         end
-        return OKParseResult{ScenarioOutline}(ScenarioOutline(description, tags, steps))
-    end
+        examples = Array{String,2}(n_examples,length(placeholders))
+        return OKParseResult{ScenarioOutline}(
+            ScenarioOutline(description, tags, steps, placeholders, examples))
+   end
 
     scenario_match = match(r"Scenario: (?<description>.+)", byline.current)
     description = scenario_match[:description]
