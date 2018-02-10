@@ -1,4 +1,4 @@
-using BDD: issuccessful, parsescenario, Given, When, Then
+using BDD.Gherkin: issuccessful, parsescenario, Given, When, Then, ByLineParser, ScenarioStep
 
 @testset "Scenario        " begin
     @testset "Scenario has a Given step; the parsed scenario has a Given struct" begin
@@ -7,13 +7,13 @@ using BDD: issuccessful, parsescenario, Given, When, Then
             Given a precondition
         """
 
-        byline = BDD.ByLineParser(text)
+        byline = ByLineParser(text)
         result = parsescenario(byline)
 
         @test issuccessful(result)
         scenario = result.value
 
-        @test scenario.steps == BDD.ScenarioStep[Given("a precondition")]
+        @test scenario.steps == ScenarioStep[Given("a precondition")]
     end
 
     @testset "Scenario has a When step; the parsed scenario has a When struct" begin
@@ -22,13 +22,13 @@ using BDD: issuccessful, parsescenario, Given, When, Then
             When some action
         """
 
-        byline = BDD.ByLineParser(text)
+        byline = ByLineParser(text)
         result = parsescenario(byline)
 
         @test issuccessful(result)
         scenario = result.value
 
-        @test scenario.steps == BDD.ScenarioStep[When("some action")]
+        @test scenario.steps == ScenarioStep[When("some action")]
     end
 
     @testset "Scenario has a Then step; the parsed scenario has a Then struct" begin
@@ -37,13 +37,13 @@ using BDD: issuccessful, parsescenario, Given, When, Then
             Then a postcondition
         """
 
-        byline = BDD.ByLineParser(text)
+        byline = ByLineParser(text)
         result = parsescenario(byline)
 
         @test issuccessful(result)
         scenario = result.value
 
-        @test scenario.steps == BDD.ScenarioStep[Then("a postcondition")]
+        @test scenario.steps == ScenarioStep[Then("a postcondition")]
     end
 
     @testset "Scenario has an And following a Given; the And step becomes a Given" begin
@@ -53,13 +53,13 @@ using BDD: issuccessful, parsescenario, Given, When, Then
               And another precondition
         """
 
-        byline = BDD.ByLineParser(text)
+        byline = ByLineParser(text)
         result = parsescenario(byline)
 
         @test issuccessful(result)
         scenario = result.value
 
-        @test scenario.steps == BDD.ScenarioStep[Given("a precondition"),
+        @test scenario.steps == ScenarioStep[Given("a precondition"),
                                                  Given("another precondition")]
     end
 
@@ -70,13 +70,13 @@ using BDD: issuccessful, parsescenario, Given, When, Then
              And another action
         """
 
-        byline = BDD.ByLineParser(text)
+        byline = ByLineParser(text)
         result = parsescenario(byline)
 
         @test issuccessful(result)
         scenario = result.value
 
-        @test scenario.steps == BDD.ScenarioStep[When("some action"),
+        @test scenario.steps == ScenarioStep[When("some action"),
                                                  When("another action")]
     end
 
@@ -87,13 +87,13 @@ using BDD: issuccessful, parsescenario, Given, When, Then
              And another postcondition
         """
 
-        byline = BDD.ByLineParser(text)
+        byline = ByLineParser(text)
         result = parsescenario(byline)
 
         @test issuccessful(result)
         scenario = result.value
 
-        @test scenario.steps == BDD.ScenarioStep[Then("some postcondition"),
+        @test scenario.steps == ScenarioStep[Then("some postcondition"),
                                                  Then("another postcondition")]
     end
 
@@ -103,7 +103,7 @@ using BDD: issuccessful, parsescenario, Given, When, Then
             Then some postcondition
             And another postcondition"""
 
-        byline = BDD.ByLineParser(text)
+        byline = ByLineParser(text)
         result = parsescenario(byline)
 
         @test issuccessful(result)
@@ -116,7 +116,7 @@ using BDD: issuccessful, parsescenario, Given, When, Then
                 And another postcondition
             """
 
-            byline = BDD.ByLineParser(text)
+            byline = ByLineParser(text)
             result = parsescenario(byline)
 
             @test !issuccessful(result)
@@ -132,7 +132,7 @@ using BDD: issuccessful, parsescenario, Given, When, Then
                 Given some precondition
             """
 
-            byline = BDD.ByLineParser(text)
+            byline = ByLineParser(text)
             result = parsescenario(byline)
 
             @test !issuccessful(result)
@@ -148,7 +148,7 @@ using BDD: issuccessful, parsescenario, Given, When, Then
                 Given some precondition
             """
 
-            byline = BDD.ByLineParser(text)
+            byline = ByLineParser(text)
             result = parsescenario(byline)
 
             @test !issuccessful(result)
@@ -164,7 +164,7 @@ using BDD: issuccessful, parsescenario, Given, When, Then
                 When some action
             """
 
-            byline = BDD.ByLineParser(text)
+            byline = ByLineParser(text)
             result = parsescenario(byline)
 
             @test !issuccessful(result)
@@ -179,7 +179,7 @@ using BDD: issuccessful, parsescenario, Given, When, Then
                 NotAStep some more text
             """
 
-            byline = BDD.ByLineParser(text)
+            byline = ByLineParser(text)
             result = parsescenario(byline)
 
             @test !issuccessful(result)
@@ -194,7 +194,7 @@ using BDD: issuccessful, parsescenario, Given, When, Then
                 Given
             """
 
-            byline = BDD.ByLineParser(text)
+            byline = ByLineParser(text)
             result = parsescenario(byline)
 
             @test !issuccessful(result)
@@ -215,7 +215,7 @@ using BDD: issuccessful, parsescenario, Given, When, Then
                 \"\"\"
             """
 
-            byline = BDD.ByLineParser(text)
+            byline = ByLineParser(text)
             result = parsescenario(byline)
 
             @test issuccessful(result)
@@ -237,7 +237,7 @@ using BDD: issuccessful, parsescenario, Given, When, Then
                 \"\"\"
             """
 
-            byline = BDD.ByLineParser(text)
+            byline = ByLineParser(text)
             result = parsescenario(byline)
 
             @test issuccessful(result)
@@ -258,7 +258,7 @@ using BDD: issuccessful, parsescenario, Given, When, Then
                 \"\"\"
             """
 
-            byline = BDD.ByLineParser(text)
+            byline = ByLineParser(text)
             result = parsescenario(byline)
 
             @test issuccessful(result)
@@ -276,7 +276,7 @@ using BDD: issuccessful, parsescenario, Given, When, Then
                 \"\"\"
             """
 
-            byline = BDD.ByLineParser(text)
+            byline = ByLineParser(text)
             result = parsescenario(byline)
 
             @test issuccessful(result)

@@ -1,5 +1,5 @@
 using Base.Test
-using BDD: hastag, parsefeature, issuccessful
+using BDD.Gherkin: hastag, parsefeature, issuccessful
 
 @testset "Tags            " begin
     @testset "Feature tags" begin

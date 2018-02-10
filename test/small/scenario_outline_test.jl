@@ -1,4 +1,4 @@
-using BDD: parsescenario, issuccessful, Given, When, Then
+using BDD.Gherkin: parsescenario, issuccessful, Given, When, Then, ByLineParser, ScenarioStep
 
 @testset "Scenario Outline" begin
     @testset "Outline has a Given step; Step is parsed" begin
@@ -11,13 +11,13 @@ using BDD: parsescenario, issuccessful, Given, When, Then
             | 1   |
             | 2   |
         """
-        byline = BDD.ByLineParser(text)
+        byline = ByLineParser(text)
 
         result = parsescenario(byline)
 
         @test issuccessful(result)
         scenario = result.value
-        @test scenario.steps == BDD.ScenarioStep[Given("a precondition with field <Foo>")]
+        @test scenario.steps == ScenarioStep[Given("a precondition with field <Foo>")]
     end
 
     @testset "Scenario Outline has description; Description is parsed" begin
@@ -30,7 +30,7 @@ using BDD: parsescenario, issuccessful, Given, When, Then
             | 1   |
             | 2   |
         """
-        byline = BDD.ByLineParser(text)
+        byline = ByLineParser(text)
 
         result = parsescenario(byline)
 
@@ -50,7 +50,7 @@ using BDD: parsescenario, issuccessful, Given, When, Then
             | 1   |
             | 2   |
         """
-        byline = BDD.ByLineParser(text)
+        byline = ByLineParser(text)
 
         result = parsescenario(byline)
 
@@ -70,7 +70,7 @@ using BDD: parsescenario, issuccessful, Given, When, Then
                 | 1   | 2   | 3   |
                 | 1   | 2   | 3   |
             """
-            byline = BDD.ByLineParser(text)
+            byline = ByLineParser(text)
 
             result = parsescenario(byline)
 
@@ -89,7 +89,7 @@ using BDD: parsescenario, issuccessful, Given, When, Then
                 | 1   | 2   | 3   |
                 | 1   | 2   | 3   |
             """
-            byline = BDD.ByLineParser(text)
+            byline = ByLineParser(text)
 
             result = parsescenario(byline)
 
@@ -109,7 +109,7 @@ using BDD: parsescenario, issuccessful, Given, When, Then
                 | 1   | 2   | 3   | 4    |
                 | 1   | 2   | 3   | 4    |
             """
-            byline = BDD.ByLineParser(text)
+            byline = ByLineParser(text)
 
             result = parsescenario(byline)
 
@@ -128,7 +128,7 @@ using BDD: parsescenario, issuccessful, Given, When, Then
                 | 1   | 2   | 3   |
                 | 4   | 5   | 6   |
             """
-            byline = BDD.ByLineParser(text)
+            byline = ByLineParser(text)
 
             result = parsescenario(byline)
 
@@ -150,7 +150,7 @@ using BDD: parsescenario, issuccessful, Given, When, Then
                 | 1   | 2   | 3   |
                 | 4   | 5   | 6   |
             """
-            byline = BDD.ByLineParser(text)
+            byline = ByLineParser(text)
 
             result = parsescenario(byline)
 
