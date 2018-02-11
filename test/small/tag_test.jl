@@ -88,4 +88,19 @@ using BDD.Gherkin: hastag, parsefeature, issuccessful
             @test hastag(result.value.scenarios[1], "@tag1") == false
         end
     end
+
+    @testset "Robustness" begin
+        @testset "Tag @tag1-2 contains a hyphen; Tag is read as @tag1-2" begin
+            text = """
+            @tag1-2
+            Feature: Some description
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result)
+            feature = result.value
+            @test hastag(feature, "@tag1-2")
+        end
+    end
 end

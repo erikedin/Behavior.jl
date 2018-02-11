@@ -97,7 +97,7 @@ iscurrentlineempty(p::ByLineParser) = strip(p.current) == ""
 function parsetags(byline::ByLineParser)
     tags = []
     while !isempty(byline)
-        tag_match = matchall(r"(@\w+)", byline.current)
+        tag_match = matchall(r"(@[^\s]+)", byline.current)
         if isempty(tag_match)
             break
         end
