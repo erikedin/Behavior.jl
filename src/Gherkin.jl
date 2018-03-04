@@ -2,6 +2,8 @@ module Gherkin
 
 import Base.==
 
+export Scenario, ScenarioOutline, Feature, Given, When, Then
+
 abstract type ParseResult{T} end
 
 struct OKParseResult{T} <: ParseResult{T}
