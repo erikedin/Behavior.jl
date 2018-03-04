@@ -1,4 +1,4 @@
-include("small/feature_test.jl")
-include("small/scenario_test.jl")
-include("small/scenario_outline_test.jl")
-include("small/tag_test.jl")
+include("gherkin/feature_test.jl")
+include("gherkin/scenario_test.jl")
+include("gherkin/scenario_outline_test.jl")
+include("gherkin/tag_test.jl")
