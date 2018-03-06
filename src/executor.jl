@@ -1,25 +1,27 @@
 abstract type StepDefinitionMatcher end
 
+findstepdefinition(::StepDefinitionMatcher, ::Gherkin.ScenarioStep) = error("Not implemented for abstract type StepDefinitionMatcher")
+
 struct Executor
     stepdefmatcher::StepDefinitionMatcher
 end
 
-struct StepExecutionResult
-    v::Int
-end
+abstract type StepExecutionResult end
 
-const NoStepDefinitionFound = StepExecutionResult(0)
-const SuccessfulStepExecution = StepExecutionResult(1)
+struct NoStepDefinitionFound <: StepExecutionResult end
+struct SuccessfulStepExecution <: StepExecutionResult end
+struct StepFailed <: StepExecutionResult end
 
 struct ScenarioResult
     steps::Vector{StepExecutionResult}
 end
 
 function executescenario(executor::Executor, scenario::Gherkin.Scenario)
-    steps = if isempty(executor.stepdefmatcher.steps)
-        NoStepDefinitionFound
-    else
-        SuccessfulStepExecution
+    steps = try
+        stepdefinition = findstepdefinition(executor.stepdefmatcher, scenario.steps[1])
+        stepdefinition()
+    catch
+        NoStepDefinitionFound()
     end
     ScenarioResult([steps])
 end
