@@ -4,6 +4,7 @@ using BDD
 
 successful_step_definition() = BDD.SuccessfulStepExecution()
 failed_step_definition() = BDD.StepFailed()
+error_step_definition() = error("Some error")
 
 struct FakeStepDefinitionMatcher <: BDD.StepDefinitionMatcher
     steps::Dict{BDD.Gherkin.ScenarioStep, Function}
@@ -42,5 +43,16 @@ BDD.findstepdefinition(s::FakeStepDefinitionMatcher, step::BDD.Gherkin.ScenarioS
         scenarioresult = BDD.executescenario(executor, scenario)
 
         @test isa(scenarioresult.steps[1], BDD.StepFailed)
+    end
+
+    @testset "Execute a one-step scenario; The matching step throws an error; Result is Error" begin
+        given = Given("Some precondition")
+        stepdefmatcher = FakeStepDefinitionMatcher(Dict(given => error_step_definition))
+        executor = BDD.Executor(stepdefmatcher)
+        scenario = Scenario("Description", [], [given])
+
+        scenarioresult = BDD.executescenario(executor, scenario)
+
+        @test isa(scenarioresult.steps[1], BDD.UnexpectedStepError)
     end
 end
