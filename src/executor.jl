@@ -12,6 +12,7 @@ struct NoStepDefinitionFound <: StepExecutionResult end
 struct SuccessfulStepExecution <: StepExecutionResult end
 struct StepFailed <: StepExecutionResult end
 struct UnexpectedStepError <: StepExecutionResult end
+struct SkippedStep <: StepExecutionResult end
 
 struct ScenarioResult
     steps::Vector{StepExecutionResult}
@@ -28,5 +29,5 @@ function executescenario(executor::Executor, scenario::Gherkin.Scenario)
     catch
         NoStepDefinitionFound()
     end
-    ScenarioResult([steps])
+    ScenarioResult([steps, SkippedStep()])
 end

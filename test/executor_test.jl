@@ -55,4 +55,17 @@ BDD.findstepdefinition(s::FakeStepDefinitionMatcher, step::BDD.Gherkin.ScenarioS
 
         @test isa(scenarioresult.steps[1], BDD.UnexpectedStepError)
     end
+
+    @testset "Execute a two-step scenario; First step fails; Second step is Skipped" begin
+        given = Given("Some precondition")
+        when = When("some action")
+        stepdefmatcher = FakeStepDefinitionMatcher(Dict(given => error_step_definition,
+                                                        when => successful_step_definition))
+        executor = BDD.Executor(stepdefmatcher)
+        scenario = Scenario("Description", [], [given, when])
+
+        scenarioresult = BDD.executescenario(executor, scenario)
+
+        @test isa(scenarioresult.steps[2], BDD.SkippedStep)
+    end
 end
