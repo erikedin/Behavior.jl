@@ -14,6 +14,9 @@ struct StepFailed <: StepExecutionResult end
 struct UnexpectedStepError <: StepExecutionResult end
 struct SkippedStep <: StepExecutionResult end
 
+issuccess(::SuccessfulStepExecution) = true
+issuccess(::StepExecutionResult) = false
+
 struct ScenarioResult
     steps::Vector{StepExecutionResult}
 end
@@ -22,16 +25,17 @@ function executescenario(executor::Executor, scenario::Gherkin.Scenario)
     steps = Vector{StepExecutionResult}(length(scenario.steps))
     fill!(steps, SkippedStep())
     for i = 1:length(scenario.steps)
-        try
-            stepdefinition = findstepdefinition(executor.stepdefmatcher, scenario.steps[1])
+        steps[i] = try
+            stepdefinition = findstepdefinition(executor.stepdefmatcher, scenario.steps[i])
             try
-                steps[i] = stepdefinition()
+                stepdefinition()
             catch ex
-                steps[i] = UnexpectedStepError()
-                break
+                UnexpectedStepError()
             end
         catch
-            steps[i] = NoStepDefinitionFound()
+            NoStepDefinitionFound()
+        end
+        if !issuccess(steps[i])
             break
         end
     end

@@ -56,7 +56,7 @@ BDD.findstepdefinition(s::FakeStepDefinitionMatcher, step::BDD.Gherkin.ScenarioS
         @test isa(scenarioresult.steps[1], BDD.UnexpectedStepError)
     end
 
-    @testset "Execute a two-step scenario; First step fails; Second step is Skipped" begin
+    @testset "Execute a two-step scenario; First step throws an error; Second step is Skipped" begin
         given = Given("Some precondition")
         when = When("some action")
         stepdefmatcher = FakeStepDefinitionMatcher(Dict(given => error_step_definition,
@@ -69,7 +69,20 @@ BDD.findstepdefinition(s::FakeStepDefinitionMatcher, step::BDD.Gherkin.ScenarioS
         @test isa(scenarioresult.steps[2], BDD.SkippedStep)
     end
 
-    @testset "Execute a two-step scenario; Both steps success; All steps are Success" begin
+    @testset "Execute a two-step scenario; First step fails; Second step is Skipped" begin
+        given = Given("Some precondition")
+        when = When("some action")
+        stepdefmatcher = FakeStepDefinitionMatcher(Dict(given => failed_step_definition,
+                                                        when => successful_step_definition))
+        executor = BDD.Executor(stepdefmatcher)
+        scenario = Scenario("Description", [], [given, when])
+
+        scenarioresult = BDD.executescenario(executor, scenario)
+
+        @test isa(scenarioresult.steps[2], BDD.SkippedStep)
+    end
+
+    @testset "Execute a two-step scenario; Both steps succeed; All results are Success" begin
         given = Given("Some precondition")
         when = When("some action")
         stepdefmatcher = FakeStepDefinitionMatcher(Dict(given => successful_step_definition,
@@ -81,5 +94,22 @@ BDD.findstepdefinition(s::FakeStepDefinitionMatcher, step::BDD.Gherkin.ScenarioS
 
         @test isa(scenarioresult.steps[1], BDD.SuccessfulStepExecution)
         @test isa(scenarioresult.steps[2], BDD.SuccessfulStepExecution)
+    end
+
+    @testset "Execute a three-step scenario; All steps succeeed; All results are Success" begin
+        given = Given("Some precondition")
+        when = When("some action")
+        then = Then("some postcondition")
+        stepdefmatcher = FakeStepDefinitionMatcher(Dict(given => successful_step_definition,
+                                                        when => successful_step_definition,
+                                                        then => successful_step_definition))
+        executor = BDD.Executor(stepdefmatcher)
+        scenario = Scenario("Description", [], [given, when, then])
+
+        scenarioresult = BDD.executescenario(executor, scenario)
+
+        @test isa(scenarioresult.steps[1], BDD.SuccessfulStepExecution)
+        @test isa(scenarioresult.steps[2], BDD.SuccessfulStepExecution)
+        @test isa(scenarioresult.steps[3], BDD.SuccessfulStepExecution)
     end
 end
