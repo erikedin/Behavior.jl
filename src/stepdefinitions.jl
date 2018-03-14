@@ -7,10 +7,13 @@ abstract type StepDefinitionMatcher end
 findstepdefinition(::StepDefinitionMatcher, ::Gherkin.ScenarioStep) = error("Not implemented for abstract type StepDefinitionMatcher")
 
 struct FromMacroStepDefinitionMatcher <: StepDefinitionMatcher
-    definitions::AbstractString
+
+    function FromMacroStepDefinitionMatcher(source::AbstractString)
+        new()
+    end
 end
 
-function findstepdefinition(::FromMacroStepDefinitionMatcher, step::Gherkin.ScenarioStep)
+function findstepdefinition(matcher::FromMacroStepDefinitionMatcher, step::Gherkin.ScenarioStep)
     if step.text == "some definition"
         () -> nothing
     else
