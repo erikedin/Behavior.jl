@@ -1,7 +1,3 @@
-abstract type StepDefinitionMatcher end
-
-findstepdefinition(::StepDefinitionMatcher, ::Gherkin.ScenarioStep) = error("Not implemented for abstract type StepDefinitionMatcher")
-
 struct Executor
     stepdefmatcher::StepDefinitionMatcher
 end
