@@ -36,7 +36,10 @@ currentdefinitions = Vector{StepDefinition}()
 
 macro given(description, definition)
     quote
-        push!(currentdefinitions, StepDefinition($description, (context) -> $definition))
+        push!(currentdefinitions, StepDefinition($description, (context) -> begin
+            $definition
+            SuccessfulStepExecution()
+        end))
     end
 end
 

@@ -96,4 +96,19 @@ using BDD.Gherkin
 
         @test context[:x] == "Some string"
     end
+
+    @testset "Execute a step definition; An empty step definition; Success is returned" begin
+        given = BDD.Gherkin.Given("some definition")
+        stepdef_matcher = BDD.FromMacroStepDefinitionMatcher("""
+            using BDD.@given
+
+            @given "some definition" begin
+                context[:x] = "Some string"
+            end
+        """)
+
+        context = BDD.StepDefinitionContext()
+        stepdefinition = BDD.findstepdefinition(stepdef_matcher, given)
+        @test stepdefinition(context) == BDD.SuccessfulStepExecution()
+    end
 end
