@@ -111,4 +111,19 @@ using BDD.Gherkin
         stepdefinition = BDD.findstepdefinition(stepdef_matcher, given)
         @test stepdefinition(context) == BDD.SuccessfulStepExecution()
     end
+
+    @testset "Execute a step definition; An assert fails; StepFailed is returned" begin
+        given = BDD.Gherkin.Given("some definition")
+        stepdef_matcher = BDD.FromMacroStepDefinitionMatcher("""
+            using BDD: @given, @expect
+
+            @given "some definition" begin
+                @expect 1 == 2
+            end
+        """)
+
+        context = BDD.StepDefinitionContext()
+        stepdefinition = BDD.findstepdefinition(stepdef_matcher, given)
+        @test stepdefinition(context) == BDD.StepFailed()
+    end
 end
