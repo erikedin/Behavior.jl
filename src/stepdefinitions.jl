@@ -5,7 +5,8 @@ struct NoMatchingStepDefinition <: Exception end
 
 abstract type StepDefinitionMatcher end
 
-findstepdefinition(::StepDefinitionMatcher, ::Gherkin.ScenarioStep) = error("Not implemented for abstract type StepDefinitionMatcher")
+# A StepDefinitionMatcher should define a method
+# findstepdefinition(::StepDefinitionMatcher, ::Gherkin.ScenarioStep)
 
 struct StepDefinition
     description::String

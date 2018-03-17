@@ -1,4 +1,5 @@
 using ExecutableSpecifications
+using ExecutableSpecifications: findstepdefinition
 using ExecutableSpecifications.Gherkin
 using ExecutableSpecifications.Gherkin: Given, When, Then
 
@@ -175,5 +176,20 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         context = ExecutableSpecifications.StepDefinitionContext()
         stepdefinition = ExecutableSpecifications.findstepdefinition(stepdef_matcher, then)
         @test stepdefinition(context) == ExecutableSpecifications.SuccessfulStepExecution()
+    end
+
+    @testset "Execute a step definition; Step throws an exception; The error is not caught" begin
+        given = Given("some precondition")
+        stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
+            using ExecutableSpecifications: @given
+
+            @given "some precondition" begin
+                throw(ErrorException("Some error"))
+            end
+        """)
+
+        context = ExecutableSpecifications.StepDefinitionContext()
+        stepdefinition = findstepdefinition(stepdef_matcher, given)
+        @test_throws ErrorException stepdefinition(context)
     end
 end
