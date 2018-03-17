@@ -44,7 +44,7 @@ function step_definition_(description::String, definition::Expr)
                 if ex isa StepAssertFailure
                     StepFailed()
                 else
-                    throw()
+                    rethrow()
                 end
             end
         end))

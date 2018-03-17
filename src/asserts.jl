@@ -2,7 +2,7 @@ struct StepAssertFailure <: Exception end
 
 macro expect(ex)
     quote
-        if !($ex)
+        if !($(esc(ex)))
             throw(StepAssertFailure())
         end
     end

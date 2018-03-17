@@ -98,13 +98,32 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         @test context[:x] == "Some string"
     end
 
+    @testset "Execute a step definition; Retrieve a value from the context; Context value is present" begin
+        given = ExecutableSpecifications.Gherkin.Then(":x has value 1")
+        stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
+            using ExecutableSpecifications: @then, @expect
+
+            @then ":x has value 1" begin
+                @expect context[:x] == 1
+            end
+        """)
+
+        context = ExecutableSpecifications.StepDefinitionContext()
+        context[:x] = 1
+        stepdefinition = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
+
+        stepdefinition(context)
+
+        @test stepdefinition(context) == ExecutableSpecifications.SuccessfulStepExecution()
+    end
+
     @testset "Execute a step definition; An empty step definition; Success is returned" begin
         given = ExecutableSpecifications.Gherkin.Given("some definition")
         stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
             using ExecutableSpecifications.@given
 
             @given "some definition" begin
-                context[:x] = "Some string"
+
             end
         """)
 
