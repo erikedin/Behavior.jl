@@ -1,10 +1,11 @@
 using Base.Test
 using ExecutableSpecifications.Gherkin
 using ExecutableSpecifications
+using ExecutableSpecifications: StepDefinitionContext
 
-successful_step_definition() = ExecutableSpecifications.SuccessfulStepExecution()
-failed_step_definition() = ExecutableSpecifications.StepFailed()
-error_step_definition() = error("Some error")
+successful_step_definition(::StepDefinitionContext) = ExecutableSpecifications.SuccessfulStepExecution()
+failed_step_definition(::StepDefinitionContext) = ExecutableSpecifications.StepFailed()
+error_step_definition(::StepDefinitionContext) = error("Some error")
 
 struct FakeStepDefinitionMatcher <: ExecutableSpecifications.StepDefinitionMatcher
     steps::Dict{ExecutableSpecifications.Gherkin.ScenarioStep, Function}

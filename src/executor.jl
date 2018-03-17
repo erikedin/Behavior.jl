@@ -18,13 +18,14 @@ struct ScenarioResult
 end
 
 function executescenario(executor::Executor, scenario::Gherkin.Scenario)
+    context = StepDefinitionContext()
     steps = Vector{StepExecutionResult}(length(scenario.steps))
     fill!(steps, SkippedStep())
     for i = 1:length(scenario.steps)
         steps[i] = try
             stepdefinition = findstepdefinition(executor.stepdefmatcher, scenario.steps[i])
             try
-                stepdefinition()
+                stepdefinition(context)
             catch ex
                 UnexpectedStepError()
             end
