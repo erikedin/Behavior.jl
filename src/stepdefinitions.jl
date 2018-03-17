@@ -34,7 +34,7 @@ currentdefinitions = Vector{StepDefinition}()
 # ExecutableSpecifications.macros
 #
 
-macro given(description, definition)
+function step_definition_(description::String, definition::Expr)
     quote
         push!(currentdefinitions, StepDefinition($description, (context) -> begin
             try
@@ -49,6 +49,18 @@ macro given(description, definition)
             end
         end))
     end
+end
+
+macro given(description, definition)
+    step_definition_(description, definition)
+end
+
+macro when(description, definition)
+    step_definition_(description, definition)
+end
+
+macro then(description, definition)
+    step_definition_(description, definition)
 end
 
 #

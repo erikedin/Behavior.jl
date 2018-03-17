@@ -1,5 +1,6 @@
 using ExecutableSpecifications
 using ExecutableSpecifications.Gherkin
+using ExecutableSpecifications.Gherkin: Given, When, Then
 
 @testset "Step Definition Matcher" begin
     @testset "Find a step definition; A matching given step; A step is found" begin
@@ -125,5 +126,35 @@ using ExecutableSpecifications.Gherkin
         context = ExecutableSpecifications.StepDefinitionContext()
         stepdefinition = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
         @test stepdefinition(context) == ExecutableSpecifications.StepFailed()
+    end
+
+    @testset "Execute a step definition; An assert fails; StepFailed is returned" begin
+        when = When("some action")
+        stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
+            using ExecutableSpecifications: @when
+
+            @when "some action" begin
+
+            end
+        """)
+
+        context = ExecutableSpecifications.StepDefinitionContext()
+        stepdefinition = ExecutableSpecifications.findstepdefinition(stepdef_matcher, when)
+        @test stepdefinition(context) == ExecutableSpecifications.SuccessfulStepExecution()
+    end
+
+    @testset "Execute a step definition; An assert fails; StepFailed is returned" begin
+        then = Then("some postcondition")
+        stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
+            using ExecutableSpecifications: @then
+
+            @then "some postcondition" begin
+
+            end
+        """)
+
+        context = ExecutableSpecifications.StepDefinitionContext()
+        stepdefinition = ExecutableSpecifications.findstepdefinition(stepdef_matcher, then)
+        @test stepdefinition(context) == ExecutableSpecifications.SuccessfulStepExecution()
     end
 end
