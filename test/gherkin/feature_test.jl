@@ -1,4 +1,4 @@
-using BDD.Gherkin: parsefeature, issuccessful
+using ExecutableSpecifications.Gherkin: parsefeature, issuccessful
 
 @testset "Feature         " begin
     @testset "Feature description" begin

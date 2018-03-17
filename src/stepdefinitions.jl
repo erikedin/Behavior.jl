@@ -1,4 +1,4 @@
-using BDD.Gherkin
+using ExecutableSpecifications.Gherkin
 
 
 struct NoMatchingStepDefinition <: Exception end
@@ -31,7 +31,7 @@ Base.setindex!(context::StepDefinitionContext, value::Any, sym::Symbol) = contex
 currentdefinitions = Vector{StepDefinition}()
 
 #
-# BDD macros
+# ExecutableSpecifications.macros
 #
 
 macro given(description, definition)

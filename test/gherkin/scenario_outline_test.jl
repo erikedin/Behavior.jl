@@ -1,4 +1,4 @@
-using BDD.Gherkin: parsescenario, issuccessful, Given, When, Then, ByLineParser, ScenarioStep
+using ExecutableSpecifications.Gherkin: parsescenario, issuccessful, Given, When, Then, ByLineParser, ScenarioStep
 
 @testset "Scenario Outline" begin
     @testset "Outline has a Given step; Step is parsed" begin

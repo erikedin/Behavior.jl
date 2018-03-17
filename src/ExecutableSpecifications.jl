@@ -1,4 +1,4 @@
-module BDD
+module ExecutableSpecifications
 
 include("Gherkin.jl")
 
