@@ -15,6 +15,7 @@ issuccess(::StepExecutionResult) = false
 
 struct ScenarioResult
     steps::Vector{StepExecutionResult}
+    scenario::Scenario
 end
 
 function executescenario(executor::Executor, scenario::Gherkin.Scenario)
@@ -36,5 +37,5 @@ function executescenario(executor::Executor, scenario::Gherkin.Scenario)
             break
         end
     end
-    ScenarioResult(steps)
+    ScenarioResult(steps, scenario)
 end

@@ -113,4 +113,15 @@ ExecutableSpecifications.findstepdefinition(s::FakeStepDefinitionMatcher, step::
         @test isa(scenarioresult.steps[2], ExecutableSpecifications.SuccessfulStepExecution)
         @test isa(scenarioresult.steps[3], ExecutableSpecifications.SuccessfulStepExecution)
     end
+
+    @testset "Execute a scenario; Scenario is provided; Scenario is returned with the result" begin
+        given = Given("Some precondition")
+        stepdefmatcher = FakeStepDefinitionMatcher(Dict(given => successful_step_definition))
+        executor = ExecutableSpecifications.Executor(stepdefmatcher)
+        scenario = Scenario("This is a scenario", [], [given])
+
+        scenarioresult = ExecutableSpecifications.executescenario(executor, scenario)
+
+        @test scenarioresult.scenario == scenario
+    end
 end
