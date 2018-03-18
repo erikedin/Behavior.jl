@@ -1,5 +1,6 @@
 using ExecutableSpecifications
 using ExecutableSpecifications: findstepdefinition, NonUniqueStepDefinition, StepDefinitionLocation
+using ExecutableSpecifications: FromMacroStepDefinitionMatcher, CompositeStepDefinitionMatcher
 using ExecutableSpecifications.Gherkin
 using ExecutableSpecifications.Gherkin: Given, When, Then
 
@@ -16,7 +17,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             """)
 
             stepdefinition = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
-            @test isa(stepdefinition, Function)
+            @test isa(stepdefinition.definition, Function)
         end
 
         @testset "Find a step definition; A non-matching given step; No step definition found" begin
@@ -43,7 +44,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             """)
 
             stepdefinition = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
-            @test isa(stepdefinition, Function)
+            @test isa(stepdefinition.definition, Function)
         end
 
         @testset "Find a step definition in another matcher; The other matcher has no matching step; No step is found" begin
@@ -80,7 +81,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
 
             context = ExecutableSpecifications.StepDefinitionContext()
             stepdefinition = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
-            stepdefinition(context)
+            stepdefinition.definition(context)
 
             @test context[:x] == 1
         end
@@ -97,7 +98,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
 
             context = ExecutableSpecifications.StepDefinitionContext()
             stepdefinition = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
-            stepdefinition(context)
+            stepdefinition.definition(context)
 
             @test context[:x] == "Some string"
         end
@@ -116,9 +117,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             context[:x] = 1
             stepdefinition = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
 
-            stepdefinition(context)
-
-            @test stepdefinition(context) == ExecutableSpecifications.SuccessfulStepExecution()
+            @test stepdefinition.definition(context) == ExecutableSpecifications.SuccessfulStepExecution()
         end
 
         @testset "Execute a step definition; An empty step definition; Success is returned" begin
@@ -133,7 +132,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
 
             context = ExecutableSpecifications.StepDefinitionContext()
             stepdefinition = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
-            @test stepdefinition(context) == ExecutableSpecifications.SuccessfulStepExecution()
+            @test stepdefinition.definition(context) == ExecutableSpecifications.SuccessfulStepExecution()
         end
 
         @testset "Execute a step definition; An assert fails; StepFailed is returned" begin
@@ -148,7 +147,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
 
             context = ExecutableSpecifications.StepDefinitionContext()
             stepdefinition = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
-            @test stepdefinition(context) == ExecutableSpecifications.StepFailed()
+            @test stepdefinition.definition(context) == ExecutableSpecifications.StepFailed()
         end
 
         @testset "Execute a step definition; An assert fails; StepFailed is returned" begin
@@ -163,7 +162,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
 
             context = ExecutableSpecifications.StepDefinitionContext()
             stepdefinition = ExecutableSpecifications.findstepdefinition(stepdef_matcher, when)
-            @test stepdefinition(context) == ExecutableSpecifications.SuccessfulStepExecution()
+            @test stepdefinition.definition(context) == ExecutableSpecifications.SuccessfulStepExecution()
         end
 
         @testset "Execute a step definition; An assert fails; StepFailed is returned" begin
@@ -178,7 +177,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
 
             context = ExecutableSpecifications.StepDefinitionContext()
             stepdefinition = ExecutableSpecifications.findstepdefinition(stepdef_matcher, then)
-            @test stepdefinition(context) == ExecutableSpecifications.SuccessfulStepExecution()
+            @test stepdefinition.definition(context) == ExecutableSpecifications.SuccessfulStepExecution()
         end
 
         @testset "Execute a step definition; Step throws an exception; The error is not caught" begin
@@ -193,7 +192,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
 
             context = ExecutableSpecifications.StepDefinitionContext()
             stepdefinition = findstepdefinition(stepdef_matcher, given)
-            @test_throws ErrorException stepdefinition(context)
+            @test_throws ErrorException stepdefinition.definition(context)
         end
     end
 
@@ -272,6 +271,24 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             end
 
             @assert exception_thrown "No NonUniqueStepDefinition exception was thrown!"
+        end
+    end
+
+    @testset "Composite matcher" begin
+        @testset "Find a step definition from a composite; First matcher has the definition; Definition is found" begin
+            given = Given("some precondition")
+            matcher1 = FromMacroStepDefinitionMatcher("""
+                using ExecutableSpecifications: @given
+
+                @given "some precondition" begin
+
+                end
+            """)
+
+            compositematcher = CompositeStepDefinitionMatcher(matcher1)
+
+            stepdefinition = findstepdefinition(compositematcher, given)
+            @test stepdefinition.definition isa Function
         end
     end
 end

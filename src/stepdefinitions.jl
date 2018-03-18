@@ -102,5 +102,14 @@ function findstepdefinition(matcher::FromMacroStepDefinitionMatcher, step::Gherk
                         matchingstepdefinitions)
         throw(NonUniqueStepDefinition(locations))
     end
-    matchingstepdefinitions[1].definition
+    matchingstepdefinitions[1]
 end
+
+#
+# Composite matcher
+#
+struct CompositeStepDefinitionMatcher <: StepDefinitionMatcher
+    matcher::StepDefinitionMatcher
+end
+
+findstepdefinition(::CompositeStepDefinitionMatcher, ::Gherkin.Given) = StepDefinition("", () -> nothing)
