@@ -289,6 +289,60 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
 
             stepdefinition = findstepdefinition(compositematcher, given)
             @test stepdefinition.definition isa Function
+            @test stepdefinition.description == "some precondition"
+        end
+
+        @testset "Find a step definition from a composite; Second matcher has the definition; Definition is found" begin
+            given = Given("some other precondition")
+            matcher1 = FromMacroStepDefinitionMatcher("""
+                using ExecutableSpecifications: @given
+            """)
+            matcher2 = FromMacroStepDefinitionMatcher("""
+                using ExecutableSpecifications: @given
+
+                @given "some other precondition" begin
+
+                end
+            """)
+
+            compositematcher = CompositeStepDefinitionMatcher(matcher1, matcher2)
+
+            stepdefinition = findstepdefinition(compositematcher, given)
+            @test stepdefinition.definition isa Function
+            @test stepdefinition.description == "some other precondition"
+        end
+
+        @testset "Find two step definitions from a composite; Both exist in a matcher; Definitions are found" begin
+            given = Given("some other precondition")
+            when = When("some action")
+            matcher1 = FromMacroStepDefinitionMatcher("""
+                using ExecutableSpecifications: @given
+
+
+            """)
+            matcher2 = FromMacroStepDefinitionMatcher("""
+                using ExecutableSpecifications: @given
+
+                @given "some other precondition" begin
+
+                end
+            """)
+            matcher3 = FromMacroStepDefinitionMatcher("""
+                using ExecutableSpecifications: @when
+
+                @when "some action" begin
+
+                end
+            """)
+
+            compositematcher = CompositeStepDefinitionMatcher(matcher1, matcher2, matcher3)
+
+            stepdefinition = findstepdefinition(compositematcher, given)
+            @test stepdefinition.definition isa Function
+            @test stepdefinition.description == "some other precondition"
+
+            stepdefinition = findstepdefinition(compositematcher, when)
+            @test stepdefinition.description == "some action"
         end
     end
 end

@@ -109,7 +109,16 @@ end
 # Composite matcher
 #
 struct CompositeStepDefinitionMatcher <: StepDefinitionMatcher
-    matcher::StepDefinitionMatcher
+    matchers::Vector{StepDefinitionMatcher}
+
+    CompositeStepDefinitionMatcher(matchers...) = new([matchers...])
 end
 
-findstepdefinition(::CompositeStepDefinitionMatcher, ::Gherkin.Given) = StepDefinition("", () -> nothing)
+function findstepdefinition(composite::CompositeStepDefinitionMatcher, step::Gherkin.ScenarioStep)
+    for m in composite.matchers
+        try
+            stepdefinition = findstepdefinition(m, step)
+            return stepdefinition
+        end
+    end
+end
