@@ -7,7 +7,7 @@ BDD is an acronym for _Behaviour Driven Development_. It is a process for creati
 requirements, written in such a way that they can be executed as code. This package aims to be a
 tool for executing such requirements, and creating reports.
 
-This package is in the early states of development, and has only minimal functionality. It is not
+This package is in the early stages of development, and has only minimal functionality. It is not
 ready for general use, but is under active development.
 
 # Usage

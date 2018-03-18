@@ -32,7 +32,7 @@ Base.setindex!(context::StepDefinitionContext, value::Any, sym::Symbol) = contex
 currentdefinitions = Vector{StepDefinition}()
 
 #
-# ExecutableSpecifications.macros
+# Step definition macros
 #
 
 function step_definition_(description::String, definition::Expr)
