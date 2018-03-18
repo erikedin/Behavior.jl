@@ -1,7 +1,7 @@
 using Base.Test
 using ExecutableSpecifications.Gherkin
 using ExecutableSpecifications
-using ExecutableSpecifications: StepDefinitionContext
+using ExecutableSpecifications: StepDefinitionContext, StepDefinition
 
 successful_step_definition(::StepDefinitionContext) = ExecutableSpecifications.SuccessfulStepExecution()
 failed_step_definition(::StepDefinitionContext) = ExecutableSpecifications.StepFailed()
@@ -11,7 +11,7 @@ struct FakeStepDefinitionMatcher <: ExecutableSpecifications.StepDefinitionMatch
     steps::Dict{ExecutableSpecifications.Gherkin.ScenarioStep, Function}
 end
 
-ExecutableSpecifications.findstepdefinition(s::FakeStepDefinitionMatcher, step::ExecutableSpecifications.Gherkin.ScenarioStep) = s.steps[step]
+ExecutableSpecifications.findstepdefinition(s::FakeStepDefinitionMatcher, step::ExecutableSpecifications.Gherkin.ScenarioStep) = StepDefinition("some text", s.steps[step])
 
 @testset "Executor        " begin
     @testset "Execute a one-step scenario; No matching step found; Result is NoStepDefinitionFound" begin

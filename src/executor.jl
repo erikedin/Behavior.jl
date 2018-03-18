@@ -26,7 +26,7 @@ function executescenario(executor::Executor, scenario::Gherkin.Scenario)
         steps[i] = try
             stepdefinition = findstepdefinition(executor.stepdefmatcher, scenario.steps[i])
             try
-                stepdefinition(context)
+                stepdefinition.definition(context)
             catch ex
                 UnexpectedStepError()
             end
