@@ -1,5 +1,5 @@
 using ExecutableSpecifications
-using ExecutableSpecifications: findstepdefinition
+using ExecutableSpecifications: findstepdefinition, NonUniqueStepDefinition, StepDefinitionLocation
 using ExecutableSpecifications.Gherkin
 using ExecutableSpecifications.Gherkin: Given, When, Then
 
@@ -194,6 +194,84 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             context = ExecutableSpecifications.StepDefinitionContext()
             stepdefinition = findstepdefinition(stepdef_matcher, given)
             @test_throws ErrorException stepdefinition(context)
+        end
+    end
+
+    @testset "Non-unique step definitions" begin
+        @testset "Find a step definition; Two step definitions have the same description; NonUniqueStepDefinition is thrown" begin
+            given = ExecutableSpecifications.Gherkin.Given("some definition")
+            stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
+                using ExecutableSpecifications.@given
+
+                @given "some definition" begin
+                end
+
+                @given "some definition" begin
+                end
+            """)
+
+            context = ExecutableSpecifications.StepDefinitionContext()
+            @test_throws NonUniqueStepDefinition ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
+        end
+
+        @testset "Find a step definition; Two step definitions have the same description; File is reported for both" begin
+            given = ExecutableSpecifications.Gherkin.Given("some definition")
+            stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
+                using ExecutableSpecifications.@given
+
+                @given "some definition" begin
+                end
+
+                @given "some definition" begin
+                end
+            """; filename="steps.jl")
+
+            context = ExecutableSpecifications.StepDefinitionContext()
+            exception_thrown = false
+            try
+                ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
+            catch ex
+                if ex isa NonUniqueStepDefinition
+                    exception_thrown = true
+                    @test ex.locations[1].filename == "steps.jl"
+                    @test ex.locations[2].filename == "steps.jl"
+                else
+                    rethrow()
+                end
+            end
+
+            @assert exception_thrown "No NonUniqueStepDefinition exception was thrown!"
+        end
+
+        @testset "Find a step definition; Two step definitions have the same description; Another file is reported for both" begin
+            given = ExecutableSpecifications.Gherkin.Given("some definition")
+            stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
+                using ExecutableSpecifications.@given
+
+
+                @given "some definition" begin
+                end
+
+
+                @given "some definition" begin
+                end
+            """; filename="othersteps.jl")
+
+            context = ExecutableSpecifications.StepDefinitionContext()
+            exception_thrown = false
+            try
+                ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
+            catch ex
+                if ex isa NonUniqueStepDefinition
+                    exception_thrown = true
+                    @test ex.locations[1].filename == "othersteps.jl"
+                    @test ex.locations[2].filename == "othersteps.jl"
+                else
+                    rethrow()
+                end
+            end
+
+            @assert exception_thrown "No NonUniqueStepDefinition exception was thrown!"
         end
     end
 end
