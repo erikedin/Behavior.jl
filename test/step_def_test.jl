@@ -344,5 +344,27 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             stepdefinition = findstepdefinition(compositematcher, when)
             @test stepdefinition.description == "some action"
         end
+
+        @testset "Find a step definition from a composite; Matching two definitions; Non unique step exception thrown" begin
+            given = Given("some precondition")
+            matcher1 = FromMacroStepDefinitionMatcher("""
+                using ExecutableSpecifications: @given
+
+                @given "some precondition" begin
+
+                end
+            """)
+            matcher2 = FromMacroStepDefinitionMatcher("""
+                using ExecutableSpecifications: @given
+
+                @given "some precondition" begin
+
+                end
+            """)
+
+            compositematcher = CompositeStepDefinitionMatcher(matcher1, matcher2)
+
+            @test_throws NonUniqueStepDefinition findstepdefinition(compositematcher, given)
+        end
     end
 end

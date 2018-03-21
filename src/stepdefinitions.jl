@@ -115,10 +115,15 @@ struct CompositeStepDefinitionMatcher <: StepDefinitionMatcher
 end
 
 function findstepdefinition(composite::CompositeStepDefinitionMatcher, step::Gherkin.ScenarioStep)
+    matching = StepDefinition[]
     for m in composite.matchers
         try
             stepdefinition = findstepdefinition(m, step)
-            return stepdefinition
+            push!(matching, stepdefinition)
         end
     end
+    if length(matching) > 1
+        throw(NonUniqueStepDefinition([]))
+    end
+    matching[1]
 end
