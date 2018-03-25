@@ -63,10 +63,11 @@ The package has minimal functionality, but is under active development.
 
 These are some current limitations, that will be lifted as development progresses:
 
-- Only one feature file and one step file.
+- Only one feature file.
 
-    Today only the feature file `features/spec.feature` and step file `feature/steps/steps.jl` are
-    read. Going forward, all feature files and all step files will be read of course.
+    Today only the feature file `features/spec.feature` is read. Step files are only read from
+    `features/steps/*.jl`. Going forward, all feature files and all step files will be read of
+    course.
 
 - Scenario Outlines are parsed, but cannot be executed.
 - Presenting the results of scenarios is very rudimentary.

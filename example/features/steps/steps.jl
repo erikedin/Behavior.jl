@@ -1,17 +1,5 @@
 using ExecutableSpecifications: @given, @when, @then, @expect
 
-@given "some precondition which does nothing" begin
-
-end
-
-@when "we perform a no-op step" begin
-
-end
-
-@then "the scenario as a whole succeeds" begin
-
-end
-
 @given "that the context variable :x has value 1" begin
     context[:x] = 1
 end
