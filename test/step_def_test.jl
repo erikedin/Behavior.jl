@@ -366,5 +366,103 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
 
             @test_throws NonUniqueStepDefinition findstepdefinition(compositematcher, given)
         end
+
+        @testset "Find a step definition from a composite; Matching two definitions in one matcher; Non unique step exception thrown" begin
+            given = Given("some precondition")
+            matcher1 = FromMacroStepDefinitionMatcher("""
+                using ExecutableSpecifications: @given
+
+                @given "some precondition" begin
+
+                end
+
+                @given "some precondition" begin
+
+                end
+            """)
+            matcher2 = FromMacroStepDefinitionMatcher("""
+                using ExecutableSpecifications: @given
+            """)
+
+            compositematcher = CompositeStepDefinitionMatcher(matcher1, matcher2)
+
+            @test_throws NonUniqueStepDefinition findstepdefinition(compositematcher, given)
+        end
+
+        @testset "Find a step definition from a composite; Matches in both matchers; Non unique locations indicates both matchers" begin
+            given = Given("some precondition")
+            matcher1 = FromMacroStepDefinitionMatcher("""
+                using ExecutableSpecifications: @given
+
+                @given "some precondition" begin
+
+                end
+            """; filename="matcher1.jl")
+            matcher2 = FromMacroStepDefinitionMatcher("""
+                using ExecutableSpecifications: @given
+
+                @given "some precondition" begin
+
+                end
+            """; filename="matcher2.jl")
+
+            compositematcher = CompositeStepDefinitionMatcher(matcher1, matcher2)
+
+            exception_is_thrown = false
+            try
+                findstepdefinition(compositematcher, given)
+            catch ex
+                if ex isa NonUniqueStepDefinition
+                    exception_is_thrown = true
+                    location_filenames = [location.filename for location in ex.locations]
+                    @test "matcher1.jl" in location_filenames
+                    @test "matcher2.jl" in location_filenames
+                else
+                    rethrow()
+                end
+            end
+
+            @test exception_is_thrown
+        end
+
+        @testset "Find a step definition from a composite; Two matchings in one and one matching in second matcher; Non unique locations indicates both matchers" begin
+            given = Given("some precondition")
+            matcher1 = FromMacroStepDefinitionMatcher("""
+                using ExecutableSpecifications: @given
+
+                @given "some precondition" begin
+
+                end
+
+                @given "some precondition" begin
+
+                end
+            """; filename="matcher1.jl")
+            matcher2 = FromMacroStepDefinitionMatcher("""
+                using ExecutableSpecifications: @given
+
+                @given "some precondition" begin
+
+                end
+            """; filename="matcher2.jl")
+
+            compositematcher = CompositeStepDefinitionMatcher(matcher1, matcher2)
+
+            exception_is_thrown = false
+            try
+                findstepdefinition(compositematcher, given)
+            catch ex
+                if ex isa NonUniqueStepDefinition
+                    exception_is_thrown = true
+                    location_filenames = [location.filename for location in ex.locations]
+                    @test "matcher1.jl" in location_filenames
+                    @test "matcher2.jl" in location_filenames
+                else
+                    rethrow()
+                end
+            end
+
+            @test exception_is_thrown
+        end
     end
 end

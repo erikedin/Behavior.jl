@@ -20,6 +20,7 @@ abstract type StepDefinitionMatcher end
 struct StepDefinition
     description::String
     definition::Function
+    location::StepDefinitionLocation
 end
 
 #
@@ -39,6 +40,7 @@ Base.setindex!(context::StepDefinitionContext, value::Any, sym::Symbol) = contex
 #
 
 currentdefinitions = Vector{StepDefinition}()
+currentfilename = ""
 
 #
 # Step definition macros
@@ -57,7 +59,8 @@ function step_definition_(description::String, definition::Expr)
                     rethrow()
                 end
             end
-        end))
+        end,
+        StepDefinitionLocation(currentfilename, 0)))
     end
 end
 
@@ -83,6 +86,8 @@ struct FromMacroStepDefinitionMatcher <: StepDefinitionMatcher
 
     function FromMacroStepDefinitionMatcher(source::AbstractString; filename::String="<no filename>")
         global currentdefinitions
+        global currentfilename
+        currentfilename = filename
         include_string(source)
         mydefinitions = currentdefinitions
         this = new(mydefinitions, filename)
@@ -116,14 +121,20 @@ end
 
 function findstepdefinition(composite::CompositeStepDefinitionMatcher, step::Gherkin.ScenarioStep)
     matching = StepDefinition[]
+    nonuniquesfound = StepDefinitionLocation[]
     for m in composite.matchers
         try
             stepdefinition = findstepdefinition(m, step)
             push!(matching, stepdefinition)
+        catch ex
+            if ex isa NonUniqueStepDefinition
+                append!(nonuniquesfound, ex.locations)
+            end
         end
     end
-    if length(matching) > 1
-        throw(NonUniqueStepDefinition([]))
+    if length(matching) > 1 || !isempty(nonuniquesfound)
+        locations = vcat(nonuniquesfound, [d.location for d in matching])
+        throw(NonUniqueStepDefinition(locations))
     end
     matching[1]
 end
