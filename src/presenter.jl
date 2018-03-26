@@ -1,4 +1,5 @@
-abstract type Presenter end
+struct QuietRealTimePresenter <: RealTimePresenter end
+present(::QuietRealTimePresenter, ::Scenario) = nothing
 
 struct ColorConsolePresenter <: Presenter
     io::IO

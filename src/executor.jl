@@ -1,5 +1,8 @@
 struct Executor
     stepdefmatcher::StepDefinitionMatcher
+    presenter::RealTimePresenter
+
+    Executor(matcher::StepDefinitionMatcher, presenter::RealTimePresenter = QuietRealTimePresenter()) = new(matcher, presenter)
 end
 
 abstract type StepExecutionResult end
@@ -19,6 +22,7 @@ struct ScenarioResult
 end
 
 function executescenario(executor::Executor, scenario::Gherkin.Scenario)
+    present(executor.presenter, scenario)
     context = StepDefinitionContext()
     steps = Vector{StepExecutionResult}(length(scenario.steps))
     fill!(steps, SkippedStep())

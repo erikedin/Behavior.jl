@@ -2,6 +2,8 @@ using Base.Test
 using ExecutableSpecifications.Gherkin
 using ExecutableSpecifications
 using ExecutableSpecifications: StepDefinitionContext, StepDefinition, StepDefinitionLocation
+using ExecutableSpecifications: Executor
+import ExecutableSpecifications: present
 
 successful_step_definition(::StepDefinitionContext) = ExecutableSpecifications.SuccessfulStepExecution()
 failed_step_definition(::StepDefinitionContext) = ExecutableSpecifications.StepFailed()
@@ -123,5 +125,26 @@ ExecutableSpecifications.findstepdefinition(s::FakeStepDefinitionMatcher, step::
         scenarioresult = ExecutableSpecifications.executescenario(executor, scenario)
 
         @test scenarioresult.scenario == scenario
+    end
+end
+
+mutable struct FakeRealTimePresenter <: ExecutableSpecifications.RealTimePresenter
+    scenario::Scenario
+
+    FakeRealTimePresenter() = new(Scenario("<no scenario set>", [], []))
+end
+
+present(p::FakeRealTimePresenter, scenario::Scenario) = p.scenario = scenario
+
+@testset "Executor Presentation" begin
+    @testset "Execution presentation; Scenario is executed; Scenario is presented" begin
+        presenter = FakeRealTimePresenter()
+        matcher = FakeStepDefinitionMatcher(Dict())
+        executor = Executor(matcher, presenter)
+
+        scenario = Scenario("Some scenario", [], [])
+        ExecutableSpecifications.executescenario(executor, scenario)
+
+        @test presenter.scenario == scenario
     end
 end
