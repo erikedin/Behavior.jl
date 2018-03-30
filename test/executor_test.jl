@@ -1,8 +1,9 @@
 using Base.Test
 using ExecutableSpecifications.Gherkin
+using ExecutableSpecifications.Gherkin: ScenarioStep
 using ExecutableSpecifications
 using ExecutableSpecifications: StepDefinitionContext, StepDefinition, StepDefinitionLocation
-using ExecutableSpecifications: Executor
+using ExecutableSpecifications: Executor, StepExecutionResult
 import ExecutableSpecifications: present
 
 successful_step_definition(::StepDefinitionContext) = ExecutableSpecifications.SuccessfulStepExecution()
@@ -130,11 +131,17 @@ end
 
 mutable struct FakeRealTimePresenter <: ExecutableSpecifications.RealTimePresenter
     scenario::Scenario
+    steps::Vector{ScenarioStep}
+    results::Dict{ScenarioStep, StepExecutionResult}
 
-    FakeRealTimePresenter() = new(Scenario("<no scenario set>", [], []))
+    FakeRealTimePresenter() = new(Scenario("<no scenario set>", [], []), [], Dict())
 end
 
 present(p::FakeRealTimePresenter, scenario::Scenario) = p.scenario = scenario
+present(p::FakeRealTimePresenter, step::ScenarioStep) = push!(p.steps, step)
+present(p::FakeRealTimePresenter, step::ScenarioStep, result::StepExecutionResult) = p.results[step] = result
+
+stepresult(p::FakeRealTimePresenter, step::ScenarioStep) = p.results[step]
 
 @testset "Executor Presentation" begin
     @testset "Execution presentation; Scenario is executed; Scenario is presented" begin
@@ -146,5 +153,29 @@ present(p::FakeRealTimePresenter, scenario::Scenario) = p.scenario = scenario
         ExecutableSpecifications.executescenario(executor, scenario)
 
         @test presenter.scenario == scenario
+    end
+
+    @testset "Execution presentation; Scenario has on Given; Given is presented" begin
+        presenter = FakeRealTimePresenter()
+        given = Given("some precondition")
+        matcher = FakeStepDefinitionMatcher(Dict(given => successful_step_definition))
+        executor = Executor(matcher, presenter)
+
+        scenario = Scenario("Some scenario", [], [given])
+        ExecutableSpecifications.executescenario(executor, scenario)
+
+        @test presenter.steps[1] == given
+    end
+
+    @testset "Execution presentation; Scenario step is successful; Step is presented as successful" begin
+        presenter = FakeRealTimePresenter()
+        given = Given("some precondition")
+        matcher = FakeStepDefinitionMatcher(Dict(given => successful_step_definition))
+        executor = Executor(matcher, presenter)
+
+        scenario = Scenario("Some scenario", [], [given])
+        ExecutableSpecifications.executescenario(executor, scenario)
+
+        @test stepresult(presenter, given) == ExecutableSpecifications.SuccessfulStepExecution()
     end
 end

@@ -27,6 +27,8 @@ function executescenario(executor::Executor, scenario::Gherkin.Scenario)
     steps = Vector{StepExecutionResult}(length(scenario.steps))
     fill!(steps, SkippedStep())
     for i = 1:length(scenario.steps)
+        present(executor.presenter, scenario.steps[i])
+        present(executor.presenter, scenario.steps[1], SuccessfulStepExecution())
         steps[i] = try
             stepdefinition = findstepdefinition(executor.stepdefmatcher, scenario.steps[i])
             try

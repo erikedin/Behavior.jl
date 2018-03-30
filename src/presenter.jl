@@ -1,5 +1,8 @@
 struct QuietRealTimePresenter <: RealTimePresenter end
 present(::QuietRealTimePresenter, ::Scenario) = nothing
+present(::QuietRealTimePresenter, ::Gherkin.ScenarioStep) = nothing
+present(::QuietRealTimePresenter, ::Gherkin.ScenarioStep, ::StepExecutionResult) = nothing
+
 
 struct ColorConsolePresenter <: Presenter
     io::IO
