@@ -8,6 +8,7 @@ end
 abstract type StepExecutionResult end
 
 struct NoStepDefinitionFound <: StepExecutionResult end
+struct NonUniqueMatch <: StepExecutionResult end
 struct SuccessfulStepExecution <: StepExecutionResult end
 struct StepFailed <: StepExecutionResult end
 struct UnexpectedStepError <: StepExecutionResult end
@@ -39,8 +40,12 @@ function executescenario(executor::Executor, scenario::Gherkin.Scenario)
             catch ex
                 UnexpectedStepError()
             end
-        catch
-            NoStepDefinitionFound()
+        catch ex
+            if ex isa NoMatchingStepDefinition
+                NoStepDefinitionFound()
+            elseif ex isa NonUniqueStepDefinition
+                NonUniqueMatch()
+            end
         end
         present(executor.presenter, scenario.steps[i], steps[i])
         lastexecutedstep = i

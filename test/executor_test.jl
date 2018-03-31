@@ -16,9 +16,15 @@ end
 
 ExecutableSpecifications.findstepdefinition(s::FakeStepDefinitionMatcher, step::ExecutableSpecifications.Gherkin.ScenarioStep) = StepDefinition("some text", s.steps[step], StepDefinitionLocation("", 0))
 
+struct ThrowingStepDefinitionMatcher <: ExecutableSpecifications.StepDefinitionMatcher
+    ex::Exception
+end
+
+ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatcher, ::ExecutableSpecifications.Gherkin.ScenarioStep) = throw(matcher.ex)
+
 @testset "Executor        " begin
     @testset "Execute a one-step scenario; No matching step found; Result is NoStepDefinitionFound" begin
-        stepdefmatcher = FakeStepDefinitionMatcher(Dict{ExecutableSpecifications.Gherkin.ScenarioStep, Function}())
+        stepdefmatcher = ThrowingStepDefinitionMatcher(ExecutableSpecifications.NoMatchingStepDefinition())
         executor = ExecutableSpecifications.Executor(stepdefmatcher)
         scenario = Scenario("Description", [], [Given("some precondition")])
 
@@ -126,6 +132,16 @@ ExecutableSpecifications.findstepdefinition(s::FakeStepDefinitionMatcher, step::
         scenarioresult = ExecutableSpecifications.executescenario(executor, scenario)
 
         @test scenarioresult.scenario == scenario
+    end
+
+    @testset "Execute a scenario; No unique step definition found; Result is NonUniqueMatch" begin
+        stepdefmatcher = ThrowingStepDefinitionMatcher(ExecutableSpecifications.NonUniqueStepDefinition([]))
+        executor = ExecutableSpecifications.Executor(stepdefmatcher)
+        scenario = Scenario("Description", [], [Given("some precondition")])
+
+        scenarioresult = ExecutableSpecifications.executescenario(executor, scenario)
+
+        @test isa(scenarioresult.steps[1], ExecutableSpecifications.NonUniqueMatch)
     end
 end
 
