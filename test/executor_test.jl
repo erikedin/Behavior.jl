@@ -149,13 +149,15 @@ mutable struct FakeRealTimePresenter <: ExecutableSpecifications.RealTimePresent
     scenarios::Vector{Scenario}
     steps::Vector{ScenarioStep}
     results::Dict{ScenarioStep, StepExecutionResult}
+    features::Vector{Feature}
 
-    FakeRealTimePresenter() = new([], [], Dict())
+    FakeRealTimePresenter() = new([], [], Dict(), [])
 end
 
 present(p::FakeRealTimePresenter, scenario::Scenario) = push!(p.scenarios, scenario)
 present(p::FakeRealTimePresenter, step::ScenarioStep) = push!(p.steps, step)
 present(p::FakeRealTimePresenter, step::ScenarioStep, result::StepExecutionResult) = p.results[step] = result
+present(p::FakeRealTimePresenter, feature::Feature) = push!(p.features, feature)
 
 stepresult(p::FakeRealTimePresenter, step::ScenarioStep) = p.results[step]
 
@@ -222,10 +224,22 @@ stepresult(p::FakeRealTimePresenter, step::ScenarioStep) = p.results[step]
 
         @test stepresult(presenter, when) == ExecutableSpecifications.SkippedStep()
     end
+
+    @testset "Execution presentation; Feature is executed; Feature is presented" begin
+        presenter = FakeRealTimePresenter()
+        matcher = FakeStepDefinitionMatcher(Dict())
+        executor = Executor(matcher, presenter)
+
+        scenario = Scenario("Some scenario", [], [])
+        feature = Feature(FeatureHeader("", [], []), [scenario])
+        ExecutableSpecifications.executefeature(executor, feature)
+
+        @test presenter.features[1] == feature
+    end
 end
 
 @testset "Feature Executor" begin
-    @testset "Execute a feature; Feature has one scenario; Feature has one scenario result" begin
+    @testset "Execute a feature; Feature has one scenario; Feature result has one scenario result" begin
         presenter = QuietRealTimePresenter()
         given = Given("some precondition")
         matcher = FakeStepDefinitionMatcher(Dict(given => successful_step_definition))
@@ -237,5 +251,52 @@ end
         featureresult = executefeature(executor, feature)
 
         @test length(featureresult.scenarioresults) == 1
+    end
+
+    @testset "Execute a feature; Feature has two scenarios; Result has two scenario results" begin
+        presenter = QuietRealTimePresenter()
+        given = Given("some precondition")
+        matcher = FakeStepDefinitionMatcher(Dict(given => successful_step_definition))
+        scenario1 = Scenario("some scenario", [], [given])
+        scenario2 = Scenario("some other scenario", [], [given])
+        featureheader = FeatureHeader("Some feature", [], [])
+        feature = Feature(featureheader, [scenario1, scenario2])
+        executor = Executor(matcher, presenter)
+
+        featureresult = executefeature(executor, feature)
+
+        @test length(featureresult.scenarioresults) == 2
+    end
+
+    @testset "Execute a feature; Feature has three scenarios; Scenarios are executed in order" begin
+        presenter = QuietRealTimePresenter()
+        given = Given("some precondition")
+        matcher = FakeStepDefinitionMatcher(Dict(given => successful_step_definition))
+        scenario1 = Scenario("some scenario", [], [given])
+        scenario2 = Scenario("some other scenario", [], [given])
+        scenario3 = Scenario("some third scenario", [], [given])
+        featureheader = FeatureHeader("Some feature", [], [])
+        feature = Feature(featureheader, [scenario1, scenario2, scenario3])
+        executor = Executor(matcher, presenter)
+
+        featureresult = executefeature(executor, feature)
+
+        @test featureresult.scenarioresults[1].scenario == scenario1
+        @test featureresult.scenarioresults[2].scenario == scenario2
+        @test featureresult.scenarioresults[3].scenario == scenario3
+    end
+
+    @testset "Execute a feature; Feature has one failing scenario; Scenario result has a failing step" begin
+        presenter = QuietRealTimePresenter()
+        given = Given("some precondition")
+        matcher = FakeStepDefinitionMatcher(Dict(given => failed_step_definition))
+        scenario = Scenario("some scenario", [], [given])
+        featureheader = FeatureHeader("Some feature", [], [])
+        feature = Feature(featureheader, [scenario])
+        executor = Executor(matcher, presenter)
+
+        featureresult = executefeature(executor, feature)
+
+        @test featureresult.scenarioresults[1].steps[1] == ExecutableSpecifications.StepFailed()
     end
 end

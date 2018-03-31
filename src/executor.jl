@@ -67,6 +67,8 @@ struct FeatureResult
     scenarioresults::Vector{ScenarioResult}
 end
 
-function executefeature(::Executor, ::Gherkin.Feature)
-    FeatureResult([ScenarioResult([], Scenario("", [], []))])
+function executefeature(executor::Executor, feature::Gherkin.Feature)
+    present(executor.presenter, feature)
+    scenarioresults = [executescenario(executor, s) for s in feature.scenarios]
+    FeatureResult(scenarioresults)
 end
