@@ -5,7 +5,7 @@ present(::QuietRealTimePresenter, ::Gherkin.ScenarioStep, ::StepExecutionResult)
 present(::QuietRealTimePresenter, ::Gherkin.Feature) = nothing
 
 
-struct ColorConsolePresenter <: Presenter
+struct ColorConsolePresenter <: RealTimePresenter
     io::IO
     colors::Dict{Type, Symbol}
 
@@ -28,16 +28,21 @@ stepformat(step::Then) = " Then $(step.text)"
 
 stepcolor(presenter::Presenter, step::StepExecutionResult) = presenter.colors[typeof(step)]
 
-function present(presenter::Presenter, scenarioresult::ScenarioResult)
-    print_with_color(:blue, presenter.io, "  Scenario: $(scenarioresult.scenario.description)\n")
-    for i = 1:length(scenarioresult.steps)
-        stepresult = scenarioresult.steps[i]
-        step = scenarioresult.scenario.steps[i]
-        print_with_color(stepcolor(presenter, stepresult), presenter.io, "    $(stepformat(step))\n")
-    end
+function present(presenter::ColorConsolePresenter, feature::Feature)
+    println()
+    print_with_color(:white, presenter.io, "Feature: $(feature.header.description)\n")
 end
 
-function present(presenter::Presenter, feature::Feature)
-    print_with_color(:white, presenter.io, "Feature: $(feature.header.description)\n")
+function present(presenter::ColorConsolePresenter, scenario::Scenario)
     println()
+    print_with_color(:blue, presenter.io, "  Scenario: $(scenario.description)\n")
+end
+
+function present(presenter::ColorConsolePresenter, step::Gherkin.ScenarioStep)
+    print_with_color(:light_cyan, presenter.io, "    $(stepformat(step))")
+end
+
+function present(presenter::ColorConsolePresenter, step::Gherkin.ScenarioStep, result::StepExecutionResult)
+    color = stepcolor(presenter, result)
+    print_with_color(color, presenter.io, "\r    $(stepformat(step))\n")
 end

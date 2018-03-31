@@ -45,6 +45,8 @@ function executescenario(executor::Executor, scenario::Gherkin.Scenario)
                 NoStepDefinitionFound()
             elseif ex isa NonUniqueStepDefinition
                 NonUniqueMatch()
+            else
+                rethrow(ex)
             end
         end
         present(executor.presenter, scenario.steps[i], steps[i])

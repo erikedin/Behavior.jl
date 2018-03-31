@@ -1,4 +1,4 @@
-using ExecutableSpecifications: FromMacroStepDefinitionMatcher, executescenario, Executor
+using ExecutableSpecifications: FromMacroStepDefinitionMatcher, executefeature, Executor
 using ExecutableSpecifications: CompositeStepDefinitionMatcher
 using ExecutableSpecifications: ColorConsolePresenter, present
 using ExecutableSpecifications.Gherkin: parsefeature, Given, When, Then
@@ -12,14 +12,11 @@ for filename in stepfiles
     push!(matchers, FromMacroStepDefinitionMatcher(readstring(joinpath("features/steps", filename))))
 end
 matcher = CompositeStepDefinitionMatcher(matchers...)
-executor = Executor(matcher)
 presenter = ColorConsolePresenter()
+executor = Executor(matcher, presenter)
 featureresult = parsefeature(readstring("features/spec.feature"))
 feature = featureresult.value
 
-present(presenter, feature)
-for scenario in feature.scenarios
-    result = executescenario(executor, scenario)
-    present(presenter, result)
-    println("")
-end
+executefeature(executor, feature)
+
+println()

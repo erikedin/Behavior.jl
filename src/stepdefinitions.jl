@@ -136,5 +136,8 @@ function findstepdefinition(composite::CompositeStepDefinitionMatcher, step::Ghe
         locations = vcat(nonuniquesfound, [d.location for d in matching])
         throw(NonUniqueStepDefinition(locations))
     end
+    if isempty(matching)
+        throw(NoMatchingStepDefinition())
+    end
     matching[1]
 end

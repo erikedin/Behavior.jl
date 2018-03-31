@@ -1,5 +1,5 @@
 using ExecutableSpecifications
-using ExecutableSpecifications: findstepdefinition, NonUniqueStepDefinition, StepDefinitionLocation
+using ExecutableSpecifications: findstepdefinition, NonUniqueStepDefinition, StepDefinitionLocation, NoMatchingStepDefinition
 using ExecutableSpecifications: FromMacroStepDefinitionMatcher, CompositeStepDefinitionMatcher
 using ExecutableSpecifications.Gherkin
 using ExecutableSpecifications.Gherkin: Given, When, Then
@@ -463,6 +463,20 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             end
 
             @test exception_is_thrown
+        end
+
+        @testset "Find a step definition from a composite; No matches found; NoMatchingStepDefinition thrown" begin
+            given = Given("some precondition")
+            matcher1 = FromMacroStepDefinitionMatcher("""
+                using ExecutableSpecifications: @given
+            """)
+            matcher2 = FromMacroStepDefinitionMatcher("""
+                using ExecutableSpecifications: @given
+            """)
+
+            compositematcher = CompositeStepDefinitionMatcher(matcher1, matcher2)
+
+            @test_throws NoMatchingStepDefinition findstepdefinition(compositematcher, given)
         end
     end
 end
