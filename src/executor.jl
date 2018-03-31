@@ -57,3 +57,11 @@ function executescenario(executor::Executor, scenario::Gherkin.Scenario)
 
     ScenarioResult(steps, scenario)
 end
+
+struct FeatureResult
+    scenarioresults::Vector{ScenarioResult}
+end
+
+function executefeature(::Executor, ::Gherkin.Feature)
+    FeatureResult([ScenarioResult([], Scenario("", [], []))])
+end

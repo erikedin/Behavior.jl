@@ -2,7 +2,7 @@ module Gherkin
 
 import Base.==
 
-export Scenario, ScenarioOutline, Feature, Given, When, Then
+export Scenario, ScenarioOutline, Feature, FeatureHeader, Given, When, Then
 
 abstract type ParseResult{T} end
 

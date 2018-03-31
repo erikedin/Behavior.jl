@@ -3,7 +3,7 @@ using ExecutableSpecifications.Gherkin
 using ExecutableSpecifications.Gherkin: ScenarioStep
 using ExecutableSpecifications
 using ExecutableSpecifications: StepDefinitionContext, StepDefinition, StepDefinitionLocation
-using ExecutableSpecifications: Executor, StepExecutionResult
+using ExecutableSpecifications: Executor, StepExecutionResult, QuietRealTimePresenter, executefeature
 import ExecutableSpecifications: present
 
 successful_step_definition(::StepDefinitionContext) = ExecutableSpecifications.SuccessfulStepExecution()
@@ -130,14 +130,14 @@ ExecutableSpecifications.findstepdefinition(s::FakeStepDefinitionMatcher, step::
 end
 
 mutable struct FakeRealTimePresenter <: ExecutableSpecifications.RealTimePresenter
-    scenario::Scenario
+    scenarios::Vector{Scenario}
     steps::Vector{ScenarioStep}
     results::Dict{ScenarioStep, StepExecutionResult}
 
-    FakeRealTimePresenter() = new(Scenario("<no scenario set>", [], []), [], Dict())
+    FakeRealTimePresenter() = new([], [], Dict())
 end
 
-present(p::FakeRealTimePresenter, scenario::Scenario) = p.scenario = scenario
+present(p::FakeRealTimePresenter, scenario::Scenario) = push!(p.scenarios, scenario)
 present(p::FakeRealTimePresenter, step::ScenarioStep) = push!(p.steps, step)
 present(p::FakeRealTimePresenter, step::ScenarioStep, result::StepExecutionResult) = p.results[step] = result
 
@@ -152,7 +152,7 @@ stepresult(p::FakeRealTimePresenter, step::ScenarioStep) = p.results[step]
         scenario = Scenario("Some scenario", [], [])
         ExecutableSpecifications.executescenario(executor, scenario)
 
-        @test presenter.scenario == scenario
+        @test presenter.scenarios[1] == scenario
     end
 
     @testset "Execution presentation; Scenario has on Given; Given is presented" begin
@@ -205,5 +205,21 @@ stepresult(p::FakeRealTimePresenter, step::ScenarioStep) = p.results[step]
         ExecutableSpecifications.executescenario(executor, scenario)
 
         @test stepresult(presenter, when) == ExecutableSpecifications.SkippedStep()
+    end
+end
+
+@testset "Feature Executor" begin
+    @testset "Execute a feature; Feature has one scenario; Feature has one scenario result" begin
+        presenter = QuietRealTimePresenter()
+        given = Given("some precondition")
+        matcher = FakeStepDefinitionMatcher(Dict(given => successful_step_definition))
+        scenario = Scenario("some scenario", [], [given])
+        featureheader = FeatureHeader("Some feature", [], [])
+        feature = Feature(featureheader, [scenario])
+        executor = Executor(matcher, presenter)
+
+        featureresult = executefeature(executor, feature)
+
+        @test length(featureresult.scenarioresults) == 1
     end
 end
