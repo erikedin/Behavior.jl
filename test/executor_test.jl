@@ -178,4 +178,32 @@ stepresult(p::FakeRealTimePresenter, step::ScenarioStep) = p.results[step]
 
         @test stepresult(presenter, given) == ExecutableSpecifications.SuccessfulStepExecution()
     end
+
+    @testset "Execution presentation; Scenario step fails; Next is also presented" begin
+        presenter = FakeRealTimePresenter()
+        given = Given("some precondition")
+        when = When("some action")
+        matcher = FakeStepDefinitionMatcher(Dict(given => failed_step_definition,
+                                                 when => successful_step_definition))
+        executor = Executor(matcher, presenter)
+
+        scenario = Scenario("Some scenario", [], [given, when])
+        ExecutableSpecifications.executescenario(executor, scenario)
+
+        @test presenter.steps[2] == when
+    end
+
+    @testset "Execution presentation; Scenario step fails; Next has result Skipped" begin
+        presenter = FakeRealTimePresenter()
+        given = Given("some precondition")
+        when = When("some action")
+        matcher = FakeStepDefinitionMatcher(Dict(given => failed_step_definition,
+                                                 when => successful_step_definition))
+        executor = Executor(matcher, presenter)
+
+        scenario = Scenario("Some scenario", [], [given, when])
+        ExecutableSpecifications.executescenario(executor, scenario)
+
+        @test stepresult(presenter, when) == ExecutableSpecifications.SkippedStep()
+    end
 end

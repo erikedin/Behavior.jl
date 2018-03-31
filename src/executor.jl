@@ -26,9 +26,12 @@ function executescenario(executor::Executor, scenario::Gherkin.Scenario)
     context = StepDefinitionContext()
     steps = Vector{StepExecutionResult}(length(scenario.steps))
     fill!(steps, SkippedStep())
+    lastexecutedstep = 0
+
+    # Find a unique step definition for each step and execute it.
+    # Present each step, first as it is about to be executed, and then once more with the result.
     for i = 1:length(scenario.steps)
         present(executor.presenter, scenario.steps[i])
-        present(executor.presenter, scenario.steps[1], SuccessfulStepExecution())
         steps[i] = try
             stepdefinition = findstepdefinition(executor.stepdefmatcher, scenario.steps[i])
             try
@@ -39,9 +42,18 @@ function executescenario(executor::Executor, scenario::Gherkin.Scenario)
         catch
             NoStepDefinitionFound()
         end
+        present(executor.presenter, scenario.steps[i], steps[i])
+        lastexecutedstep = i
         if !issuccess(steps[i])
             break
         end
     end
+
+    # Present any remaining steps as skipped.
+    for k = lastexecutedstep + 1:length(scenario.steps)
+        present(executor.presenter, scenario.steps[k])
+        present(executor.presenter, scenario.steps[k], steps[k])
+    end
+
     ScenarioResult(steps, scenario)
 end
