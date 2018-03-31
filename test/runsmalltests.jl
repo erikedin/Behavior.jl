@@ -5,3 +5,4 @@ include("gherkin/tag_test.jl")
 
 include("executor_test.jl")
 include("step_def_test.jl")
+include("result_accumulator_test.jl")

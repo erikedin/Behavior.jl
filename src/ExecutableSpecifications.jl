@@ -9,7 +9,8 @@ include("stepdefinitions.jl")
 include("executor.jl")
 include("asserts.jl")
 include("presenter.jl")
+include("result_accumulator.jl")
 
-export @given
+export @given, @when, @then, @expect
 
 end # module
