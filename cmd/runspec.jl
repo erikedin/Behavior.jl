@@ -1,13 +1,13 @@
-using ExecutableSpecifications: FromMacroStepDefinitionMatcher, executefeature, Executor
-using ExecutableSpecifications: CompositeStepDefinitionMatcher
-using ExecutableSpecifications: ColorConsolePresenter, present
+using ExecutableSpecifications:
+    FromMacroStepDefinitionMatcher, executefeature, Executor, CompositeStepDefinitionMatcher,
+    ColorConsolePresenter, present, ResultAccumulator, accumulateresult, issuccess
 using ExecutableSpecifications.Gherkin: parsefeature, Given, When, Then, Feature
 import Base: show
 
 function allfileswithext(path::String, extension::String)
     [filename for filename in readdir(path)
               if isfile(joinpath(path, filename)) &&
-              splitext(joinpath(path, filename))[2] == extension]
+                 splitext(joinpath(path, filename))[2] == extension]
 end
 
 # Find all step definition files and all feature files.
@@ -31,9 +31,21 @@ end
 # The presenter will print all scenario steps as they are executed.
 presenter = ColorConsolePresenter()
 executor = Executor(matcher, presenter)
+accumulator = ResultAccumulator()
 
 for feature in features
-    executefeature(executor, feature)
+    result = executefeature(executor, feature)
+    accumulateresult(accumulator, result)
 end
 
 println()
+
+istotalsuccess = issuccess(accumulator)
+if istotalsuccess
+    println("SUCCESS")
+else
+    println("FAILURE")
+end
+
+exitcode = istotalsuccess ? 0 : - 1
+exit(exitcode)
