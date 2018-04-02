@@ -194,6 +194,23 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             stepdefinition = findstepdefinition(stepdef_matcher, given)
             @test_throws ErrorException stepdefinition.definition(context)
         end
+
+        @testset "Execute a step definition; Call a method defined in the steps file; Method is in scope" begin
+            when = ExecutableSpecifications.Gherkin.When("calling empty function foo")
+            stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
+                using ExecutableSpecifications.@when
+
+                foo() = nothing
+
+                @when "calling empty function foo" begin
+                    foo()
+                end
+            """)
+
+            context = ExecutableSpecifications.StepDefinitionContext()
+            stepdefinition = ExecutableSpecifications.findstepdefinition(stepdef_matcher, when)
+            @test stepdefinition.definition(context) == ExecutableSpecifications.SuccessfulStepExecution()
+        end
     end
 
     @testset "Non-unique step definitions" begin
