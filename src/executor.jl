@@ -10,7 +10,9 @@ abstract type StepExecutionResult end
 struct NoStepDefinitionFound <: StepExecutionResult end
 struct NonUniqueMatch <: StepExecutionResult end
 struct SuccessfulStepExecution <: StepExecutionResult end
-struct StepFailed <: StepExecutionResult end
+struct StepFailed <: StepExecutionResult
+    assertion::String
+end
 struct UnexpectedStepError <: StepExecutionResult end
 struct SkippedStep <: StepExecutionResult end
 

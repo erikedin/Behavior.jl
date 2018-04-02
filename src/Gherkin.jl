@@ -1,7 +1,5 @@
 module Gherkin
 
-import Base.==
-
 export Scenario, ScenarioOutline, Feature, FeatureHeader, Given, When, Then
 
 abstract type ParseResult{T} end
@@ -20,9 +18,6 @@ issuccessful(::OKParseResult{T}) where {T} = true
 issuccessful(::BadParseResult{T}) where {T} = false
 
 abstract type ScenarioStep end
-function ==(a::T, b::T) where {T <: ScenarioStep}
-    a.text == b.text
-end
 
 struct Given <: ScenarioStep
     text::String

@@ -7,7 +7,7 @@ using ExecutableSpecifications: Executor, StepExecutionResult, QuietRealTimePres
 import ExecutableSpecifications: present
 
 successful_step_definition(::StepDefinitionContext) = ExecutableSpecifications.SuccessfulStepExecution()
-failed_step_definition(::StepDefinitionContext) = ExecutableSpecifications.StepFailed()
+failed_step_definition(::StepDefinitionContext) = ExecutableSpecifications.StepFailed("")
 error_step_definition(::StepDefinitionContext) = error("Some error")
 
 struct FakeStepDefinitionMatcher <: ExecutableSpecifications.StepDefinitionMatcher
@@ -297,6 +297,6 @@ end
 
         featureresult = executefeature(executor, feature)
 
-        @test featureresult.scenarioresults[1].steps[1] == ExecutableSpecifications.StepFailed()
+        @test featureresult.scenarioresults[1].steps[1] isa ExecutableSpecifications.StepFailed
     end
 end

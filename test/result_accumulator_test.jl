@@ -19,7 +19,7 @@ using ExecutableSpecifications:
         accumulator = ResultAccumulator()
 
         given = Given("some precondition")
-        scenario = ScenarioResult([StepFailed()], Scenario("Some scenario", [], [given]))
+        scenario = ScenarioResult([StepFailed("")], Scenario("Some scenario", [], [given]))
         featureresult = FeatureResult([scenario])
 
         accumulateresult(accumulator, featureresult)
@@ -32,7 +32,7 @@ using ExecutableSpecifications:
 
         given = Given("some precondition")
         when = When("some action")
-        scenario = ScenarioResult([SuccessfulStepExecution(), StepFailed()], Scenario("Some scenario", [], [given, when]))
+        scenario = ScenarioResult([SuccessfulStepExecution(), StepFailed("")], Scenario("Some scenario", [], [given, when]))
         featureresult = FeatureResult([scenario])
 
         accumulateresult(accumulator, featureresult)
@@ -46,7 +46,7 @@ using ExecutableSpecifications:
         given = Given("some precondition")
         when = When("some action")
         successfulscenario = ScenarioResult([SuccessfulStepExecution()], Scenario("Some scenario", [], [given]))
-        failingscenario = ScenarioResult([StepFailed()], Scenario("Some other scenario", [],  [when]))
+        failingscenario = ScenarioResult([StepFailed("")], Scenario("Some other scenario", [],  [when]))
         featureresult = FeatureResult([successfulscenario, failingscenario])
 
         accumulateresult(accumulator, featureresult)

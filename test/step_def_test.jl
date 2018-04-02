@@ -147,7 +147,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
 
             context = ExecutableSpecifications.StepDefinitionContext()
             stepdefinition = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
-            @test stepdefinition.definition(context) == ExecutableSpecifications.StepFailed()
+            @test stepdefinition.definition(context) isa ExecutableSpecifications.StepFailed
         end
 
         @testset "Execute a step definition; An assert fails; StepFailed is returned" begin

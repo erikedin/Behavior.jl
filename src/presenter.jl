@@ -28,6 +28,11 @@ stepformat(step::Then) = " Then $(step.text)"
 
 stepcolor(presenter::Presenter, step::StepExecutionResult) = presenter.colors[typeof(step)]
 
+stepresultmessage(step::StepFailed) = ["FAILED: " * step.assertion]
+stepresultmessage(::SuccessfulStepExecution) = []
+stepresultmessage(::SkippedStep) = []
+stepresultmessage(::StepExecutionResult) = []
+
 function present(presenter::ColorConsolePresenter, feature::Feature)
     println()
     print_with_color(:white, presenter.io, "Feature: $(feature.header.description)\n")
@@ -45,4 +50,12 @@ end
 function present(presenter::ColorConsolePresenter, step::Gherkin.ScenarioStep, result::StepExecutionResult)
     color = stepcolor(presenter, result)
     print_with_color(color, presenter.io, "\r    $(stepformat(step))\n")
+
+    resultmessage = stepresultmessage(result)
+    if !isempty(resultmessage)
+        # The result message may be one or more lines. Indent them all.
+        s = [" " ^ 8 * x * "\n" for x in resultmessage]
+        println()
+        println(join(s))
+    end
 end

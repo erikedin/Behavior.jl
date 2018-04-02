@@ -1,11 +1,9 @@
 using ExecutableSpecifications.Gherkin
-import Base.==
 
 struct StepDefinitionLocation
     filename::String
     lineno::Int
 end
-==(a::StepDefinitionLocation, b::StepDefinitionLocation) = a.filename == b.filename && a.lineno == b.lineno
 
 struct NoMatchingStepDefinition <: Exception end
 struct NonUniqueStepDefinition <: Exception
@@ -54,7 +52,7 @@ function step_definition_(description::String, definition::Expr)
                 SuccessfulStepExecution()
             catch ex
                 if ex isa StepAssertFailure
-                    StepFailed()
+                    StepFailed(ex.assertion)
                 else
                     rethrow()
                 end
