@@ -17,7 +17,8 @@ featurefiles = allfileswithext("features", ".feature")
 # Read all step definition files.
 matchers = FromMacroStepDefinitionMatcher[]
 for filename in stepfiles
-    push!(matchers, FromMacroStepDefinitionMatcher(readstring(joinpath("features/steps", filename))))
+    fullpath = joinpath("features/steps", filename)
+    push!(matchers, FromMacroStepDefinitionMatcher(readstring(fullpath); filename=fullpath))
 end
 matcher = CompositeStepDefinitionMatcher(matchers...)
 

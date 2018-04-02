@@ -11,3 +11,11 @@ end
 @then "the scenario as a whole succeeds" begin
 
 end
+
+@when "a step has more than one matching step definition" begin
+
+end
+
+@when "a step has more than one matching step definition" begin
+
+end

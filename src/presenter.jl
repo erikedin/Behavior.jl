@@ -12,6 +12,7 @@ struct ColorConsolePresenter <: RealTimePresenter
     function ColorConsolePresenter(io::IO = STDOUT)
         colors = Dict{Type, Symbol}(
             NoStepDefinitionFound => :yellow,
+            NonUniqueMatch => :magenta,
             SuccessfulStepExecution => :green,
             StepFailed => :red,
             UnexpectedStepError => :light_magenta,
@@ -29,8 +30,11 @@ stepformat(step::Then) = " Then $(step.text)"
 stepcolor(presenter::Presenter, step::StepExecutionResult) = presenter.colors[typeof(step)]
 
 stepresultmessage(step::StepFailed) = ["FAILED: " * step.assertion]
+stepresultmessage(nomatch::NoStepDefinitionFound) = ["No match for '$(stepformat(nomatch.step))'"]
+stepresultmessage(nonunique::NonUniqueMatch) = vcat(["Multiple matches found:"], ["  In " * location.filename for location in nonunique.locations])
 stepresultmessage(::SuccessfulStepExecution) = []
 stepresultmessage(::SkippedStep) = []
+stepresultmessage(unexpected::UnexpectedStepError) = vcat(["Exception: $(string(unexpected.ex))"], ["  " * string(x) for x in unexpected.stack])
 stepresultmessage(::StepExecutionResult) = []
 
 function present(presenter::ColorConsolePresenter, feature::Feature)

@@ -7,13 +7,20 @@ end
 
 abstract type StepExecutionResult end
 
-struct NoStepDefinitionFound <: StepExecutionResult end
-struct NonUniqueMatch <: StepExecutionResult end
+struct NoStepDefinitionFound <: StepExecutionResult
+    step::Gherkin.ScenarioStep
+end
+struct NonUniqueMatch <: StepExecutionResult
+    locations::Vector{StepDefinitionLocation}
+end
 struct SuccessfulStepExecution <: StepExecutionResult end
 struct StepFailed <: StepExecutionResult
     assertion::String
 end
-struct UnexpectedStepError <: StepExecutionResult end
+struct UnexpectedStepError <: StepExecutionResult
+    ex::Exception
+    stack::StackTrace
+end
 struct SkippedStep <: StepExecutionResult end
 
 issuccess(::SuccessfulStepExecution) = true
@@ -40,13 +47,13 @@ function executescenario(executor::Executor, scenario::Gherkin.Scenario)
             try
                 stepdefinition.definition(context)
             catch ex
-                UnexpectedStepError()
+                UnexpectedStepError(ex, catch_stacktrace())
             end
         catch ex
             if ex isa NoMatchingStepDefinition
-                NoStepDefinitionFound()
+                NoStepDefinitionFound(scenario.steps[i])
             elseif ex isa NonUniqueStepDefinition
-                NonUniqueMatch()
+                NonUniqueMatch(ex.locations)
             else
                 rethrow(ex)
             end

@@ -10,7 +10,7 @@ end
 end
 
 @then "the comparison is true" begin
-    @expect 1 == 1
+    @expect context[:result]
 end
 
 @when "this step fails" begin
