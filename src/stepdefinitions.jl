@@ -45,10 +45,11 @@ currentfilename = ""
 #
 
 function step_definition_(description::String, definition::Expr)
+    definitionfunction = :(context -> $definition)
     quote
         push!(currentdefinitions, StepDefinition($description, (context) -> begin
             try
-                $definition
+                $(esc(definitionfunction))(context)
                 SuccessfulStepExecution()
             catch ex
                 if ex isa StepAssertFailure

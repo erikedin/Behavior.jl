@@ -150,7 +150,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             @test stepdefinition.definition(context) isa ExecutableSpecifications.StepFailed
         end
 
-        @testset "Execute a step definition; An assert fails; StepFailed is returned" begin
+        @testset "Execute a step definition; An empty When step; Success is returned" begin
             when = When("some action")
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications: @when
@@ -165,7 +165,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             @test stepdefinition.definition(context) == ExecutableSpecifications.SuccessfulStepExecution()
         end
 
-        @testset "Execute a step definition; An assert fails; StepFailed is returned" begin
+        @testset "Execute a step definition; An empty Then step; Success is returned" begin
             then = Then("some postcondition")
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications: @then
