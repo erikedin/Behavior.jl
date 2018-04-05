@@ -14,37 +14,41 @@ ready for general use, but is under active development.
 Specifications are written in the Gherkin format, such as
 
 ```gherkin
-Feature: Coffee machine
+Feature: Making coffee
 
-    Scenario: Coffee with milk
-        Given that the machine has both coffee beans and milk
-         When the "Coffee with milk" button is pressed
-         Then both coffee and milk is dispensed into the cup
+    Scenario: Making a cup of coffee
+        Given that there is a cup in the coffee machine
+         When the "Coffee" button is pressed
+         Then the cup is filled with coffee
 ```
 
 For each `Given`, `When`, and `Then` line, a corresponding method is written, which is executed when
 that line is reached.
 
 ```julia
-using ExecutableSpecifications: @given, @when, @then, @expect
+using ExecutableSpecifications
 using CoffeeMachine
 
-@given "that the machine has both coffee beans and milk" begin
-    cup = CoffeeCup()
-    machine = CoffeeMachine(cup, coffeebeans=100, milk=10)
-    context[:machine] = machine
+hascoffee(cup::Cup) = cup[:coffee] > 0.0
+
+@given "that there is a cup in the coffee machine" begin
+    cup = Cup()
+    machine = Machine()
+
+    cupisinthemachine(machine, cup)
+
     context[:cup] = cup
+    context[:machine] = machine
 end
 
-@when "the "Coffee with milk" button is pressed" begin
+@when "the \"Coffee\" button is pressed" begin
     machine = context[:machine]
-    machine.pressedCoffeeWithMilk()
+    coffeewaspressed(machine)
 end
 
-@then "both coffee and milk is dispensed into the cup" begin
+@then "the cup is filled with coffee" begin
     cup = context[:cup]
     @expect hascoffee(cup)
-    @expect hasmilk(cup)
 end
 ```
 
