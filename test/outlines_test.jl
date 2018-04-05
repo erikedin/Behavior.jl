@@ -16,4 +16,16 @@ using ExecutableSpecifications: transformoutline
         scenario = scenarios[1]
         @test scenario.steps[1] == Given("placeholder bar")
     end
+
+    @testset "Transform; Placeholder is quux; quux is replaced by example" begin
+        outline = ScenarioOutline("", [],
+            [Given("placeholder <quux>")],
+            ["quux"],
+            Array{String}(["baz"]))
+
+        scenarios = transformoutline(outline)
+
+        scenario = scenarios[1]
+        @test scenario.steps[1] == Given("placeholder baz")
+    end
 end
