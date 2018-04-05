@@ -52,6 +52,10 @@ Feature files have extension `.feature`, and are stored in the `features` direct
 "Current state" for current limitations), and step definitions (the executable code) have the
 extension `.jl` and are stored in `feature/steps`.
 
+# Example project
+The project [CoffeeMachine.jl](https://github.com/erikedin/CoffeeMachine.jl) is an example of how to
+use ExecutableSpecifications.jl.
+
 # Running
 Run the command line tool `runspec.jl` from the directory containing the `features` directory.
 The current functionality is rudimentary, and is not yet appropriate for general use.
@@ -63,22 +67,17 @@ The package has minimal functionality, but is under active development.
 
 These are some current limitations, that will be lifted as development progresses:
 
-- Only one feature file.
+- Reads feature and step definition files from a single hardcoded directory.
 
-    Today only the feature file `features/spec.feature` is read. Step files are only read from
+    Today only the directory `features` is searched for feature files. Step files are only read from
     `features/steps/*.jl`. Going forward, all feature files and all step files will be read of
     course.
 
 - Scenario Outlines are parsed, but cannot be executed.
 - Presenting the results of scenarios is very rudimentary.
-- No final pass/fail result is reported.
-
-    This means it cannot yet be used as part of an automatic tests, as there's no way to check for
-    success or failure.
-
 - No setup or teardown functions.
 
-In short, this package is not ready for general use.
+In short, this package has the minimal amount of features required to make it useful, but no more.
 
 # License
 ExecutableSpecifications.jl is licensed under the Apache License version 2.0.
