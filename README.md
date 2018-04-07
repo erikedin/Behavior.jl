@@ -54,7 +54,7 @@ end
 
 Feature files have extension `.feature`, and are stored in the `features` directory (see
 "Current state" for current limitations), and step definitions (the executable code) have the
-extension `.jl` and are stored in `feature/steps`.
+extension `.jl` and are stored in `features/steps`.
 
 # Example project
 The project [CoffeeMachine.jl](https://github.com/erikedin/CoffeeMachine.jl) is an example of how to
@@ -77,7 +77,6 @@ These are some current limitations, that will be lifted as development progresse
     `features/steps/*.jl`. Going forward, all feature files and all step files will be read of
     course.
 
-- Scenario Outlines are parsed, but cannot be executed.
 - Presenting the results of scenarios is very rudimentary.
 - No setup or teardown functions.
 
