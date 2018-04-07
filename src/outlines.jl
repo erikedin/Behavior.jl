@@ -1,7 +1,10 @@
 
 function transformoutline(outline::ScenarioOutline)
-    [interpolatexample(outline, example)
-     for example in outline.examples]
+    # The examples are in a multidimensional array.
+    # The size of dimension 1 is the number of placeholders.
+    # The size of dimension 2 is the number of examples.
+    [interpolatexample(outline, outline.examples[:,exampleindex])
+     for exampleindex in 1:size(outline.examples, 2)]
 end
 
 

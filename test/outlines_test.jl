@@ -8,7 +8,7 @@ using ExecutableSpecifications: transformoutline
         outline = ScenarioOutline("Some description", [],
             [Given("placeholder <foo>")],
             ["foo"],
-            [["bar"]])
+            ["bar"])
 
         scenarios = transformoutline(outline)
 
@@ -19,7 +19,7 @@ using ExecutableSpecifications: transformoutline
         outline = ScenarioOutline("", ["@foo", "@bar"],
             [Given("some <foo>")],
             ["foo"],
-            [["bar"]])
+            ["bar"])
 
         scenarios = transformoutline(outline)
 
@@ -30,7 +30,7 @@ using ExecutableSpecifications: transformoutline
         outline = ScenarioOutline("", [],
             [Given("placeholder <foo>")],
             ["foo"],
-            [["bar"]])
+            ["bar"])
 
         scenarios = transformoutline(outline)
 
@@ -43,7 +43,7 @@ using ExecutableSpecifications: transformoutline
         outline = ScenarioOutline("", [],
             [Given("placeholder <quux>")],
             ["quux"],
-            [["baz"]])
+            ["baz"])
 
         scenarios = transformoutline(outline)
 
@@ -55,7 +55,7 @@ using ExecutableSpecifications: transformoutline
         outline = ScenarioOutline("", [],
             [Given("placeholders <foo> <quux>")],
             ["foo", "quux"],
-            [["bar", "baz"]])
+            ["bar"; "baz"])
 
         scenarios = transformoutline(outline)
 
@@ -68,7 +68,7 @@ using ExecutableSpecifications: transformoutline
         outline = ScenarioOutline("", [],
             steps,
             ["quux"],
-            [["baz"]])
+            ["baz"])
 
         scenarios = transformoutline(outline)
 
@@ -82,7 +82,7 @@ using ExecutableSpecifications: transformoutline
         outline = ScenarioOutline("", [],
             steps,
             ["quux"],
-            [["baz"]])
+            ["baz"])
 
         scenarios = transformoutline(outline)
 
@@ -96,7 +96,7 @@ using ExecutableSpecifications: transformoutline
         outline = ScenarioOutline("", [],
             steps,
             ["quux"],
-            [["baz"]])
+            ["baz"])
 
         scenarios = transformoutline(outline)
 
@@ -108,7 +108,7 @@ using ExecutableSpecifications: transformoutline
         outline = ScenarioOutline("", [],
             [Given("step <quux>")],
             ["quux"],
-            [["bar"], ["baz"]])
+            ["bar" "baz"])
 
         scenarios = transformoutline(outline)
 
@@ -123,7 +123,7 @@ using ExecutableSpecifications: transformoutline
              When(""; block_text="when <quux>"),
              Then(""; block_text="then <quux>")],
             ["quux"],
-            [["bar"]])
+            ["bar"])
 
         scenarios = transformoutline(outline)
 

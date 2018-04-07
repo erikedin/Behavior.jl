@@ -5,8 +5,8 @@ using ExecutableSpecifications: @given, @when, @then, @expect
 end
 
 @when "the context variable :x is compared with 1" begin
-    isequal = context[:x] == 1
-    context[:result] = isequal
+    v = context[:x] == 1
+    context[:result] = v
 end
 
 @then "the comparison is true" begin
