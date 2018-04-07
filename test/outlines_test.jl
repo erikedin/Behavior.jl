@@ -117,7 +117,6 @@ using ExecutableSpecifications: transformoutline
         @test scenarios[2].steps[1] == Given("step baz")
     end
 
-    # TODO: Test for interpolating values in block_text
     @testset "Transform; Placeholders in the block_text; Placeholders are replaced with examples" begin
         outline = ScenarioOutline("", [],
             [Given(""; block_text="given <quux>"),
@@ -133,4 +132,6 @@ using ExecutableSpecifications: transformoutline
         @test scenarios[1].steps[2] == When(""; block_text="when bar")
         @test scenarios[1].steps[3] == Then(""; block_text="then bar")
     end
+
+    # TODO: Mismatching placeholders
 end

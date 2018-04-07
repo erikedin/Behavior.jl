@@ -1,6 +1,6 @@
 module Gherkin
 
-import Base: ==
+import Base: ==, hash
 
 export Scenario, ScenarioOutline, Feature, FeatureHeader, Given, When, Then
 
@@ -24,6 +24,7 @@ abstract type ScenarioStep end
 function ==(a::T, b::T) where {T <: ScenarioStep}
     a.text == b.text && a.block_text == b.block_text
 end
+hash(a::T, h::UInt) where {T <: ScenarioStep} = hash((a.text, a.block_text), h)
 
 struct Given <: ScenarioStep
     text::String

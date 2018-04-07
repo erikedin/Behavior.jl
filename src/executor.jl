@@ -74,6 +74,12 @@ function executescenario(executor::Executor, scenario::Gherkin.Scenario)
     ScenarioResult(steps, scenario)
 end
 
+function executescenario(executor::Executor, outline::Gherkin.ScenarioOutline)
+    scenarios = transformoutline(outline)
+    [executescenario(executor, scenario)
+     for scenario in scenarios]
+end
+
 struct FeatureResult
     scenarioresults::Vector{ScenarioResult}
 end
@@ -81,5 +87,5 @@ end
 function executefeature(executor::Executor, feature::Gherkin.Feature)
     present(executor.presenter, feature)
     scenarioresults = [executescenario(executor, s) for s in feature.scenarios]
-    FeatureResult(scenarioresults)
+    FeatureResult(reduce(vcat, [], scenarioresults))
 end

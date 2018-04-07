@@ -143,6 +143,48 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
 
         @test isa(scenarioresult.steps[1], ExecutableSpecifications.NonUniqueMatch)
     end
+
+    @testset "Execute a ScenarioOutline; Outline has two examples; Two scenarios are returned" begin
+        outline = ScenarioOutline("", [], [Given("step <stepnumber>")], ["stepnumber"], [["1"], ["2"]])
+        step1 = Given("step 1")
+        step2 = Given("step 2")
+        stepdefmatcher = FakeStepDefinitionMatcher(Dict(step1 => successful_step_definition,
+                                                        step2 => successful_step_definition))
+        executor = ExecutableSpecifications.Executor(stepdefmatcher)
+
+        outlineresult = ExecutableSpecifications.executescenario(executor, outline)
+
+        @test length(outlineresult) == 2
+    end
+
+    @testset "Execute a ScenarioOutline; Outline has a successful and a failing example; First is success, second is fail" begin
+        outline = ScenarioOutline("", [], [Given("step <stepnumber>")], ["stepnumber"], [["1"], ["2"]])
+        step1 = Given("step 1")
+        step2 = Given("step 2")
+        stepdefmatcher = FakeStepDefinitionMatcher(Dict(step1 => successful_step_definition,
+                                                        step2 => failed_step_definition))
+        executor = ExecutableSpecifications.Executor(stepdefmatcher)
+
+        outlineresult = ExecutableSpecifications.executescenario(executor, outline)
+
+        @test outlineresult[1].steps[1] isa ExecutableSpecifications.SuccessfulStepExecution
+        @test outlineresult[2].steps[1] isa ExecutableSpecifications.StepFailed
+    end
+
+    @testset "Execute a ScenarioOutline; Outline has three examples; Three scenarios are returned" begin
+        outline = ScenarioOutline("", [], [Given("step <stepnumber>")], ["stepnumber"], [["1"], ["2"], ["3"]])
+        step1 = Given("step 1")
+        step2 = Given("step 2")
+        step3 = Given("step 3")
+        stepdefmatcher = FakeStepDefinitionMatcher(Dict(step1 => successful_step_definition,
+                                                        step2 => successful_step_definition,
+                                                        step3 => successful_step_definition))
+        executor = ExecutableSpecifications.Executor(stepdefmatcher)
+
+        outlineresult = ExecutableSpecifications.executescenario(executor, outline)
+
+        @test length(outlineresult) == 3
+    end
 end
 
 mutable struct FakeRealTimePresenter <: ExecutableSpecifications.RealTimePresenter
@@ -298,5 +340,24 @@ end
         featureresult = executefeature(executor, feature)
 
         @test featureresult.scenarioresults[1].steps[1] isa ExecutableSpecifications.StepFailed
+    end
+
+    @testset "Execute a feature; One Scenario and an Outline with two examples; Three results" begin
+        presenter = QuietRealTimePresenter()
+
+        step1 = Given("step 1")
+        step2 = Given("step 2")
+        scenario = Scenario("some scenario", [], [step1])
+        outline = ScenarioOutline("", [], [Given("step <stepnumber>")], ["stepnumber"], [["1"], ["2"]])
+        matcher = FakeStepDefinitionMatcher(Dict(step1 => successful_step_definition,
+                                                 step2 => successful_step_definition))
+
+        featureheader = FeatureHeader("Some feature", [], [])
+        feature = Feature(featureheader, [scenario, outline])
+        executor = Executor(matcher, presenter)
+
+        featureresult = executefeature(executor, feature)
+
+        @test length(featureresult.scenarioresults) == 3
     end
 end
