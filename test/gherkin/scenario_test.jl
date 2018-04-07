@@ -1,9 +1,4 @@
 using ExecutableSpecifications.Gherkin: issuccessful, parsescenario, Given, When, Then, ByLineParser, ScenarioStep
-import Base.==
-
-function ==(a::T, b::T) where {T <: ScenarioStep}
-    a.text == b.text
-end
 
 @testset "Scenario        " begin
     @testset "Scenario has a Given step; the parsed scenario has a Given struct" begin
