@@ -7,8 +7,7 @@ BDD is an acronym for _Behaviour Driven Development_. It is a process for creati
 requirements, written in such a way that they can be executed as code. This package aims to be a
 tool for executing such requirements, and creating reports.
 
-This package is in the early stages of development, and has only minimal functionality. It is not
-ready for general use, but is under active development.
+This package is in the early stages of development, and has only minimal functionality.
 
 # Usage
 Specifications are written in the Gherkin format, such as
@@ -61,8 +60,13 @@ The project [CoffeeMachine.jl](https://github.com/erikedin/CoffeeMachine.jl) is 
 use ExecutableSpecifications.jl.
 
 # Running
-Run the command line tool `runspec.jl` from the directory containing the `features` directory.
-The current functionality is rudimentary, and is not yet appropriate for general use.
+Run the command line tool `runspec.jl` from the directory containing the `features` directory, or
+from the Julia REPL with
+
+```julia
+julia> using ExecutableSpecifications
+julia> runspec()
+```
 
 See "Current state" for limitations.
 
@@ -79,8 +83,11 @@ These are some current limitations, that will be lifted as development progresse
 
 - Presenting the results of scenarios is very rudimentary.
 - No setup or teardown functions.
+- No variables in step definition strings
 
-In short, this package has the minimal amount of features required to make it useful, but no more.
+    One would like to be able to define a variable in a step definition like
+    `@given "some value {foo}" begin`. Without this, scenario outlines may become difficult to use,
+    since you have to define a separate step definition for each value used in the outline.
 
 # License
 ExecutableSpecifications.jl is licensed under the Apache License version 2.0.
