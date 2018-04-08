@@ -1,6 +1,6 @@
 using ExecutableSpecifications:
     FromMacroStepDefinitionMatcher, executefeature, Executor, CompositeStepDefinitionMatcher,
-    ColorConsolePresenter, present, ResultAccumulator, accumulateresult, issuccess
+    ColorConsolePresenter, present, ResultAccumulator, accumulateresult, issuccess, featureresults
 using ExecutableSpecifications.Gherkin: parsefeature, Given, When, Then, Feature
 
 function allfileswithext(path::String, extension::String)
@@ -37,6 +37,27 @@ function runspec()
     for feature in features
         result = executefeature(executor, feature)
         accumulateresult(accumulator, result)
+    end
+
+    println()
+
+    #
+    # Present number of scenarios that succeeded and failed for each feature
+    #
+    results = featureresults(accumulator)
+
+    # Find the longest feature name, so we can align the result table.
+    maxfeature = maximum(length(r.feature.header.description) for r in results)
+
+    featureprefix = "  Feature: "
+    print_with_color(:white, " " ^ (length(featureprefix) + maxfeature + 1), "| Success | Failure\n")
+    for r in results
+        linecolor = r.n_failure == 0 ? :green : :red
+        print_with_color(linecolor, featureprefix, rpad(r.feature.header.description, maxfeature))
+        print_with_color(:white, " | ")
+        print_with_color(:green, rpad("$(r.n_success)", 7))
+        print_with_color(:white, " | ")
+        print_with_color(linecolor, rpad("$(r.n_failure)", 7), "\n")
     end
 
     println()
