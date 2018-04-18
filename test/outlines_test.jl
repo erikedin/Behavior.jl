@@ -1,4 +1,4 @@
-using Base.Test
+using Test
 using ExecutableSpecifications
 using ExecutableSpecifications.Gherkin
 using ExecutableSpecifications: transformoutline

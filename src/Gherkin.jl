@@ -101,7 +101,7 @@ iscurrentlineempty(p::ByLineParser) = strip(p.current) == ""
 function parsetags(byline::ByLineParser)
     tags = []
     while !isempty(byline)
-        tag_match = matchall(r"(@[^\s]+)", byline.current)
+        tag_match = collect((m.match for m = eachmatch(r"(@[^\s]+)", byline.current)))
         if isempty(tag_match)
             break
         end
@@ -145,7 +145,7 @@ function parseblocktext(byline::ByLineParser)
     while !isempty(byline)
         line = byline.current
         consume!(byline)
-        if ismatch(r"\"\"\"", line)
+        if occursin(r"\"\"\"", line)
             break
         end
         push!(block_text_lines, strip(line))
@@ -224,11 +224,11 @@ function parsescenario(byline::ByLineParser)
         consume!(byline)
 
         # Consume the placeholders line
-        placeholders = matchall(r"(\w+)", byline.current)
+        placeholders = collect((m.match for m = eachmatch(r"(\w+)", byline.current)))
         consume!(byline)
 
         # Parse the examples
-        examples = Array{String,2}(length(placeholders), 0)
+        examples = Array{String,2}(undef, length(placeholders), 0)
         while !iscurrentlineempty(byline)
             example = split(strip(byline.current), "|")
             filter!(x -> !isempty(x), example)

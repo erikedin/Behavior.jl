@@ -26,4 +26,4 @@ interpolatestep(step::When, fromplaceholders::Function) = When(interpolatestepte
 interpolatestep(step::Then, fromplaceholders::Function) = Then(interpolatesteptext(step.text, fromplaceholders);
                                                                block_text=interpolatesteptext(step.block_text, fromplaceholders))
 
-interpolatesteptext(text::String, fromplaceholders::Function) = replace(text, r"<[^>]*>", fromplaceholders)
+interpolatesteptext(text::String, fromplaceholders::Function) = replace(text, r"<[^>]*>" => fromplaceholders)
