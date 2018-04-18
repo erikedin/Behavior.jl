@@ -70,6 +70,14 @@ julia> runspec()
 
 See "Current state" for limitations.
 
+# Migration to 0.7
+Then plan is to do the migration to Julia 0.7 in the `migration-0.7` branch. Once 0.7 is released,
+this branch will be merged to master, and updates to the 0.6 version of the code will only be made
+upon request.
+
+Essentially this package will move to 0.7 as soon as possible, which is feasible because it
+presumably is not used widely (or at all) yet.
+
 # Current state
 The package has minimal functionality, but is under active development.
 
