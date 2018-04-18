@@ -1,3 +1,5 @@
+using Base.StackTraces
+
 struct Executor
     stepdefmatcher::StepDefinitionMatcher
     presenter::RealTimePresenter
@@ -34,7 +36,7 @@ end
 function executescenario(executor::Executor, scenario::Gherkin.Scenario)
     present(executor.presenter, scenario)
     context = StepDefinitionContext()
-    steps = Vector{StepExecutionResult}(length(scenario.steps))
+    steps = Vector{StepExecutionResult}(undef, length(scenario.steps))
     fill!(steps, SkippedStep())
     lastexecutedstep = 0
 
@@ -47,7 +49,7 @@ function executescenario(executor::Executor, scenario::Gherkin.Scenario)
             try
                 Base.invokelatest(stepdefinition.definition, context)
             catch ex
-                UnexpectedStepError(ex, catch_stacktrace())
+                UnexpectedStepError(ex, stacktrace(catch_backtrace()))
             end
         catch ex
             if ex isa NoMatchingStepDefinition

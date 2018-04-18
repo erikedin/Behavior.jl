@@ -87,7 +87,7 @@ struct FromMacroStepDefinitionMatcher <: StepDefinitionMatcher
         global currentdefinitions
         global currentfilename
         currentfilename = filename
-        include_string(source)
+        include_string(Main, source)
         mydefinitions = currentdefinitions
         this = new(mydefinitions, filename)
         currentdefinitions = Vector{StepDefinition}()
@@ -96,7 +96,7 @@ struct FromMacroStepDefinitionMatcher <: StepDefinitionMatcher
 end
 
 function findstepdefinition(matcher::FromMacroStepDefinitionMatcher, step::Gherkin.ScenarioStep)
-    matchingindexes = find(x -> x.description == step.text, matcher.stepdefinitions)
+    matchingindexes = findall(x -> x.description == step.text, matcher.stepdefinitions)
     matchingstepdefinitions = [matcher.stepdefinitions[i] for i in matchingindexes]
     if isempty(matchingstepdefinitions)
         throw(NoMatchingStepDefinition())

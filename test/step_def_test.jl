@@ -9,7 +9,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         @testset "Find a step definition; A matching given step; A step is found" begin
             given = ExecutableSpecifications.Gherkin.Given("some definition")
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications.@given
+                using ExecutableSpecifications: @given
 
                 @given "some definition" begin
                     x = 1
@@ -23,7 +23,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         @testset "Find a step definition; A non-matching given step; No step definition found" begin
             given = ExecutableSpecifications.Gherkin.Given("some other definition")
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications.@given
+                using ExecutableSpecifications: @given
 
                 @given "some definition" begin
                     x = 1
@@ -36,7 +36,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         @testset "Find a step definition; A matching given step with another description; A step is found" begin
             given = ExecutableSpecifications.Gherkin.Given("some other definition")
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications.@given
+                using ExecutableSpecifications: @given
 
                 @given "some other definition" begin
                     x = 1
@@ -52,7 +52,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             # kept globally.
             given = ExecutableSpecifications.Gherkin.Given("some definition")
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications.@given
+                using ExecutableSpecifications: @given
 
                 @given "some definition" begin
                     x = 1
@@ -61,7 +61,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
 
             # There is no step definitions here, so it should not find any matching definitions.
             empty_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications.@given
+                using ExecutableSpecifications: @given
             """)
 
             @test_throws ExecutableSpecifications.NoMatchingStepDefinition ExecutableSpecifications.findstepdefinition(empty_matcher, given)
@@ -72,7 +72,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         @testset "Execute a step definition; Store an int in context; Context stores the value" begin
             given = ExecutableSpecifications.Gherkin.Given("some definition")
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications.@given
+                using ExecutableSpecifications: @given
 
                 @given "some definition" begin
                     context[:x] = 1
@@ -89,7 +89,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         @testset "Execute a step definition; Store a string in context; Context stores the value" begin
             given = ExecutableSpecifications.Gherkin.Given("some definition")
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications.@given
+                using ExecutableSpecifications: @given
 
                 @given "some definition" begin
                     context[:x] = "Some string"
@@ -123,7 +123,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         @testset "Execute a step definition; An empty step definition; Success is returned" begin
             given = ExecutableSpecifications.Gherkin.Given("some definition")
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications.@given
+                using ExecutableSpecifications: @given
 
                 @given "some definition" begin
 
@@ -198,7 +198,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         @testset "Execute a step definition; Call a method defined in the steps file; Method is in scope" begin
             when = ExecutableSpecifications.Gherkin.When("calling empty function foo")
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications.@when
+                using ExecutableSpecifications: @when
 
                 foo() = nothing
 
@@ -217,7 +217,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         @testset "Find a step definition; Two step definitions have the same description; NonUniqueStepDefinition is thrown" begin
             given = ExecutableSpecifications.Gherkin.Given("some definition")
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications.@given
+                using ExecutableSpecifications: @given
 
                 @given "some definition" begin
                 end
@@ -233,7 +233,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         @testset "Find a step definition; Two step definitions have the same description; File is reported for both" begin
             given = ExecutableSpecifications.Gherkin.Given("some definition")
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications.@given
+                using ExecutableSpecifications: @given
 
                 @given "some definition" begin
                 end
@@ -262,7 +262,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         @testset "Find a step definition; Two step definitions have the same description; Another file is reported for both" begin
             given = ExecutableSpecifications.Gherkin.Given("some definition")
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications.@given
+                using ExecutableSpecifications: @given
 
 
                 @given "some definition" begin

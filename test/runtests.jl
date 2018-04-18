@@ -1,4 +1,4 @@
 using ExecutableSpecifications
-using Base.Test
+using Test
 
 include("runsmalltests.jl")
