@@ -18,14 +18,14 @@ function runspec()
     matchers = FromMacroStepDefinitionMatcher[]
     for filename in stepfiles
         fullpath = joinpath("features/steps", filename)
-        push!(matchers, FromMacroStepDefinitionMatcher(readstring(fullpath); filename=fullpath))
+        push!(matchers, FromMacroStepDefinitionMatcher(read(fullpath, String); filename=fullpath))
     end
     matcher = CompositeStepDefinitionMatcher(matchers...)
 
     # Read all feature files.
     features = Feature[]
     for filename in featurefiles
-        featureresult = parsefeature(readstring(joinpath("features", filename)))
+        featureresult = parsefeature(read(joinpath("features", filename), String))
         push!(features, featureresult.value)
     end
 
@@ -50,14 +50,14 @@ function runspec()
     maxfeature = maximum(length(r.feature.header.description) for r in results)
 
     featureprefix = "  Feature: "
-    print_with_color(:white, " " ^ (length(featureprefix) + maxfeature + 1), "| Success | Failure\n")
+    printstyled(" " ^ (length(featureprefix) + maxfeature + 1), "| Success | Failure\n"; color=:white)
     for r in results
         linecolor = r.n_failure == 0 ? :green : :red
-        print_with_color(linecolor, featureprefix, rpad(r.feature.header.description, maxfeature))
-        print_with_color(:white, " | ")
-        print_with_color(:green, rpad("$(r.n_success)", 7))
-        print_with_color(:white, " | ")
-        print_with_color(linecolor, rpad("$(r.n_failure)", 7), "\n")
+        printstyled(featureprefix, rpad(r.feature.header.description, maxfeature); color=linecolor)
+        printstyled(" | "; color=:white)
+        printstyled(rpad("$(r.n_success)", 7); color=:green)
+        printstyled(" | "; color=:white)
+        printstyled(rpad("$(r.n_failure)", 7), "\n"; color=linecolor)
     end
 
     println()

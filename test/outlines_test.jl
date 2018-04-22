@@ -133,5 +133,16 @@ using ExecutableSpecifications: transformoutline
         @test scenarios[1].steps[3] == Then(""; block_text="then bar")
     end
 
+    @testset "Transform; Outline examples are AbstractStrings; Interpolation works" begin
+        outline = ScenarioOutline("Some description", [],
+            [Given("placeholder <foo>")],
+            ["foo"],
+            AbstractString["bar"])
+
+        scenarios = transformoutline(outline)
+
+        @test scenarios[1].description == "Some description"
+    end
+
     # TODO: Mismatching placeholders
 end
