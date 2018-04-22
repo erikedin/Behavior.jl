@@ -9,7 +9,7 @@ struct ColorConsolePresenter <: RealTimePresenter
     io::IO
     colors::Dict{Type, Symbol}
 
-    function ColorConsolePresenter(io::IO = STDOUT)
+    function ColorConsolePresenter(io::IO = stdout)
         colors = Dict{Type, Symbol}(
             NoStepDefinitionFound => :yellow,
             NonUniqueMatch => :magenta,
@@ -39,21 +39,21 @@ stepresultmessage(::StepExecutionResult) = []
 
 function present(presenter::ColorConsolePresenter, feature::Feature)
     println()
-    print_with_color(:white, presenter.io, "Feature: $(feature.header.description)\n")
+    printstyled(presenter.io, "Feature: $(feature.header.description)\n"; color=:white)
 end
 
 function present(presenter::ColorConsolePresenter, scenario::Scenario)
     println()
-    print_with_color(:blue, presenter.io, "  Scenario: $(scenario.description)\n")
+    printstyled(presenter.io, "  Scenario: $(scenario.description)\n"; color=:blue)
 end
 
 function present(presenter::ColorConsolePresenter, step::Gherkin.ScenarioStep)
-    print_with_color(:light_cyan, presenter.io, "    $(stepformat(step))")
+    printstyled(presenter.io, "    $(stepformat(step))"; color=:light_cyan)
 end
 
 function present(presenter::ColorConsolePresenter, step::Gherkin.ScenarioStep, result::StepExecutionResult)
     color = stepcolor(presenter, result)
-    print_with_color(color, presenter.io, "\r    $(stepformat(step))\n")
+    printstyled(presenter.io, "\r    $(stepformat(step))\n"; color=color)
 
     resultmessage = stepresultmessage(result)
     if !isempty(resultmessage)

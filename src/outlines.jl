@@ -9,9 +9,9 @@ end
 
 
 
-function interpolatexample(outline::ScenarioOutline, example::Vector{String})
+function interpolatexample(outline::ScenarioOutline, example::Vector{T}) where {T <: AbstractString}
     placeholders_kv = ["<$(outline.placeholders[i])>" => example[i] for i in 1:length(example)]
-    placeholders = Dict{String, String}(placeholders_kv...)
+    placeholders = Dict{String, T}(placeholders_kv...)
 
     fromplaceholders = x -> placeholders[x]
     steps = [interpolatestep(step, fromplaceholders) for step in outline.steps]
