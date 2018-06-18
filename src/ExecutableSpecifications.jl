@@ -6,7 +6,6 @@ abstract type Presenter end
 abstract type RealTimePresenter <: Presenter end
 
 include("stepdefinitions.jl")
-include("outlines.jl")
 include("executor.jl")
 include("asserts.jl")
 include("presenter.jl")
