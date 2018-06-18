@@ -1,6 +1,6 @@
 using ExecutableSpecifications.Gherkin
 using ExecutableSpecifications:
-    ResultAccumulator, accumulateresult, issuccess, featureresults,
+    ResultAccumulator, accumulateresult!, issuccess, featureresults,
     FeatureResult, ScenarioResult, Given, SuccessfulStepExecution, Scenario, StepFailed
 
 @testset "Result Accumulator" begin
@@ -12,7 +12,7 @@ using ExecutableSpecifications:
         successfulscenario = ScenarioResult([SuccessfulStepExecution()], Scenario("Some scenario", [], [given]))
         featureresult = FeatureResult(feature, [successfulscenario])
 
-        accumulateresult(accumulator, featureresult)
+        accumulateresult!(accumulator, featureresult)
 
         @test issuccess(accumulator)
     end
@@ -25,7 +25,7 @@ using ExecutableSpecifications:
         scenario = ScenarioResult([StepFailed("")], Scenario("Some scenario", [], [given]))
         featureresult = FeatureResult(feature, [scenario])
 
-        accumulateresult(accumulator, featureresult)
+        accumulateresult!(accumulator, featureresult)
 
         @test issuccess(accumulator) == false
     end
@@ -39,7 +39,7 @@ using ExecutableSpecifications:
         scenario = ScenarioResult([SuccessfulStepExecution(), StepFailed("")], Scenario("Some scenario", [], [given, when]))
         featureresult = FeatureResult(feature, [scenario])
 
-        accumulateresult(accumulator, featureresult)
+        accumulateresult!(accumulator, featureresult)
 
         @test issuccess(accumulator) == false
     end
@@ -54,7 +54,7 @@ using ExecutableSpecifications:
         failingscenario = ScenarioResult([StepFailed("")], Scenario("Some other scenario", [],  [when]))
         featureresult = FeatureResult(feature, [successfulscenario, failingscenario])
 
-        accumulateresult(accumulator, featureresult)
+        accumulateresult!(accumulator, featureresult)
 
         @test issuccess(accumulator) == false
     end
@@ -67,7 +67,7 @@ using ExecutableSpecifications:
         successfulscenario = ScenarioResult([SuccessfulStepExecution()], Scenario("Some scenario", [], [given]))
         featureresult = FeatureResult(feature, [successfulscenario])
 
-        accumulateresult(accumulator, featureresult)
+        accumulateresult!(accumulator, featureresult)
 
         @test featureresults(accumulator)[1].n_success == 1
         @test featureresults(accumulator)[1].n_failure == 0
@@ -83,7 +83,7 @@ using ExecutableSpecifications:
         failingscenario = ScenarioResult([StepFailed("")], Scenario("Some other scenario", [],  [when]))
         featureresult = FeatureResult(feature, [successfulscenario, failingscenario])
 
-        accumulateresult(accumulator, featureresult)
+        accumulateresult!(accumulator, featureresult)
 
         @test featureresults(accumulator)[1].n_success == 1
         @test featureresults(accumulator)[1].n_failure == 1
@@ -101,7 +101,7 @@ using ExecutableSpecifications:
             [successfulscenario, successfulscenario, successfulscenario, successfulscenario, successfulscenario,
              failingscenario, failingscenario])
 
-        accumulateresult(accumulator, featureresult)
+        accumulateresult!(accumulator, featureresult)
 
         @test featureresults(accumulator)[1].n_success == 5
         @test featureresults(accumulator)[1].n_failure == 2
@@ -117,8 +117,8 @@ using ExecutableSpecifications:
         featureresult1 = FeatureResult(feature1, [successfulscenario])
         featureresult2 = FeatureResult(feature1, [successfulscenario])
 
-        accumulateresult(accumulator, featureresult1)
-        accumulateresult(accumulator, featureresult2)
+        accumulateresult!(accumulator, featureresult1)
+        accumulateresult!(accumulator, featureresult2)
 
         @test featureresults(accumulator)[1].n_success > 0
         @test featureresults(accumulator)[1].n_failure == 0

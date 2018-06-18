@@ -11,7 +11,7 @@ mutable struct ResultAccumulator
     ResultAccumulator() = new(true, [])
 end
 
-function accumulateresult(acc::ResultAccumulator, result::FeatureResult)
+function accumulateresult!(acc::ResultAccumulator, result::FeatureResult)
     n_success::UInt = 0
     n_failure::UInt = 0
     for scenarioresult in result.scenarioresults

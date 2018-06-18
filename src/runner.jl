@@ -1,6 +1,6 @@
 using ExecutableSpecifications:
     FromMacroStepDefinitionMatcher, executefeature, Executor, CompositeStepDefinitionMatcher,
-    ColorConsolePresenter, present, ResultAccumulator, accumulateresult, issuccess, featureresults
+    ColorConsolePresenter, present, ResultAccumulator, accumulateresult!, issuccess, featureresults
 using ExecutableSpecifications.Gherkin: parsefeature, Given, When, Then, Feature
 
 function allfileswithext(path::String, extension::String)
@@ -36,7 +36,7 @@ function runspec()
 
     for feature in features
         result = executefeature(executor, feature)
-        accumulateresult(accumulator, result)
+        accumulateresult!(accumulator, result)
     end
 
     println()
