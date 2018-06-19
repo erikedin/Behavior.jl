@@ -98,7 +98,7 @@ Base.isempty(p::ByLineParser) = p.isempty
 
 iscurrentlineempty(p::ByLineParser) = strip(p.current) == ""
 
-function parsetags(byline::ByLineParser)
+function parsetags!(byline::ByLineParser)
     tags = []
     while !isempty(byline)
         tag_match = collect((m.match for m = eachmatch(r"(@[^\s]+)", byline.current)))
@@ -113,8 +113,8 @@ function parsetags(byline::ByLineParser)
     tags
 end
 
-function parsefeatureheader(byline::ByLineParser) :: ParseResult{FeatureHeader}
-    feature_tags = parsetags(byline)
+function parsefeatureheader!(byline::ByLineParser) :: ParseResult{FeatureHeader}
+    feature_tags = parsetags!(byline)
 
     description_match = match(r"Feature: (?<description>.+)", byline.current)
     if description_match == nothing
@@ -139,7 +139,7 @@ function parsefeatureheader(byline::ByLineParser) :: ParseResult{FeatureHeader}
     return OKParseResult{FeatureHeader}(feature_header)
 end
 
-function parseblocktext(byline::ByLineParser)
+function parseblocktext!(byline::ByLineParser)
     consume!(byline)
     block_text_lines = []
     while !isempty(byline)
@@ -153,7 +153,7 @@ function parseblocktext(byline::ByLineParser)
     return OKParseResult{String}(join(block_text_lines, "\n"))
 end
 
-function parsescenariosteps(byline::ByLineParser)
+function parsescenariosteps!(byline::ByLineParser)
     steps = []
     allowed_step_types = Set([Given, When, Then])
 
@@ -169,7 +169,7 @@ function parsescenariosteps(byline::ByLineParser)
         end
 
         if block_text_start_match != nothing
-            block_text_result = parseblocktext(byline)
+            block_text_result = parseblocktext!(byline)
             prev_step_type = typeof(steps[end])
             steps[end] = prev_step_type(steps[end].text; block_text=block_text_result.value)
             continue
@@ -205,8 +205,8 @@ function parsescenariosteps(byline::ByLineParser)
     return OKParseResult{Vector{ScenarioStep}}(steps)
 end
 
-function parsescenario(byline::ByLineParser)
-    tags = parsetags(byline)
+function parsescenario!(byline::ByLineParser)
+    tags = parsetags!(byline)
 
     scenario_outline_match = match(r"Scenario Outline: (?<description>.+)", byline.current)
     if scenario_outline_match != nothing
@@ -214,7 +214,7 @@ function parsescenario(byline::ByLineParser)
         consume!(byline)
 
         # Parse scenario outline steps
-        steps_result = parsescenariosteps(byline)
+        steps_result = parsescenariosteps!(byline)
         if !issuccessful(steps_result)
             return steps_result
         end
@@ -244,7 +244,7 @@ function parsescenario(byline::ByLineParser)
     description = scenario_match[:description]
     consume!(byline)
 
-    steps_result = parsescenariosteps(byline)
+    steps_result = parsescenariosteps!(byline)
     if !issuccessful(steps_result)
         return steps_result
     end
@@ -256,7 +256,7 @@ end
 function parsefeature(text::String) :: ParseResult{Feature}
     byline = ByLineParser(text)
 
-    feature_header_result = parsefeatureheader(byline)
+    feature_header_result = parsefeatureheader!(byline)
     if !issuccessful(feature_header_result)
         return BadParseResult{Feature}(feature_header_result.reason,
                                        feature_header_result.expected,
@@ -269,7 +269,7 @@ function parsefeature(text::String) :: ParseResult{Feature}
             consume!(byline)
             continue
         end
-        scenario_parse_result = parsescenario(byline)
+        scenario_parse_result = parsescenario!(byline)
         if issuccessful(scenario_parse_result)
             push!(scenarios, scenario_parse_result.value)
         end

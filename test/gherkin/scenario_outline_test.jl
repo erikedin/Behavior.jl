@@ -1,4 +1,4 @@
-using ExecutableSpecifications.Gherkin: parsescenario, issuccessful, Given, When, Then, ByLineParser, ScenarioStep
+using ExecutableSpecifications.Gherkin: parsescenario!, issuccessful, Given, When, Then, ByLineParser, ScenarioStep
 
 @testset "Scenario Outline" begin
     @testset "Outline has a Given step; Step is parsed" begin
@@ -13,7 +13,7 @@ using ExecutableSpecifications.Gherkin: parsescenario, issuccessful, Given, When
         """
         byline = ByLineParser(text)
 
-        result = parsescenario(byline)
+        result = parsescenario!(byline)
 
         @test issuccessful(result)
         scenario = result.value
@@ -32,7 +32,7 @@ using ExecutableSpecifications.Gherkin: parsescenario, issuccessful, Given, When
         """
         byline = ByLineParser(text)
 
-        result = parsescenario(byline)
+        result = parsescenario!(byline)
 
         @test issuccessful(result)
         scenario = result.value
@@ -52,7 +52,7 @@ using ExecutableSpecifications.Gherkin: parsescenario, issuccessful, Given, When
         """
         byline = ByLineParser(text)
 
-        result = parsescenario(byline)
+        result = parsescenario!(byline)
 
         @test issuccessful(result)
         scenario = result.value
@@ -72,7 +72,7 @@ using ExecutableSpecifications.Gherkin: parsescenario, issuccessful, Given, When
             """
             byline = ByLineParser(text)
 
-            result = parsescenario(byline)
+            result = parsescenario!(byline)
 
             @test issuccessful(result)
             scenario = result.value
@@ -91,7 +91,7 @@ using ExecutableSpecifications.Gherkin: parsescenario, issuccessful, Given, When
             """
             byline = ByLineParser(text)
 
-            result = parsescenario(byline)
+            result = parsescenario!(byline)
 
             @test issuccessful(result)
             scenario = result.value
@@ -111,7 +111,7 @@ using ExecutableSpecifications.Gherkin: parsescenario, issuccessful, Given, When
             """
             byline = ByLineParser(text)
 
-            result = parsescenario(byline)
+            result = parsescenario!(byline)
 
             @test issuccessful(result)
             scenario = result.value
@@ -130,7 +130,7 @@ using ExecutableSpecifications.Gherkin: parsescenario, issuccessful, Given, When
             """
             byline = ByLineParser(text)
 
-            result = parsescenario(byline)
+            result = parsescenario!(byline)
 
             @test issuccessful(result)
             scenario = result.value
@@ -150,7 +150,7 @@ using ExecutableSpecifications.Gherkin: parsescenario, issuccessful, Given, When
             """
             byline = ByLineParser(text)
 
-            result = parsescenario(byline)
+            result = parsescenario!(byline)
 
             @test issuccessful(result)
             scenario = result.value
@@ -172,7 +172,7 @@ using ExecutableSpecifications.Gherkin: parsescenario, issuccessful, Given, When
             """
             byline = ByLineParser(text)
 
-            result = parsescenario(byline)
+            result = parsescenario!(byline)
 
             @test !issuccessful(result)
         end
