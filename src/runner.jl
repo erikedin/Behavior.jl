@@ -3,12 +3,23 @@ using ExecutableSpecifications:
     ColorConsolePresenter, present, ResultAccumulator, accumulateresult!, issuccess, featureresults
 using ExecutableSpecifications.Gherkin: parsefeature, Given, When, Then, Feature
 
+"""
+    allfileswithext(path::String, extension::String)
+
+Find all files in a directory with a given extension.
+"""
 function allfileswithext(path::String, extension::String)
     [filename for filename in readdir(path)
               if isfile(joinpath(path, filename)) &&
                  splitext(joinpath(path, filename))[2] == extension]
 end
 
+"""
+    runspec()
+
+Execute all features found from the current directory. Called directly from a command line script,
+or the REPL.
+"""
 function runspec()
     # Find all step definition files and all feature files.
     stepfiles = allfileswithext("features/steps", ".jl")

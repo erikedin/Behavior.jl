@@ -1,10 +1,17 @@
+"""
+A `QuietRealTimePresenter` prints nothing as scenarios are being executed.
+This is useful if you're only after a final report, after all features have been executed.
+"""
 struct QuietRealTimePresenter <: RealTimePresenter end
 present(::QuietRealTimePresenter, ::Scenario) = nothing
 present(::QuietRealTimePresenter, ::Gherkin.ScenarioStep) = nothing
 present(::QuietRealTimePresenter, ::Gherkin.ScenarioStep, ::StepExecutionResult) = nothing
 present(::QuietRealTimePresenter, ::Gherkin.Feature) = nothing
 
-
+"""
+This presenter prints a line to the console before, during, and after a scenario. Results are color
+coded.
+"""
 struct ColorConsolePresenter <: RealTimePresenter
     io::IO
     colors::Dict{Type, Symbol}
@@ -23,12 +30,27 @@ struct ColorConsolePresenter <: RealTimePresenter
     end
 end
 
+"""
+    stepformat(step::ScenarioStep)
+
+Format a step according to Gherkin syntax.
+"""
 stepformat(step::Given) = "Given $(step.text)"
 stepformat(step::When) = " When $(step.text)"
 stepformat(step::Then) = " Then $(step.text)"
 
+"""
+    stepcolor(::Presenter, ::StepExecutionResult)
+
+Get a console color for a given result when executing a scenario step.
+"""
 stepcolor(presenter::Presenter, step::StepExecutionResult) = presenter.colors[typeof(step)]
 
+"""
+    stepresultmessage(::StepExecutionResult)
+
+A human readable message for a given result.
+"""
 stepresultmessage(step::StepFailed) = ["FAILED: " * step.assertion]
 stepresultmessage(nomatch::NoStepDefinitionFound) = ["No match for '$(stepformat(nomatch.step))'"]
 stepresultmessage(nonunique::NonUniqueMatch) = vcat(["Multiple matches found:"], ["  In " * location.filename for location in nonunique.locations])
