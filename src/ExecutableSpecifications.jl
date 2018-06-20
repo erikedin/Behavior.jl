@@ -2,7 +2,10 @@ module ExecutableSpecifications
 
 include("Gherkin.jl")
 
+"Abstraction for presenting results from scenario steps."
 abstract type Presenter end
+
+"Presenting results from scenario steps as they occur."
 abstract type RealTimePresenter <: Presenter end
 
 include("stepdefinitions.jl")

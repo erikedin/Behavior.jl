@@ -1,7 +1,27 @@
+"Thrown at @expect failures in step definitions."
 struct StepAssertFailure <: Exception
     assertion::String
 end
 
+"""
+    expect(ex)
+
+Assert that a condition `ex` is true. Throws a StepAssertFailure if false.
+
+# Examples
+```
+@then "this condition should hold" begin
+    @expect 1 == 1
+end
+```
+
+This will fail and throw a `StepAssertFailure`
+```
+@then "this condition should not hold" begin
+    @expect 1 == 2
+end
+```
+"""
 macro expect(ex)
     # Create a human readable form of the expectation.
     if length(ex.args) > 0 && ex.args[1] isa Expr && ex.args[1].head == :globalref
