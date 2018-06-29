@@ -4,40 +4,50 @@ import Base: ==, hash
 
 export Scenario, ScenarioOutline, Feature, FeatureHeader, Given, When, Then
 
+"A good or bad result when parsing Gherkin."
 abstract type ParseResult{T} end
 
+"A successful parse that results in the expected value."
 struct OKParseResult{T} <: ParseResult{T}
     value::T
 end
 
+"An unsuccessful parse that results in an error."
 struct BadParseResult{T} <: ParseResult{T}
     reason::Symbol
     expected::Symbol
     actual::Symbol
 end
 
+"Was the parsing successful?"
 issuccessful(::OKParseResult{T}) where {T} = true
 issuccessful(::BadParseResult{T}) where {T} = false
 
+"A step in a Gherkin Scenario."
 abstract type ScenarioStep end
 
+"Equality for scenario steps is their text and their block text."
 function ==(a::T, b::T) where {T <: ScenarioStep}
     a.text == b.text && a.block_text == b.block_text
 end
+"Hash scenario steps by their text and block text."
 hash(a::T, h::UInt) where {T <: ScenarioStep} = hash((a.text, a.block_text), h)
 
+"A Given scenario step."
 struct Given <: ScenarioStep
     text::String
     block_text::String
 
     Given(text::AbstractString; block_text = "") = new(text, block_text)
 end
+"A When scenario step."
 struct When <: ScenarioStep
     text::String
     block_text::String
 
     When(text::AbstractString; block_text="") = new(text, block_text)
 end
+"A Then scenario step."
 struct Then <: ScenarioStep
     text::String
     block_text::String
@@ -45,13 +55,47 @@ struct Then <: ScenarioStep
     Then(text::AbstractString; block_text="") = new(text, block_text)
 end
 
+"An AbstractScenario is a Scenario or a Scenario Outline in Gherkin."
 abstract type AbstractScenario end
+
+"""
+A Gherkin Scenario.
+
+# Example
+```
+@tag1 @tag2
+Scenario: Some description
+    Given some precondition
+     When some action is taken
+     Then some postcondition holds
+```
+
+becomes a `Scenario` struct with description "Some description", tags `["@tag1", "@tag2"]`, and
+steps
+```[
+    Given("some precondition"),
+    When("some action is taken"),
+    Then("some postcondition holds")
+]```.
+"""
 struct Scenario <: AbstractScenario
     description::String
     tags::Vector{String}
     steps::Vector{ScenarioStep}
 end
 
+"""
+A `ScenarioOutline` is a scenario with multiple examples.
+
+# Example
+```
+@tag1 @tag2
+Scenario: Some description
+    Given some precondition
+     When some action is taken
+     Then some postcondition holds
+```
+"""
 struct ScenarioOutline <: AbstractScenario
     description::String
     tags::Vector{String}
