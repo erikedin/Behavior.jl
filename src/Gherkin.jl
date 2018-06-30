@@ -104,17 +104,34 @@ struct ScenarioOutline <: AbstractScenario
     examples::AbstractArray
 end
 
+"""
+A FeatureHeader has a (short) description, a longer description, and a list of applicable tags.
+
+# Example
+```
+@tag1 @tag2
+Feature: This is a description
+    This is
+    a longer description.
+```
+"""
 struct FeatureHeader
     description::String
     long_description::Vector{String}
     tags::Vector{String}
 end
 
+"""
+A Feature has a feature header and a list of Scenarios and Scenario Outlines.
+"""
 struct Feature
     header::FeatureHeader
     scenarios::Vector{AbstractScenario}
 end
 
+"""
+ByLineParser takes a long text and lets the Gherkin parser work line by line.
+"""
 mutable struct ByLineParser
     current::String
     rest::Vector{String}
@@ -128,6 +145,11 @@ mutable struct ByLineParser
     end
 end
 
+"""
+    consume!(p::ByLineParser)
+
+The current line has been consumed by the Gherkin parser.
+"""
 function consume!(p::ByLineParser)
     if isempty(p.rest)
         p.current = ""
@@ -138,14 +160,31 @@ function consume!(p::ByLineParser)
     end
 end
 
+"""
+Override the normal `isempty` method for `ByLineParser`.
+"""
 Base.isempty(p::ByLineParser) = p.isempty
 
+"""
+    iscurrentlineempty(p::ByLineParser)
+
+Check if the current line in the parser is empty.
+"""
 iscurrentlineempty(p::ByLineParser) = strip(p.current) == ""
 
+"""
+    parsetags!(byline::ByLineParser)
+
+Parse all tags on form @tagname until a non-tag is encountered. Return a possibly empty list of
+tags.
+"""
 function parsetags!(byline::ByLineParser)
     tags = []
     while !isempty(byline)
+        # Use a regular expression to find all occurrences of @tagname on a line.
         tag_match = collect((m.match for m = eachmatch(r"(@[^\s]+)", byline.current)))
+
+        # Break if something that isn't a list of tags is encountered.
         if isempty(tag_match)
             break
         end
@@ -157,6 +196,20 @@ function parsetags!(byline::ByLineParser)
     tags
 end
 
+"""
+    parsefeatureheader!(byline::ByLineParser) :: ParseResult{FeatureHeader}
+
+Parse a feature header and return the feature header on success, or a bad parse result on failure.
+
+# Example of a feature header
+```
+@tag1
+@tag2
+Feature: Some description
+    A longer description
+    on multiple lines.
+```
+"""
 function parsefeatureheader!(byline::ByLineParser) :: ParseResult{FeatureHeader}
     feature_tags = parsetags!(byline)
 
@@ -166,6 +219,8 @@ function parsefeatureheader!(byline::ByLineParser) :: ParseResult{FeatureHeader}
     end
     consume!(byline)
 
+    # Consume all lines after the `Feature:` row as a long description, until an empty line is
+    # encountered.
     long_description_lines = []
     while !isempty(byline)
         if iscurrentlineempty(byline)
@@ -183,9 +238,22 @@ function parsefeatureheader!(byline::ByLineParser) :: ParseResult{FeatureHeader}
     return OKParseResult{FeatureHeader}(feature_header)
 end
 
+"""
+    parseblocktext!(byline::ByLineParser)
+
+Parse a block of text that may occur as part of a scenario step.
+A block of text is multiple lines of text surrounded by three double quotes.
+For example, this comment is a valid block text.
+
+Precondition: This function assumes that the current line is the starting line of three double
+quotes.
+"""
 function parseblocktext!(byline::ByLineParser)
+    # Consume the current line with three double quotes """
     consume!(byline)
     block_text_lines = []
+
+    # Consume and save all lines, until we reach one that is the ending line of three double quotes.
     while !isempty(byline)
         line = byline.current
         consume!(byline)
@@ -197,21 +265,36 @@ function parseblocktext!(byline::ByLineParser)
     return OKParseResult{String}(join(block_text_lines, "\n"))
 end
 
+"""
+    parsescenariosteps!(byline::ByLineParser)
+
+Parse all scenario steps following a Scenario or Scenario Outline.
+"""
 function parsescenariosteps!(byline::ByLineParser)
     steps = []
     allowed_step_types = Set([Given, When, Then])
 
     while !isempty(byline)
+        # An empty line indicates the end of the scenario steps.
         if iscurrentlineempty(byline)
             consume!(byline)
             break
         end
+
+        # Match Given, When, or Then on the line, or match a block text.
+        # Note: This is a place where English Gherkin is hard coded.
         step_match = match(r"(?<step_type>Given|When|Then|And) (?<step_definition>.+)", byline.current)
         block_text_start_match = match(r"\"\"\"", byline.current)
+        # A line must either be a new scenario step, or a block text following the previous scenario
+        # step.
         if step_match == nothing && block_text_start_match == nothing
             return BadParseResult{Vector{ScenarioStep}}(:invalid_step, :step_definition, :invalid_step_definition)
         end
 
+        # The current line starts a block text. Parse the rest of the block text and continue with
+        # the following line.
+        # Note: The method parseblocktext!(byline) consumes the current line, so it doesn't need to
+        # be done here.
         if block_text_start_match != nothing
             block_text_result = parseblocktext!(byline)
             prev_step_type = typeof(steps[end])
@@ -219,6 +302,11 @@ function parsescenariosteps!(byline::ByLineParser)
             continue
         end
 
+        # The current line is a scenario step.
+        # Check that the scenario step is allowed, and create a Given/When/Then object.
+        # Note that scenario steps must occur in the order Given, When, Then. A Given may not follow
+        # once a When has been seen, and a When must not follow when a Then has been seen.
+        # This is what `allowed_step_types` keeps track of.
         step_type = step_match[:step_type]
         step_definition = step_match[:step_definition]
         if step_type == "Given"
@@ -237,6 +325,8 @@ function parsescenariosteps!(byline::ByLineParser)
             delete!(allowed_step_types, Given)
             delete!(allowed_step_types, When)
         elseif step_type == "And"
+            # A scenario step may be And, in which case it's the same type as the previous step.
+            # This means that an And may not be the first scenario step.
             if isempty(steps)
                 return BadParseResult{Vector{ScenarioStep}}(:leading_and, :specific_step, :and_step)
             end
@@ -249,6 +339,20 @@ function parsescenariosteps!(byline::ByLineParser)
     return OKParseResult{Vector{ScenarioStep}}(steps)
 end
 
+"""
+    parsescenario!(byline::ByLineParser)
+
+Parse a Scenario or a Scenario Outline.
+
+# Example of a scenario
+```
+@tag1 @tag2
+Scenario: Some description
+    Given some precondition
+     When some action is taken
+     Then some postcondition holds
+```
+"""
 function parsescenario!(byline::ByLineParser)
     tags = parsetags!(byline)
 
