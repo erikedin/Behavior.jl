@@ -356,38 +356,43 @@ Scenario: Some description
 function parsescenario!(byline::ByLineParser)
     tags = parsetags!(byline)
 
+    # The scenario is either a Scenario or a Scenario Outline. Check for Scenario Outline first.
     scenario_outline_match = match(r"Scenario Outline: (?<description>.+)", byline.current)
     if scenario_outline_match != nothing
         description = scenario_outline_match[:description]
         consume!(byline)
 
-        # Parse scenario outline steps
+        # Parse scenario outline steps.
         steps_result = parsescenariosteps!(byline)
         if !issuccessful(steps_result)
             return steps_result
         end
         steps = steps_result.value
 
-        # Consume the Example: line
+        # Consume the Example: line.
         consume!(byline)
 
-        # Consume the placeholders line
+        # Get the name of each placeholder variable.
         placeholders = collect((m.match for m = eachmatch(r"(\w+)", byline.current)))
         consume!(byline)
 
-        # Parse the examples
+        # Parse the examples, until we hit an empty line.
+        # TODO: This needs to be updated to allow for multiple Examples sections.
         examples = Array{String,2}(undef, length(placeholders), 0)
         while !iscurrentlineempty(byline)
+            # Each variable is in a column, separated by |
             example = split(strip(byline.current), "|")
             filter!(x -> !isempty(x), example)
+            # Remove surrounding whitespace around each value.
             example = map(strip, example)
             consume!(byline)
             examples = [examples example]
         end
         return OKParseResult{ScenarioOutline}(
             ScenarioOutline(description, tags, steps, placeholders, examples))
-   end
+    end
 
+    # Here we parse a normal Scenario instead.
     scenario_match = match(r"Scenario: (?<description>.+)", byline.current)
     description = scenario_match[:description]
     consume!(byline)
@@ -401,6 +406,24 @@ function parsescenario!(byline::ByLineParser)
     OKParseResult{Scenario}(Scenario(description, tags, steps))
 end
 
+"""
+    parsefeature(::String)
+
+Parse an entire feature file.
+
+# Example of a feature file
+```
+@tag1 @tag2
+Feature: Some feature description
+    This is some block text,
+    and it may be multiple lines.
+
+    Scenario: Some scenario description
+        Given some precondition
+         When some action is taken
+         Then some postcondition holds
+```
+"""
 function parsefeature(text::String) :: ParseResult{Feature}
     byline = ByLineParser(text)
 
