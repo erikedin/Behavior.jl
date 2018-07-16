@@ -154,7 +154,7 @@ function executefeature(executor::Executor, feature::Gherkin.Feature)
     # Return a list of `ScenarioResults`.
     # Since regular scenarios return a `ScenarioResult` directly, and scenario outlines return lists
     # of `ScenarioResult`s, we have to flatten that list.
-    FeatureResult(feature, reduce(vcat, [], scenarioresults))
+    FeatureResult(feature, reduce(vcat, scenarioresults, init=[]))
 end
 
 #
