@@ -427,6 +427,8 @@ Feature: Some feature description
 function parsefeature(text::String) :: ParseResult{Feature}
     byline = ByLineParser(text)
 
+    # The feature header includes all feature level tags, the description, and the long multiline
+    # description.
     feature_header_result = parsefeatureheader!(byline)
     if !issuccessful(feature_header_result)
         return BadParseResult{Feature}(feature_header_result.reason,
@@ -434,12 +436,15 @@ function parsefeature(text::String) :: ParseResult{Feature}
                                        feature_header_result.actual)
     end
 
+    # Each `parsescenario!`
     scenarios = []
     while !isempty(byline)
+        # Just consume all empty lines between scenarios.
         if iscurrentlineempty(byline)
             consume!(byline)
             continue
         end
+
         scenario_parse_result = parsescenario!(byline)
         if issuccessful(scenario_parse_result)
             push!(scenarios, scenario_parse_result.value)
@@ -450,6 +455,17 @@ function parsefeature(text::String) :: ParseResult{Feature}
         Feature(feature_header_result.value, scenarios))
 end
 
+"""
+    hastag(feature::Feature, tag::String)
+
+Check if a feature has a given tag.
+
+# Example
+```
+feature = parsefeature(featuretext)
+hassometag = hastag(feature, "@sometag")
+```
+"""
 hastag(feature::Feature, tag::String) = tag in feature.header.tags
 hastag(scenario::Scenario, tag::String) = tag in scenario.tags
 
