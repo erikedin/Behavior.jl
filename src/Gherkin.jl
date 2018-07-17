@@ -162,6 +162,44 @@ function consume!(p::ByLineParser)
 end
 
 """
+    @untilemptyline(byline::Symbol,)
+
+Execute the function for each line, until an empty line is encountered, or no further lines are
+available.
+"""
+macro untilemptyline(ex::Expr)
+    esc(quote
+        while !isempty(byline)
+            if iscurrentlineempty(byline)
+                consume!(byline)
+                break
+            end
+            $ex
+            consume!(byline)
+        end
+    end)
+end
+
+"""
+    ignoringemptylines!(f::Function, byline::ByLineParser)
+
+Execute function `f` for all non-empty lines, until the end of the file.
+"""
+macro ignoringemptylines(ex::Expr)
+    esc(quote
+        while !isempty(byline)
+            if iscurrentlineempty(byline)
+                consume!(byline)
+                continue
+            end
+
+            $ex
+        end
+    end)
+end
+
+
+"""
 Override the normal `isempty` method for `ByLineParser`.
 """
 Base.isempty(p::ByLineParser) = p.isempty
@@ -223,14 +261,11 @@ function parsefeatureheader!(byline::ByLineParser) :: ParseResult{FeatureHeader}
     # Consume all lines after the `Feature:` row as a long description, until an empty line is
     # encountered.
     long_description_lines = []
-    while !isempty(byline)
-        if iscurrentlineempty(byline)
-            consume!(byline)
-            break
-        end
-
+    # untilemptyline!(byline) do
+    #     push!(long_description_lines, strip(byline.current))
+    # end
+    @untilemptyline begin
         push!(long_description_lines, strip(byline.current))
-        consume!(byline)
     end
 
     feature_header = FeatureHeader(description_match[:description],
@@ -255,10 +290,10 @@ function parseblocktext!(byline::ByLineParser)
     block_text_lines = []
 
     # Consume and save all lines, until we reach one that is the ending line of three double quotes.
-    while !isempty(byline)
+    @untilemptyline begin
         line = byline.current
-        consume!(byline)
         if occursin(r"\"\"\"", line)
+            consume!(byline)
             break
         end
         push!(block_text_lines, strip(line))
@@ -275,13 +310,7 @@ function parsescenariosteps!(byline::ByLineParser)
     steps = []
     allowed_step_types = Set([Given, When, Then])
 
-    while !isempty(byline)
-        # An empty line indicates the end of the scenario steps.
-        if iscurrentlineempty(byline)
-            consume!(byline)
-            break
-        end
-
+    @untilemptyline begin
         # Match Given, When, or Then on the line, or match a block text.
         # Note: This is a place where English Gherkin is hard coded.
         step_match = match(r"(?<step_type>Given|When|Then|And) (?<step_definition>.+)", byline.current)
@@ -335,7 +364,6 @@ function parsescenariosteps!(byline::ByLineParser)
             step = last_specific_type(step_definition)
         end
         push!(steps, step)
-        consume!(byline)
     end
     return OKParseResult{Vector{ScenarioStep}}(steps)
 end
@@ -380,13 +408,12 @@ function parsescenario!(byline::ByLineParser)
         # Parse the examples, until we hit an empty line.
         # TODO: This needs to be updated to allow for multiple Examples sections.
         examples = Array{String,2}(undef, length(placeholders), 0)
-        while !iscurrentlineempty(byline)
+        @untilemptyline begin
             # Each variable is in a column, separated by |
             example = split(strip(byline.current), "|")
             filter!(x -> !isempty(x), example)
             # Remove surrounding whitespace around each value.
             example = map(strip, example)
-            consume!(byline)
             examples = [examples example]
         end
         return OKParseResult{ScenarioOutline}(
@@ -439,13 +466,7 @@ function parsefeature(text::String) :: ParseResult{Feature}
 
     # Each `parsescenario!`
     scenarios = []
-    while !isempty(byline)
-        # Just consume all empty lines between scenarios.
-        if iscurrentlineempty(byline)
-            consume!(byline)
-            continue
-        end
-
+    @ignoringemptylines begin
         scenario_parse_result = parsescenario!(byline)
         if issuccessful(scenario_parse_result)
             push!(scenarios, scenario_parse_result.value)
