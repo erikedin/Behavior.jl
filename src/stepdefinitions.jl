@@ -47,6 +47,9 @@ Base.getindex(context::StepDefinitionContext, sym::Symbol) = context.variables[s
 "Set a variable value given a symbol name and a value."
 Base.setindex!(context::StepDefinitionContext, value::Any, sym::Symbol) = context.variables[sym] = value
 
+"Check for a mapping for a given key"
+Base.haskey(context::StepDefinitionContext, sym::Symbol) = haskey(context.variables, sym)
+
 #
 # Global state
 #

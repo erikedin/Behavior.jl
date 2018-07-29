@@ -4,8 +4,11 @@ using Base.StackTraces
 struct Executor
     stepdefmatcher::StepDefinitionMatcher
     presenter::RealTimePresenter
+    executionenv::ExecutionEnvironment
 
-    Executor(matcher::StepDefinitionMatcher, presenter::RealTimePresenter = QuietRealTimePresenter()) = new(matcher, presenter)
+    Executor(matcher::StepDefinitionMatcher,
+             presenter::RealTimePresenter = QuietRealTimePresenter();
+             executionenv::ExecutionEnvironment = NoExecutionEnvironment()) = new(matcher, presenter, executionenv)
 end
 
 "Abstract type for a result when executing a scenario step."
@@ -66,6 +69,8 @@ function executescenario(executor::Executor, scenario::Gherkin.Scenario)
     # so they may store intermediate values.
     context = StepDefinitionContext()
 
+    beforescenario(executor.executionenv, context, scenario)
+
     # The `steps` vector contains the results for all steps. At initialization,
     # they are all `Skipped`, because if one step fails then we stop the execution of the following
     # steps.
@@ -116,6 +121,8 @@ function executescenario(executor::Executor, scenario::Gherkin.Scenario)
         present(executor.presenter, scenario.steps[k])
         present(executor.presenter, scenario.steps[k], steps[k])
     end
+
+    afterscenario(executor.executionenv, context, scenario)
 
     ScenarioResult(steps, scenario)
 end
