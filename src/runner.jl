@@ -17,18 +17,20 @@ end
 """
     runspec()
 
-Execute all features found from the current directory. Called directly from a command line script,
-or the REPL.
+Execute all features found from the current directory, or another specified directory.
 """
-function runspec()
+function runspec(rootpath::String = ".")
+    featurepath = joinpath(rootpath, "features")
+    stepspath = joinpath(featurepath, "steps")
     # Find all step definition files and all feature files.
-    stepfiles = allfileswithext("features/steps", ".jl")
-    featurefiles = allfileswithext("features", ".feature")
+    stepfiles = allfileswithext(stepspath, ".jl")
+    featurefiles = allfileswithext(featurepath, ".feature")
+
 
     # Read all step definition files.
     matchers = FromMacroStepDefinitionMatcher[]
     for filename in stepfiles
-        fullpath = joinpath("features/steps", filename)
+        fullpath = joinpath(stepspath, filename)
         push!(matchers, FromMacroStepDefinitionMatcher(read(fullpath, String); filename=fullpath))
     end
     matcher = CompositeStepDefinitionMatcher(matchers...)
@@ -36,7 +38,7 @@ function runspec()
     # Read all feature files.
     features = Feature[]
     for filename in featurefiles
-        featureresult = parsefeature(read(joinpath("features", filename), String))
+        featureresult = parsefeature(read(joinpath(featurepath, filename), String))
         push!(features, featureresult.value)
     end
 
