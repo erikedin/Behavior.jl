@@ -1,6 +1,6 @@
 authors = ["Erik Edin <erikedin@users.noreply.github.com>"]
 name = "ExecutableSpecifications"
-uuid = "bd734c66-7175-11e8-1beb-b15c36fec37b"
+uuid = "7a129280-419d-58e9-81ef-4f6801251892"
 version = "0.1.0"
 
 [deps]
