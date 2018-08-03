@@ -1,7 +1,9 @@
 using ExecutableSpecifications
-using ExecutableSpecifications: StepDefinitionMatcher
-using ExecutableSpecifications: Executor, executescenario, @expect, SuccessfulStepExecution
-using ExecutableSpecifications: issuccess
+using ExecutableSpecifications:
+    StepDefinitionMatcher,
+    Executor, executescenario, @expect, SuccessfulStepExecution,
+    issuccess, beforescenario, afterscenario, FromSourceExecutionEnvironment
+
 
 mutable struct FakeExecutionEnvironment <: ExecutableSpecifications.ExecutionEnvironment
     afterscenariowasexecuted::Bool
@@ -100,6 +102,42 @@ end
 
             # Assert
             @test env.afterscenariowasexecuted
+        end
+    end
+
+    @testset "FromSourceExecutionEnvironment" begin
+        @testset "beginscenario is defined in source; beginscenario is executed" begin
+            # Arrange
+            env = FromSourceExecutionEnvironment("""
+                using ExecutableSpecifications
+
+                @beforescenario begin
+                    context[:beforescenariowasexecuted] = true
+                end
+            """)
+
+            context = StepDefinitionContext()
+            scenario = Gherkin.Scenario("", [], [])
+
+            # Act
+            beforescenario(env, context, scenario)
+
+            # Assert
+            @test context[:beforescenariowasexecuted]
+        end
+
+        @testset "No beginscenario is defined in source; beginscenario is a noop" begin
+            # Arrange
+            env = FromSourceExecutionEnvironment("")
+
+            context = StepDefinitionContext()
+            scenario = Gherkin.Scenario("", [], [])
+
+            # Act
+            beforescenario(env, context, scenario)
+
+            # Assert
+            @test !haskey(context, :beforescenariowasexecuted)
         end
     end
 end
