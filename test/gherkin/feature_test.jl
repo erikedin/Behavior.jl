@@ -1,6 +1,6 @@
 using ExecutableSpecifications.Gherkin: parsefeature, issuccessful
 
-@testset "Feature         " begin
+@testset "Feature              " begin
     @testset "Feature description" begin
         @testset "Read feature description; Description matches input" begin
             text = """

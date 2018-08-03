@@ -1,7 +1,7 @@
 using ExecutableSpecifications
 using ExecutableSpecifications.Gherkin
 
-@testset "Asserts" begin
+@testset "Asserts              " begin
     @testset "Assert failure; Assert is 1 == 2; Failure has human readable string 1 == 2" begin
         try
             @expect 1 == 2

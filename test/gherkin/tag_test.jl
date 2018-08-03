@@ -1,7 +1,7 @@
 using Test
 using ExecutableSpecifications.Gherkin: hastag, parsefeature, issuccessful
 
-@testset "Tags            " begin
+@testset "Tags                 " begin
     @testset "Feature tags" begin
         @testset "@tag1 is applied to a feature; The parsed feature has @tag1" begin
             text = """

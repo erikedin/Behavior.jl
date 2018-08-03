@@ -3,7 +3,7 @@ using ExecutableSpecifications
 using ExecutableSpecifications.Gherkin
 using ExecutableSpecifications: transformoutline
 
-@testset "Scenario Outline" begin
+@testset "Scenario Outline     " begin
     @testset "Transform; Outline description is \"Some description\"; Result description is same" begin
         outline = ScenarioOutline("Some description", [],
             [Given("placeholder <foo>")],

@@ -3,7 +3,7 @@ using ExecutableSpecifications:
     ResultAccumulator, accumulateresult!, issuccess, featureresults,
     FeatureResult, ScenarioResult, Given, SuccessfulStepExecution, Scenario, StepFailed
 
-@testset "Result Accumulator" begin
+@testset "Result Accumulator   " begin
     @testset "Accumulate results; One feature with a successful scenario; Total result is success" begin
         accumulator = ResultAccumulator()
 

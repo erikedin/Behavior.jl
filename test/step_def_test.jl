@@ -4,7 +4,7 @@ using ExecutableSpecifications: FromMacroStepDefinitionMatcher, CompositeStepDef
 using ExecutableSpecifications.Gherkin
 using ExecutableSpecifications.Gherkin: Given, When, Then
 
-@testset "Step definitions" begin
+@testset "Step definitions     " begin
     @testset "Find a step definition" begin
         @testset "Find a step definition; A matching given step; A step is found" begin
             given = ExecutableSpecifications.Gherkin.Given("some definition")

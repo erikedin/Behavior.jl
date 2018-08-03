@@ -22,7 +22,7 @@ end
 
 ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatcher, ::ExecutableSpecifications.Gherkin.ScenarioStep) = throw(matcher.ex)
 
-@testset "Executor        " begin
+@testset "Executor             " begin
     @testset "Execute a one-step scenario; No matching step found; Result is NoStepDefinitionFound" begin
         stepdefmatcher = ThrowingStepDefinitionMatcher(ExecutableSpecifications.NoMatchingStepDefinition())
         executor = ExecutableSpecifications.Executor(stepdefmatcher)
@@ -280,7 +280,7 @@ stepresult(p::FakeRealTimePresenter, step::ScenarioStep) = p.results[step]
     end
 end
 
-@testset "Feature Executor" begin
+@testset "Feature Executor     " begin
     @testset "Execute a feature; Feature has one scenario; Feature result has one scenario result" begin
         presenter = QuietRealTimePresenter()
         given = Given("some precondition")
