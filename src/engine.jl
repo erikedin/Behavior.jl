@@ -1,11 +1,19 @@
 struct Engine
+    accumulator::ResultAccumulator
+    executor::Executor
+    matcher::StepDefinitionMatcher
 
-    Engine(realtimepresenter::RealTimePresenter) = new()
+    function Engine(realtimepresenter::RealTimePresenter)
+        matcher = CompositeStepDefinitionMatcher()
+        executor = Executor(matcher, realtimepresenter)
+        new(ResultAccumulator(), executor, matcher)
+    end
 end
 
-struct FakeResultAccumulator end
-issuccess(::FakeResultAccumulator) = true
+addmatcher!(engine::Engine, matcher::StepDefinitionMatcher) = addmatcher!(engine.matcher, matcher)
+function runfeature!(engine::Engine, feature::Feature)
+    result = executefeature(engine.executor, feature)
+    accumulateresult!(engine.accumulator, result)
+end
 
-addmatcher(::Engine, ::StepDefinitionMatcher) = nothing
-runfeature(::Engine, ::Feature) = nothing
-finish(::Engine) = FakeResultAccumulator()
+finish(engine::Engine) = engine.accumulator

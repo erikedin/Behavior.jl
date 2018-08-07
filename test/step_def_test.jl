@@ -1,6 +1,6 @@
 using ExecutableSpecifications
 using ExecutableSpecifications: findstepdefinition, NonUniqueStepDefinition, StepDefinitionLocation, NoMatchingStepDefinition
-using ExecutableSpecifications: FromMacroStepDefinitionMatcher, CompositeStepDefinitionMatcher
+using ExecutableSpecifications: FromMacroStepDefinitionMatcher, CompositeStepDefinitionMatcher, addmatcher!
 using ExecutableSpecifications.Gherkin
 using ExecutableSpecifications.Gherkin: Given, When, Then
 
@@ -494,6 +494,52 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             compositematcher = CompositeStepDefinitionMatcher(matcher1, matcher2)
 
             @test_throws NoMatchingStepDefinition findstepdefinition(compositematcher, given)
+        end
+
+        @testset "Add a matcher after construction; Definition is found" begin
+            given = Given("some precondition")
+            matcher1 = FromMacroStepDefinitionMatcher("""
+                using ExecutableSpecifications
+
+                @given "some precondition" begin end
+            """)
+
+            compositematcher = CompositeStepDefinitionMatcher()
+            addmatcher!(compositematcher, matcher1)
+
+            stepdefinition = findstepdefinition(compositematcher, given)
+            @test stepdefinition.definition isa Function
+            @test stepdefinition.description == "some precondition"
+        end
+
+        @testset "Add two step definitions to a composite; Both exist in a matcher; Definitions are found" begin
+            given = Given("some other precondition")
+            when = When("some action")
+            matcher1 = FromMacroStepDefinitionMatcher("""
+                using ExecutableSpecifications: @given
+
+                @given "some other precondition" begin
+
+                end
+            """)
+            matcher2 = FromMacroStepDefinitionMatcher("""
+                using ExecutableSpecifications: @when
+
+                @when "some action" begin
+
+                end
+            """)
+
+            compositematcher = CompositeStepDefinitionMatcher()
+            addmatcher!(compositematcher, matcher1)
+            addmatcher!(compositematcher, matcher2)
+
+            stepdefinition = findstepdefinition(compositematcher, given)
+            @test stepdefinition.definition isa Function
+            @test stepdefinition.description == "some other precondition"
+
+            stepdefinition = findstepdefinition(compositematcher, when)
+            @test stepdefinition.description == "some action"
         end
     end
 end

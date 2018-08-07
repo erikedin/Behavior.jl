@@ -157,7 +157,7 @@ end
 """
 Find step definitions from multiple other step definition matchers.
 """
-struct CompositeStepDefinitionMatcher <: StepDefinitionMatcher
+mutable struct CompositeStepDefinitionMatcher <: StepDefinitionMatcher
     matchers::Vector{StepDefinitionMatcher}
 
     CompositeStepDefinitionMatcher(matchers...) = new([matchers...])
@@ -189,4 +189,8 @@ function findstepdefinition(composite::CompositeStepDefinitionMatcher, step::Ghe
         throw(NoMatchingStepDefinition())
     end
     matching[1]
+end
+
+function addmatcher!(composite::CompositeStepDefinitionMatcher, matcher::StepDefinitionMatcher)
+    push!(composite.matchers, matcher)
 end
