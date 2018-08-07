@@ -1,7 +1,7 @@
 using ExecutableSpecifications:
     Engine, ExecutorEngine, QuietRealTimePresenter, FromMacroStepDefinitionMatcher,
     runfeature!, finish, issuccess, findstepdefinition, NoMatchingStepDefinition,
-    Driver, findstepdefinitions!, OSAbstraction
+    Driver, readstepdefinitions!, OSAbstraction
 using ExecutableSpecifications.Gherkin: Feature, FeatureHeader, Scenario, Given
 import ExecutableSpecifications: addmatcher!, findfileswithextension, readfile
 
@@ -113,7 +113,7 @@ readfile(os::FakeOSAbstraction, path::String) = os.filecontents[path]
         driver = Driver(osal, engine)
 
         # Act
-        findstepdefinitions!(driver, "somepath")
+        readstepdefinitions!(driver, "somepath")
 
         # Assert
         @test length(engine.matchers) == 1
@@ -128,7 +128,7 @@ readfile(os::FakeOSAbstraction, path::String) = os.filecontents[path]
         driver = Driver(osal, engine)
 
         # Act
-        findstepdefinitions!(driver, "somepath")
+        readstepdefinitions!(driver, "somepath")
 
         # Assert
         @test length(engine.matchers) == 2
@@ -143,7 +143,7 @@ readfile(os::FakeOSAbstraction, path::String) = os.filecontents[path]
         driver = Driver(osal, engine)
 
         # Act
-        findstepdefinitions!(driver, "somepath")
+        readstepdefinitions!(driver, "somepath")
 
         # Assert
         @test osal.findfileswithextension_args[1][2] == ".jl"
@@ -158,7 +158,7 @@ readfile(os::FakeOSAbstraction, path::String) = os.filecontents[path]
         driver = Driver(osal, engine)
 
         # Act
-        findstepdefinitions!(driver, "features/steps")
+        readstepdefinitions!(driver, "features/steps")
 
         # Assert
         @test osal.findfileswithextension_args[1][1] == "features/steps"
@@ -173,7 +173,7 @@ readfile(os::FakeOSAbstraction, path::String) = os.filecontents[path]
         driver = Driver(osal, engine)
 
         # Act
-        findstepdefinitions!(driver, "features/othersteps")
+        readstepdefinitions!(driver, "features/othersteps")
 
         # Assert
         @test osal.findfileswithextension_args[1][1] == "features/othersteps"
@@ -193,7 +193,7 @@ readfile(os::FakeOSAbstraction, path::String) = os.filecontents[path]
         successfulstep = Given("successful step")
 
         # Act
-        findstepdefinitions!(driver, "features/othersteps")
+        readstepdefinitions!(driver, "features/othersteps")
 
         # Assert
         # This method throws if no such step definition was found.
@@ -214,7 +214,7 @@ readfile(os::FakeOSAbstraction, path::String) = os.filecontents[path]
         successfulstep = Given("successful step")
 
         # Act
-        findstepdefinitions!(driver, "features/othersteps")
+        readstepdefinitions!(driver, "features/othersteps")
 
         # Assert
         # This method throws if no such step definition was found.

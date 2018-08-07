@@ -32,7 +32,7 @@ struct Driver
     Driver(os::OSAbstraction, engine::Engine) = new(os, engine)
 end
 
-function findstepdefinitions!(driver::Driver, path::String)
+function readstepdefinitions!(driver::Driver, path::String)
     stepdefinitionfiles = findfileswithextension(driver.os, path, ".jl")
     for f in stepdefinitionfiles
         addmatcher!(driver.engine, FromMacroStepDefinitionMatcher(readfile(driver.os, f)))
