@@ -1,19 +1,31 @@
-struct Engine
+abstract type Engine end
+abstract type OSAbstraction end
+
+struct ExecutorEngine <: Engine
     accumulator::ResultAccumulator
     executor::Executor
     matcher::StepDefinitionMatcher
 
-    function Engine(realtimepresenter::RealTimePresenter)
+    function ExecutorEngine(realtimepresenter::RealTimePresenter)
         matcher = CompositeStepDefinitionMatcher()
         executor = Executor(matcher, realtimepresenter)
         new(ResultAccumulator(), executor, matcher)
     end
 end
 
-addmatcher!(engine::Engine, matcher::StepDefinitionMatcher) = addmatcher!(engine.matcher, matcher)
-function runfeature!(engine::Engine, feature::Feature)
+addmatcher!(engine::ExecutorEngine, matcher::StepDefinitionMatcher) = addmatcher!(engine.matcher, matcher)
+function runfeature!(engine::ExecutorEngine, feature::Feature)
     result = executefeature(engine.executor, feature)
     accumulateresult!(engine.accumulator, result)
 end
 
-finish(engine::Engine) = engine.accumulator
+finish(engine::ExecutorEngine) = engine.accumulator
+
+
+struct Driver
+    engine::Engine
+
+    Driver(os::OSAbstraction, engine::Engine) = new(engine)
+end
+
+findstepdefinitions!(driver::Driver, path::String) = addmatcher!(driver.engine, FromMacroStepDefinitionMatcher(""))
