@@ -38,3 +38,13 @@ function readstepdefinitions!(driver::Driver, path::String)
         addmatcher!(driver.engine, FromMacroStepDefinitionMatcher(readfile(driver.os, f)))
     end
 end
+
+function runfeatures!(driver::Driver, path::String)
+    featurefiles = findfileswithextension(driver.os, path, ".feature")
+    for featurefile in featurefiles
+        featureparseresult = parsefeature(readfile(driver.os, featurefile))
+        feature = featureparseresult.value
+        runfeature!(driver.engine, feature)
+    end
+    finish(driver.engine)
+end
