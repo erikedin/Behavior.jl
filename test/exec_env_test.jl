@@ -139,5 +139,39 @@ end
             # Assert
             @test !haskey(context, :beforescenariowasexecuted)
         end
+
+        @testset "afterscenario is defined in source; afterscenario is executed" begin
+            # Arrange
+            env = FromSourceExecutionEnvironment("""
+                using ExecutableSpecifications
+
+                @afterscenario begin
+                    context[:afterscenariowasexecuted] = true
+                end
+            """)
+
+            context = StepDefinitionContext()
+            scenario = Gherkin.Scenario("", [], [])
+
+            # Act
+            afterscenario(env, context, scenario)
+
+            # Assert
+            @test context[:afterscenariowasexecuted]
+        end
+
+        @testset "No afterscenario is defined in source; afterscenario is a noop" begin
+            # Arrange
+            env = FromSourceExecutionEnvironment("")
+
+            context = StepDefinitionContext()
+            scenario = Gherkin.Scenario("", [], [])
+
+            # Act
+            afterscenario(env, context, scenario)
+
+            # Assert
+            @test !haskey(context, :afterscenariowasexecuted)
+        end
     end
 end

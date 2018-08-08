@@ -17,6 +17,6 @@ include("result_accumulator.jl")
 include("engine.jl")
 include("runner.jl")
 
-export @given, @when, @then, @expect, @beforescenario, runspec
+export @given, @when, @then, @expect, @beforescenario, @afterscenario, runspec
 
 end # module

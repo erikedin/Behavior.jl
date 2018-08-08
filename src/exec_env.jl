@@ -21,6 +21,13 @@ macro beforescenario(ex::Expr)
     end
 end
 
+macro afterscenario(ex::Expr)
+    envdefinition = :( (context, scenario) -> $ex )
+    quote
+        GlobalExecEnv.envs[:afterscenario] = $(esc(envdefinition))
+    end
+end
+
 struct FromSourceExecutionEnvironment <: ExecutionEnvironment
     envdefinitions::Dict{Symbol, Function}
 
@@ -33,15 +40,22 @@ struct FromSourceExecutionEnvironment <: ExecutionEnvironment
     end
 end
 
-function beforescenario(
+function invokeenvironmentmethod(
         executionenv::FromSourceExecutionEnvironment,
         context::StepDefinitionContext,
-        scenario::Gherkin.Scenario)
+        scenario::Gherkin.Scenario,
+        methodsym::Symbol)
 
-    if haskey(executionenv.envdefinitions, :beforescenario)
-        method = executionenv.envdefinitions[:beforescenario]
+    if haskey(executionenv.envdefinitions, methodsym)
+        method = executionenv.envdefinitions[methodsym]
         Base.invokelatest(method, context, scenario)
     end
 end
 
-afterscenario(::FromSourceExecutionEnvironment, ::StepDefinitionContext, ::Gherkin.Scenario) = nothing
+beforescenario(executionenv::FromSourceExecutionEnvironment,
+               context::StepDefinitionContext,
+               scenario::Gherkin.Scenario) = invokeenvironmentmethod(executionenv, context, scenario, :beforescenario)
+
+afterscenario(executionenv::FromSourceExecutionEnvironment,
+              context::StepDefinitionContext,
+              scenario::Gherkin.Scenario) = invokeenvironmentmethod(executionenv, context, scenario, :afterscenario)
