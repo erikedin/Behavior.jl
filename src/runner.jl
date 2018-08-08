@@ -1,6 +1,9 @@
 using ExecutableSpecifications:
     ExecutorEngine, ColorConsolePresenter, Driver,
-    readstepdefinitions!, runfeatures!, issuccess
+    readstepdefinitions!, runfeatures!, issuccess,
+    FromSourceExecutionEnvironment, NoExecutionEnvironment
+import ExecutableSpecifications:
+    findfileswithextension, readfile, fileexists
 
 struct OSAL <: ExecutableSpecifications.OSAbstraction end
 function findfileswithextension(::OSAL, path::String, extension::String)
@@ -10,6 +13,7 @@ function findfileswithextension(::OSAL, path::String, extension::String)
 end
 
 readfile(::OSAL, path::String) = read(path, String)
+fileexists(::OSAL, path::String) = isfile(path)
 
 """
     runspec()
@@ -19,8 +23,16 @@ Execute all features found from the current directory, or another specified dire
 function runspec(rootpath::String = ".")
     featurepath = joinpath(rootpath, "features")
     stepspath = joinpath(featurepath, "steps")
+    execenvpath = joinpath(featurepath, "environment.jl")
     os = OSAL()
-    engine = ExecutorEngine(ColorConsolePresenter())
+
+    executionenv = if fileexists(os, execenvpath)
+        FromSourceExecutionEnvironment(readfile(os, execenvpath))
+    else
+        NoExecutionEnvironment()
+    end
+
+    engine = ExecutorEngine(ColorConsolePresenter(); executionenv=executionenv)
     driver = Driver(os, engine)
 
     readstepdefinitions!(driver, stepspath)

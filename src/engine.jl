@@ -3,15 +3,17 @@ abstract type OSAbstraction end
 
 findfileswithextension(::OSAbstraction, ::String, ::String) = error("override this method")
 readfile(::OSAbstraction, ::String) = error("override this method")
+fileexists(::OSAbstraction, ::String) = error("override this method")
 
 struct ExecutorEngine <: Engine
     accumulator::ResultAccumulator
     executor::Executor
     matcher::StepDefinitionMatcher
 
-    function ExecutorEngine(realtimepresenter::RealTimePresenter)
+    function ExecutorEngine(realtimepresenter::RealTimePresenter;
+                            executionenv=NoExecutionEnvironment())
         matcher = CompositeStepDefinitionMatcher()
-        executor = Executor(matcher, realtimepresenter)
+        executor = Executor(matcher, realtimepresenter; executionenv=executionenv)
         new(ResultAccumulator(), executor, matcher)
     end
 end

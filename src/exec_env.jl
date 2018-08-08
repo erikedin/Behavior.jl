@@ -39,6 +39,9 @@ function beforescenario(
         scenario::Gherkin.Scenario)
 
     if haskey(executionenv.envdefinitions, :beforescenario)
-        executionenv.envdefinitions[:beforescenario](context, scenario)
+        method = executionenv.envdefinitions[:beforescenario]
+        Base.invokelatest(method, context, scenario)
     end
 end
+
+afterscenario(::FromSourceExecutionEnvironment, ::StepDefinitionContext, ::Gherkin.Scenario) = nothing
