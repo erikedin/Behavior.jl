@@ -1,18 +1,15 @@
 using ExecutableSpecifications:
-    FromMacroStepDefinitionMatcher, executefeature, Executor, CompositeStepDefinitionMatcher,
-    ColorConsolePresenter, present, ResultAccumulator, accumulateresult!, issuccess, featureresults
-using ExecutableSpecifications.Gherkin: parsefeature, Given, When, Then, Feature
+    ExecutorEngine, ColorConsolePresenter, Driver,
+    readstepdefinitions!, runfeatures!, issuccess
 
-"""
-    allfileswithext(path::String, extension::String)
-
-Find all files in a directory with a given extension.
-"""
-function allfileswithext(path::String, extension::String)
-    [filename for filename in readdir(path)
+struct OSAL <: ExecutableSpecifications.OSAbstraction end
+function findfileswithextension(::OSAL, path::String, extension::String)
+    [joinpath(path, filename) for filename in readdir(path)
               if isfile(joinpath(path, filename)) &&
                  splitext(joinpath(path, filename))[2] == extension]
 end
+
+readfile(::OSAL, path::String) = read(path, String)
 
 """
     runspec()
@@ -22,42 +19,17 @@ Execute all features found from the current directory, or another specified dire
 function runspec(rootpath::String = ".")
     featurepath = joinpath(rootpath, "features")
     stepspath = joinpath(featurepath, "steps")
-    # Find all step definition files and all feature files.
-    stepfiles = allfileswithext(stepspath, ".jl")
-    featurefiles = allfileswithext(featurepath, ".feature")
+    os = OSAL()
+    engine = ExecutorEngine(ColorConsolePresenter())
+    driver = Driver(os, engine)
 
-
-    # Read all step definition files.
-    matchers = FromMacroStepDefinitionMatcher[]
-    for filename in stepfiles
-        fullpath = joinpath(stepspath, filename)
-        push!(matchers, FromMacroStepDefinitionMatcher(read(fullpath, String); filename=fullpath))
-    end
-    matcher = CompositeStepDefinitionMatcher(matchers...)
-
-    # Read all feature files.
-    features = Feature[]
-    for filename in featurefiles
-        featureresult = parsefeature(read(joinpath(featurepath, filename), String))
-        push!(features, featureresult.value)
-    end
-
-    # The presenter will print all scenario steps as they are executed.
-    presenter = ColorConsolePresenter()
-    executor = Executor(matcher, presenter)
-    accumulator = ResultAccumulator()
-
-    for feature in features
-        result = executefeature(executor, feature)
-        accumulateresult!(accumulator, result)
-    end
-
-    println()
+    readstepdefinitions!(driver, stepspath)
+    resultaccumulator = runfeatures!(driver, featurepath)
 
     #
     # Present number of scenarios that succeeded and failed for each feature
     #
-    results = featureresults(accumulator)
+    results = featureresults(resultaccumulator)
 
     # Find the longest feature name, so we can align the result table.
     maxfeature = maximum(length(r.feature.header.description) for r in results)
@@ -75,7 +47,7 @@ function runspec(rootpath::String = ".")
 
     println()
 
-    istotalsuccess = issuccess(accumulator)
+    istotalsuccess = issuccess(resultaccumulator)
     if istotalsuccess
         println("SUCCESS")
     else
