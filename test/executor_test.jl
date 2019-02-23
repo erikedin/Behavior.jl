@@ -185,6 +185,47 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
 
         @test length(outlineresult) == 3
     end
+
+    @testset "Block text" begin
+        @testset "Scenario step has a block text; Context contains the block text" begin
+            given = Given("Some precondition", block_text="Some block text")
+            function check_block_text_step_definition(context::StepDefinitionContext)
+                if context[:block_text] == "Some block text"
+                    ExecutableSpecifications.SuccessfulStepExecution()
+                else
+                    ExecutableSpecifications.StepFailed("")
+                end
+            end
+            stepdefmatcher = FakeStepDefinitionMatcher(Dict(given => check_block_text_step_definition))
+            executor = ExecutableSpecifications.Executor(stepdefmatcher)
+            scenario = Scenario("Description", [], [given])
+
+            scenarioresult = ExecutableSpecifications.executescenario(executor, scenario)
+
+            @test isa(scenarioresult.steps[1], ExecutableSpecifications.SuccessfulStepExecution)
+        end
+
+        @testset "First step has block text, but second doesn't; The block text is cleared in the second step" begin
+            given = Given("Some precondition", block_text="Some block text")
+            when = When("some action")
+            function check_block_text_step_definition(context::StepDefinitionContext)
+                if context[:block_text] == ""
+                    ExecutableSpecifications.SuccessfulStepExecution()
+                else
+                    ExecutableSpecifications.StepFailed("")
+                end
+            end
+            stepdefmatcher = FakeStepDefinitionMatcher(Dict(
+                given => successful_step_definition,
+                when => check_block_text_step_definition))
+            executor = ExecutableSpecifications.Executor(stepdefmatcher)
+            scenario = Scenario("Description", [], [given, when])
+
+            scenarioresult = ExecutableSpecifications.executescenario(executor, scenario)
+
+            @test isa(scenarioresult.steps[2], ExecutableSpecifications.SuccessfulStepExecution)
+        end
+    end
 end
 
 mutable struct FakeRealTimePresenter <: ExecutableSpecifications.RealTimePresenter

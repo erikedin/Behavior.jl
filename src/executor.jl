@@ -84,12 +84,17 @@ function executescenario(executor::Executor, scenario::Gherkin.Scenario)
     # Find a unique step definition for each step and execute it.
     # Present each step, first as it is about to be executed, and then once more with the result.
     for i = 1:length(scenario.steps)
+        step = scenario.steps[i]
         # Tell the presenter that this step is about to be executed.
-        present(executor.presenter, scenario.steps[i])
+        present(executor.presenter, step)
 
         steps[i] = try
             # Find a step definition matching the step text.
-            stepdefinition = findstepdefinition(executor.stepdefmatcher, scenario.steps[i])
+            stepdefinition = findstepdefinition(executor.stepdefmatcher, step)
+
+            # The block text is provided to the step definition via the context.
+            context[:block_text] = step.block_text
+
             try
                 # Execute the step definition. Note that it's important to use `Base.invokelatest` here,
                 # because otherwise it might not find that function defined yet.
@@ -99,7 +104,7 @@ function executescenario(executor::Executor, scenario::Gherkin.Scenario)
             end
         catch ex
             if ex isa NoMatchingStepDefinition
-                NoStepDefinitionFound(scenario.steps[i])
+                NoStepDefinitionFound(step)
             elseif ex isa NonUniqueStepDefinition
                 NonUniqueMatch(ex.locations)
             else
@@ -107,7 +112,7 @@ function executescenario(executor::Executor, scenario::Gherkin.Scenario)
             end
         end
         # Present the result after execution.
-        present(executor.presenter, scenario.steps[i], steps[i])
+        present(executor.presenter, step, steps[i])
         lastexecutedstep = i
 
         # If this step failed, then we skip any remaining steps.
