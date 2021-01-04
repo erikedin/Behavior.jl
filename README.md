@@ -1,6 +1,5 @@
 # ExecutableSpecifications
 
-[![Build Status](https://travis-ci.org/erikedin/ExecutableSpecifications.jl.svg?branch=master)](https://travis-ci.org/erikedin/ExecutableSpecifications.jl)
 [![codecov.io](http://codecov.io/github/erikedin/ExecutableSpecifications.jl/coverage.svg?branch=master)](http://codecov.io/github/erikedin/ExecutableSpecifications.jl?branch=master)
 
 BDD is an acronym for _Behaviour Driven Development_. It is a process for creating and verifying
