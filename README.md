@@ -70,13 +70,6 @@ julia> runspec()
 
 See "Current state" for limitations.
 
-# Julia 0.7 and 0.6
-The master branch for this package is now for Julia 0.7. All development will be for 0.7 going
-forward.
-
-If you require this package for Julia 0.6, there is a branch `julia-release-0.6`. This is behind
-in features, and will only be updated on demand.
-
 # Current state
 The package has minimal functionality, but is under active development.
 
@@ -89,7 +82,6 @@ These are some current limitations, that will be lifted as development progresse
     course.
 
 - Presenting the results of scenarios is very rudimentary.
-- No setup or teardown functions.
 - No variables in step definition strings
 
     One would like to be able to define a variable in a step definition like
