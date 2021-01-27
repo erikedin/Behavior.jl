@@ -131,18 +131,32 @@ struct Feature
 end
 
 """
+ParseOptions lets the user control certain behavior of the parser, making it more lenient towards errors.
+"""
+struct ParseOptions
+    allow_any_step_order::Bool
+
+    function ParseOptions(;
+        allow_any_step_order::Bool = false)
+
+        new(allow_any_step_order)
+    end
+end
+
+"""
 ByLineParser takes a long text and lets the Gherkin parser work line by line.
 """
 mutable struct ByLineParser
     current::String
     rest::Vector{String}
     isempty::Bool
+    options::ParseOptions
 
-    function ByLineParser(text::String)
+    function ByLineParser(text::String, options::ParseOptions = ParseOptions())
         lines = split(text, "\n")
         current = lines[1]
         rest = lines[2:end]
-        new(current, rest, false)
+        new(current, rest, false, options)
     end
 end
 
@@ -337,10 +351,11 @@ function parsescenariosteps!(byline::ByLineParser)
         # Note that scenario steps must occur in the order Given, When, Then. A Given may not follow
         # once a When has been seen, and a When must not follow when a Then has been seen.
         # This is what `allowed_step_types` keeps track of.
+        # Options: allow_any_step_order disables this check.
         step_type = step_match[:step_type]
         step_definition = step_match[:step_definition]
         if step_type == "Given"
-            if !(Given in allowed_step_types)
+            if !byline.options.allow_any_step_order && !(Given in allowed_step_types)
                 return BadParseResult{Vector{ScenarioStep}}(:bad_step_order, :NotGiven, :Given)
             end
             step = Given(step_definition)
