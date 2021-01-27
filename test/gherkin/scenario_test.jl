@@ -1,4 +1,4 @@
-using ExecutableSpecifications.Gherkin: issuccessful, parsescenario!, Given, When, Then, ByLineParser, ScenarioStep
+using ExecutableSpecifications.Gherkin: issuccessful, parsescenario!, Given, When, Then, ByLineParser, ScenarioStep, ParseOptions
 
 @testset "Scenario             " begin
     @testset "Scenario has a Given step; the parsed scenario has a Given struct" begin
@@ -201,6 +201,56 @@ using ExecutableSpecifications.Gherkin: issuccessful, parsescenario!, Given, Whe
             @test result.reason == :invalid_step
             @test result.expected == :step_definition
             @test result.actual == :invalid_step_definition
+        end
+    end
+
+    @testset "Lenient parsing" begin
+        @testset "Allow arbitrary step order" begin
+            @testset "Given after a When; Steps are When and Given" begin
+                text = """
+                Scenario: Some description
+                    When some action
+                    Given some precondition
+                """
+
+                byline = ByLineParser(text, ParseOptions(allow_any_step_order=true))
+                result = parsescenario!(byline)
+
+                @test issuccessful(result)
+                scenario = result.value
+                @test scenario.steps == ScenarioStep[When("some action"), Given("some precondition")]
+            end
+
+            @testset "When after a Then; Steps are Then and When" begin
+                text = """
+                Scenario: Some description
+                    Then some postcondition
+                    When some action
+                """
+
+                byline = ByLineParser(text, ParseOptions(allow_any_step_order=true))
+                result = parsescenario!(byline)
+
+                @test issuccessful(result)
+                scenario = result.value
+                @test scenario.steps == ScenarioStep[Then("some postcondition"), When("some action")]
+            end
+
+            @testset "Steps are Then/When/Given; Parse result is in that order" begin
+                text = """
+                Scenario: Some description
+                    Then some postcondition
+                    When some action
+                    Given some precondition
+                """
+
+                byline = ByLineParser(text, ParseOptions(allow_any_step_order=true))
+                result = parsescenario!(byline)
+
+                @test issuccessful(result)
+                scenario = result.value
+                @test scenario.steps == ScenarioStep[Then("some postcondition"), When("some action"), Given("some precondition")]
+            end
         end
     end
 

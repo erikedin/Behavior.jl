@@ -1,4 +1,4 @@
-using ExecutableSpecifications.Gherkin: parsefeature, issuccessful
+using ExecutableSpecifications.Gherkin: parsefeature, issuccessful, ParseOptions
 
 @testset "Feature              " begin
     @testset "Feature description" begin
@@ -246,6 +246,38 @@ using ExecutableSpecifications.Gherkin: parsefeature, issuccessful
             @test result.reason == :unexpected_construct
             @test result.expected == :feature
             @test result.actual == :scenario
+        end
+
+        @testset "Scenario has out-of-order steps; Parse fails with :bad_step_order" begin
+            text = """
+            Feature: This feature has one scenario
+
+                Scenario: This scenario has out-of-order steps
+                    When an action
+                    Given a precondition
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result) == false
+            @test result.reason == :bad_step_order
+        end
+    end
+
+    @testset "Lenient parser" begin
+        @testset "Allow arbitrary step order" begin
+            text = """
+            Feature: This feature has one scenario
+
+                Scenario: This scenario has steps out-of-order
+                    Then a postcondition
+                    When an action
+                    Given a precondition
+            """
+
+            result = parsefeature(text, options=ParseOptions(allow_any_step_order = true))
+
+            @test issuccessful(result)
         end
     end
 end
