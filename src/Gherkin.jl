@@ -3,7 +3,7 @@ module Gherkin
 import Base: ==, hash
 
 export Scenario, ScenarioOutline, Feature, FeatureHeader, Given, When, Then
-export parsefeature, hastag
+export parsefeature, hastag, ParseOptions
 
 "A good or bad result when parsing Gherkin."
 abstract type ParseResult{T} end

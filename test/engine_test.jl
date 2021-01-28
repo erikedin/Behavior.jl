@@ -2,7 +2,7 @@ using ExecutableSpecifications:
     Engine, ExecutorEngine, QuietRealTimePresenter, FromMacroStepDefinitionMatcher,
     finish, issuccess, findstepdefinition, NoMatchingStepDefinition, runfeatures!,
     Driver, readstepdefinitions!, OSAbstraction
-using ExecutableSpecifications.Gherkin: Feature, FeatureHeader, Scenario, Given
+using ExecutableSpecifications.Gherkin: Feature, FeatureHeader, Scenario, Given, ParseOptions
 import ExecutableSpecifications: addmatcher!, findfileswithextension, readfile, runfeature!,
                                  issuccess, finish
 
@@ -331,5 +331,27 @@ readfile(os::FakeOSAbstraction, path::String) = os.filecontents[path]
 
         # Assert
         @test issuccess(result)
+    end
+
+    @testset "Running feature files with parse options; One scenario with out-of-order steps; Feature is executed" begin
+        # Arrange
+        filecontents = Dict("features/file.feature" => """
+            Feature: Some feature
+
+                Scenario: A scenario with out-of-order steps
+                    Then a postcondition
+                    When an action
+                    Given a precondition
+            """)
+        engine = FakeEngine()
+        osal = FakeOSAbstraction(fileswithext=[".feature" => ["features/file.feature"]],
+                                 filecontents = filecontents)
+        driver = Driver(osal, engine)
+
+        # Act
+        result = runfeatures!(driver, "features", parseoptions = ParseOptions(allow_any_step_order = true))
+
+        # Assert
+        @test length(engine.features) == 1
     end
 end

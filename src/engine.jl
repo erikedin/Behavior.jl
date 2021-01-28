@@ -41,10 +41,10 @@ function readstepdefinitions!(driver::Driver, path::String)
     end
 end
 
-function runfeatures!(driver::Driver, path::String)
+function runfeatures!(driver::Driver, path::String; parseoptions::ParseOptions = ParseOptions())
     featurefiles = findfileswithextension(driver.os, path, ".feature")
     for featurefile in featurefiles
-        featureparseresult = parsefeature(readfile(driver.os, featurefile))
+        featureparseresult = parsefeature(readfile(driver.os, featurefile), options=parseoptions)
         feature = featureparseresult.value
         runfeature!(driver.engine, feature)
     end

@@ -20,7 +20,7 @@ fileexists(::OSAL, path::String) = isfile(path)
 
 Execute all features found from the current directory, or another specified directory.
 """
-function runspec(rootpath::String = ".")
+function runspec(rootpath::String = "."; parseoptions::ParseOptions=ParseOptions())
     featurepath = joinpath(rootpath, "features")
     stepspath = joinpath(featurepath, "steps")
     execenvpath = joinpath(featurepath, "environment.jl")
@@ -36,7 +36,7 @@ function runspec(rootpath::String = ".")
     driver = Driver(os, engine)
 
     readstepdefinitions!(driver, stepspath)
-    resultaccumulator = runfeatures!(driver, featurepath)
+    resultaccumulator = runfeatures!(driver, featurepath, parseoptions=parseoptions)
 
     #
     # Present number of scenarios that succeeded and failed for each feature
