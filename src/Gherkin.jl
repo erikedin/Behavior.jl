@@ -330,7 +330,7 @@ function parsescenariosteps!(byline::ByLineParser)
     @untilemptyline begin
         # Match Given, When, or Then on the line, or match a block text.
         # Note: This is a place where English Gherkin is hard coded.
-        step_match = match(r"(?<step_type>Given|When|Then|And) (?<step_definition>.+)", byline.current)
+        step_match = match(r"(?<step_type>Given|When|Then|And|But|\*) (?<step_definition>.+)", byline.current)
         block_text_start_match = match(r"\"\"\"", byline.current)
         # A line must either be a new scenario step, or a block text following the previous scenario
         # step.
@@ -372,7 +372,7 @@ function parsescenariosteps!(byline::ByLineParser)
             step = Then(step_definition)
             delete!(allowed_step_types, Given)
             delete!(allowed_step_types, When)
-        elseif step_type == "And"
+        elseif step_type == "And" || step_type == "But" || step_type == "*"
             # A scenario step may be And, in which case it's the same type as the previous step.
             # This means that an And may not be the first scenario step.
             if isempty(steps)

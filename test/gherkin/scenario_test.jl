@@ -97,6 +97,82 @@ using ExecutableSpecifications.Gherkin: issuccessful, parsescenario!, Given, Whe
                                                  Then("another postcondition")]
     end
 
+    @testset "But and * keywords" begin
+        @testset "But follows Given/When/Then; Each But step is same as the preceding" begin
+            text = """
+            Scenario: Some description
+                Given some precondition
+                But after given
+                When some action
+                But after when
+                Then some postcondition
+                But after then
+            """
+
+            byline = ByLineParser(text)
+            result = parsescenario!(byline)
+
+            @test issuccessful(result)
+            scenario = result.value
+
+            @test scenario.steps == ScenarioStep[Given("some precondition"),
+                                                 Given("after given"),
+                                                 When("some action"),
+                                                 When("after when"),
+                                                 Then("some postcondition"),
+                                                 Then("after then")]
+
+        end
+
+        @testset "* follows Given/When/Then; Each * step is same as the preceding" begin
+            text = """
+            Scenario: Some description
+                Given some precondition
+                * after given
+                When some action
+                * after when
+                Then some postcondition
+                * after then
+            """
+
+            byline = ByLineParser(text)
+            result = parsescenario!(byline)
+
+            @test issuccessful(result)
+            scenario = result.value
+
+            @test scenario.steps == ScenarioStep[Given("some precondition"),
+                                                 Given("after given"),
+                                                 When("some action"),
+                                                 When("after when"),
+                                                 Then("some postcondition"),
+                                                 Then("after then")]
+
+        end
+
+        @testset "List items as *; Items are the same type as the preceding step" begin
+            text = """
+            Scenario: Some description
+                Given some precondition
+                * item 1
+                * item 2
+                * item 3
+            """
+
+            byline = ByLineParser(text)
+            result = parsescenario!(byline)
+
+            @test issuccessful(result)
+            scenario = result.value
+
+            @test scenario.steps == ScenarioStep[Given("some precondition"),
+                                                 Given("item 1"),
+                                                 Given("item 2"),
+                                                 Given("item 3")]
+
+        end
+    end
+
     @testset "Scenario is not terminated by newline; EOF is also an OK termination" begin
         text = """
         Scenario: Some description
