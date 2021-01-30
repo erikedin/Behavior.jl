@@ -108,6 +108,11 @@ struct ScenarioOutline <: AbstractScenario
     examples::AbstractArray
 end
 
+struct Background
+    description::String
+end
+Background() = Background("")
+
 """
 A FeatureHeader has a (short) description, a longer description, and a list of applicable tags.
 
@@ -130,7 +135,11 @@ A Feature has a feature header and a list of Scenarios and Scenario Outlines.
 """
 struct Feature
     header::FeatureHeader
+    background::Background
     scenarios::Vector{AbstractScenario}
+
+    Feature(header::FeatureHeader, background::Background, scenarios::Vector{<:AbstractScenario}) = new(header, background, scenarios)
+    Feature(header::FeatureHeader, scenarios::Vector{<:AbstractScenario}) = new(header, Background(), scenarios)
 end
 
 """
@@ -215,7 +224,6 @@ macro ignoringemptylines(ex::Expr)
     end)
 end
 
-
 """
 Override the normal `isempty` method for `ByLineParser`.
 """
@@ -227,6 +235,12 @@ Base.isempty(p::ByLineParser) = p.isempty
 Check if the current line in the parser is empty.
 """
 iscurrentlineempty(p::ByLineParser) = strip(p.current) == ""
+
+function consumeemptylines!(p::ByLineParser)
+    while !isempty(p) && iscurrentlineempty(p)
+        consume!(p)
+    end
+end
 
 """
     parsetags!(byline::ByLineParser)
@@ -452,6 +466,19 @@ function parsescenario!(byline::ByLineParser)
     OKParseResult{Scenario}(Scenario(description, tags, steps))
 end
 
+function parsebackground!(byline::ByLineParser) :: ParseResult{Background}
+    consumeemptylines!(byline)
+
+    background_match = match(r"Background: (?<description>.+)", byline.current)
+    if background_match !== nothing
+        consume!(byline)
+        consume!(byline)
+        return OKParseResult{Background}(Background(background_match[:description]))
+    end
+
+    OKParseResult{Background}(Background())
+end
+
 """
     parsefeature(::String)
 
@@ -482,8 +509,12 @@ function parsefeature(text::String; options :: ParseOptions = ParseOptions()) ::
                                        feature_header_result.actual)
     end
 
+    # Optionally read a Background section
+    background_result = parsebackground!(byline)
+    background = background_result.value
+
     # Each `parsescenario!`
-    scenarios = []
+    scenarios = AbstractScenario[]
     @ignoringemptylines begin
         scenario_parse_result = parsescenario!(byline)
         if issuccessful(scenario_parse_result)
@@ -494,7 +525,7 @@ function parsefeature(text::String; options :: ParseOptions = ParseOptions()) ::
     end
 
     OKParseResult{Feature}(
-        Feature(feature_header_result.value, scenarios))
+        Feature(feature_header_result.value, background, scenarios))
 end
 
 """

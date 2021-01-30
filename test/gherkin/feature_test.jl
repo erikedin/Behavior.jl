@@ -280,4 +280,21 @@ using ExecutableSpecifications.Gherkin: parsefeature, issuccessful, ParseOptions
             @test issuccessful(result)
         end
     end
+
+    @testset "Background sections" begin
+        @testset "Background with a single Given step; Background description is available in the result" begin
+            text = """
+            Feature: This feature has a Background section
+
+                Background: Some background steps
+                    Given some background precondition
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result)
+            feature = result.value
+            @test feature.background.description == "Some background steps"
+        end
+    end
 end
