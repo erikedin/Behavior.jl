@@ -17,3 +17,15 @@ Feature: This is a feature file
             | foo | comparison |
             | 42  | greater    |
             | -17 | less       |
+
+     Scenario: Doc strings are multi-line blocks of text
+          When we need multiple lines of text
+               """
+               This is line 1.
+               This is line 2.
+               """
+          Then we can use doc strings like this
+               """
+               And like
+               this.
+               """

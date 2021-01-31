@@ -35,3 +35,17 @@ end
 @then "foo is less than zero" begin
     @expect context[:foo] < 0
 end
+
+@when "we need multiple lines of text" begin
+    docstring = context[:block_text]
+    @expect docstring == """
+        This is line 1.
+        This is line 2."""
+end
+
+@then "we can use doc strings like this" begin
+    docstring = context[:block_text]
+    @expect docstring == """
+        And like
+        this."""
+end
