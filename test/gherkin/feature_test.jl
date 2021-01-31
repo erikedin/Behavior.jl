@@ -1,4 +1,6 @@
-using ExecutableSpecifications.Gherkin: parsefeature, issuccessful, ParseOptions
+using ExecutableSpecifications.Gherkin:
+    parsefeature, issuccessful, ParseOptions,
+    Given
 
 @testset "Feature              " begin
     @testset "Feature description" begin
@@ -295,6 +297,21 @@ using ExecutableSpecifications.Gherkin: parsefeature, issuccessful, ParseOptions
             @test issuccessful(result)
             feature = result.value
             @test feature.background.description == "Some background steps"
+        end
+
+        @testset "Background with a single Given step; The Given step is available in the result" begin
+            text = """
+            Feature: This feature has a Background section
+
+                Background: Some background steps
+                    Given some background precondition
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result)
+            feature = result.value
+            @test feature.background.steps == [Given("some background precondition")]
         end
     end
 end

@@ -110,8 +110,9 @@ end
 
 struct Background
     description::String
+    steps::Vector{ScenarioStep}
 end
-Background() = Background("")
+Background() = Background("", ScenarioStep[])
 
 """
 A FeatureHeader has a (short) description, a longer description, and a list of applicable tags.
@@ -473,7 +474,9 @@ function parsebackground!(byline::ByLineParser) :: ParseResult{Background}
     if background_match !== nothing
         consume!(byline)
         consume!(byline)
-        return OKParseResult{Background}(Background(background_match[:description]))
+
+        steps = ScenarioStep[Given("some background precondition")]
+        return OKParseResult{Background}(Background(background_match[:description], steps))
     end
 
     OKParseResult{Background}(Background())
