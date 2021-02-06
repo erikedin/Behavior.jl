@@ -313,5 +313,76 @@ using ExecutableSpecifications.Gherkin:
             feature = result.value
             @test feature.background.steps == [Given("some background precondition")]
         end
+
+        @testset "Background with three Given steps; The Given steps are available in the result" begin
+            text = """
+            Feature: This feature has a Background section
+
+                Background: Some background steps
+                    Given some background precondition 1
+                    Given some background precondition 2
+                    Given some background precondition 3
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result)
+            feature = result.value
+            @test feature.background.steps == [
+                Given("some background precondition 1"),
+                Given("some background precondition 2"),
+                Given("some background precondition 3"),
+            ]
+        end
+
+        @testset "Background with a doc string; The doc string is part of the step" begin
+            text = """
+            Feature: This feature has a Background section
+
+                Background: Some background steps
+                    Given some background precondition
+                        \"\"\"
+                        Doc string
+                        \"\"\"
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result)
+            feature = result.value
+            @test feature.background.steps == [
+                Given("some background precondition"; block_text="Doc string"),
+            ]
+        end
+
+        @testset "Background with a When step type; Parser error is :invalid_step" begin
+            text = """
+            Feature: This feature has a Background section
+
+                Background: Some background steps
+                    Given some background precondition
+                    When some action
+            """
+
+            result = parsefeature(text)
+
+            @test !issuccessful(result)
+            @test result.reason == :invalid_step
+        end
+
+        @testset "Background with a Then step type; Parser error is :invalid_step" begin
+            text = """
+            Feature: This feature has a Background section
+
+                Background: Some background steps
+                    Given some background precondition
+                    Then some postcondition
+            """
+
+            result = parsefeature(text)
+
+            @test !issuccessful(result)
+            @test result.reason == :invalid_step
+        end
     end
 end

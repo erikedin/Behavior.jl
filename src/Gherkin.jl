@@ -338,14 +338,14 @@ end
 
 Parse all scenario steps following a Scenario or Scenario Outline.
 """
-function parsescenariosteps!(byline::ByLineParser)
+function parsescenariosteps!(byline::ByLineParser; valid_step_types::String = "Given|When|Then")
     steps = []
     allowed_step_types = Set([Given, When, Then])
 
     @untilemptyline begin
         # Match Given, When, or Then on the line, or match a block text.
         # Note: This is a place where English Gherkin is hard coded.
-        step_match = match(r"(?<step_type>Given|When|Then|And|But|\*) (?<step_definition>.+)", byline.current)
+        step_match = match(Regex("(?<step_type>$(valid_step_types)|And|But|\\*) (?<step_definition>.+)"), byline.current)
         block_text_start_match = match(r"\"\"\"", byline.current)
         # A line must either be a new scenario step, or a block text following the previous scenario
         # step.
@@ -473,9 +473,15 @@ function parsebackground!(byline::ByLineParser) :: ParseResult{Background}
     background_match = match(r"Background: (?<description>.+)", byline.current)
     if background_match !== nothing
         consume!(byline)
-        consume!(byline)
 
-        steps = ScenarioStep[Given("some background precondition")]
+        steps_result = parsescenariosteps!(byline; valid_step_types = "Given")
+        if !issuccessful(steps_result)
+            return BadParseResult{Background}(steps_result.reason,
+                                              steps_result.expected,
+                                              steps_result.actual)
+        end
+        steps = steps_result.value
+
         return OKParseResult{Background}(Background(background_match[:description], steps))
     end
 
@@ -514,6 +520,11 @@ function parsefeature(text::String; options :: ParseOptions = ParseOptions()) ::
 
     # Optionally read a Background section
     background_result = parsebackground!(byline)
+    if !issuccessful(background_result)
+        return BadParseResult{Feature}(background_result.reason,
+                                       background_result.expected,
+                                       background_result.actual)
+    end
     background = background_result.value
 
     # Each `parsescenario!`
