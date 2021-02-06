@@ -5,6 +5,9 @@ using ExecutableSpecifications:
 import ExecutableSpecifications:
     findfileswithextension, readfile, fileexists
 
+using ExecutableSpecifications.Gherkin: BadParseResult
+using Glob
+
 struct OSAL <: ExecutableSpecifications.OSAbstraction end
 function findfileswithextension(::OSAL, path::String, extension::String)
     [joinpath(path, filename) for filename in readdir(path)
@@ -14,6 +17,29 @@ end
 
 readfile(::OSAL, path::String) = read(path, String)
 fileexists(::OSAL, path::String) = isfile(path)
+
+function parseonly(featurepath::String; parseoptions::ParseOptions=ParseOptions())
+
+    # -----------------------------------------------------------------------------
+    # borrowed code from runspec; should be refactored later
+    os = OSAL()
+    engine = ExecutorEngine(ColorConsolePresenter(); executionenv=NoExecutionEnvironment())
+    driver = Driver(os, engine)
+    # -----------------------------------------------------------------------------
+
+    # Find all feature files recursively
+    rglob(pat, topdir) = Base.Iterators.flatten(map(d -> glob(pat, d[1]), walkdir(topdir)))
+    featurefiles = rglob("*.feature", featurepath)
+
+    # Parse all feature files and collect results to an array of named tuples
+    results = []
+    for featurefile in featurefiles
+        parseddata = parsefeature(readfile(driver.os, featurefile), options=parseoptions)
+        isbad = parseddata isa BadParseResult
+        push!(results, (filename = featurefile, success = !isbad, result = parseddata))
+    end
+    return results
+end
 
 """
     runspec()

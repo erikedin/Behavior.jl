@@ -1,7 +1,8 @@
-authors = ["Erik Edin <erikedin@users.noreply.github.com>"]
 name = "ExecutableSpecifications"
 uuid = "7a129280-419d-58e9-81ef-4f6801251892"
+authors = ["Erik Edin <erikedin@users.noreply.github.com>"]
 version = "0.1.0"
 
 [deps]
+Glob = "c27321d9-0574-5035-807b-f59d2c89b15c"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
