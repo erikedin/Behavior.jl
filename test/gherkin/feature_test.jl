@@ -385,4 +385,20 @@ using ExecutableSpecifications.Gherkin:
             @test result.reason == :invalid_step
         end
     end
+
+    @testset "Comments" begin
+        @testset "Comments preceding the Feature; Ignored" begin
+            text = """
+            # Comment line 1
+            # Comment line 2
+            Feature: This is a feature
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result)
+            feature = result.value
+            @test feature.header.description == "This is a feature"
+        end
+    end
 end

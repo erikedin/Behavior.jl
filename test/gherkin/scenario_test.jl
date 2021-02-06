@@ -278,6 +278,21 @@ using ExecutableSpecifications.Gherkin: issuccessful, parsescenario!, Given, Whe
             @test result.expected == :step_definition
             @test result.actual == :invalid_step_definition
         end
+
+        @testset "Improper scenario header; Expected valid scenario header" begin
+            text = """
+            Scenario malformed: This is not a proper scenario header
+                Given some precondition
+            """
+
+            byline = ByLineParser(text)
+            result = parsescenario!(byline)
+
+            @test !issuccessful(result)
+            @test result.reason   == :invalid_scenario_header
+            @test result.expected == :scenario_or_outline
+            @test result.actual   == :invalid_header
+        end
     end
 
     @testset "Lenient parsing" begin

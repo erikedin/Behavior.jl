@@ -235,7 +235,7 @@ Base.isempty(p::ByLineParser) = p.isempty
 
 Check if the current line in the parser is empty.
 """
-iscurrentlineempty(p::ByLineParser) = strip(p.current) == ""
+iscurrentlineempty(p::ByLineParser) = strip(p.current) == "" || startswith(strip(p.current), "#")
 
 function consumeemptylines!(p::ByLineParser)
     while !isempty(p) && iscurrentlineempty(p)
@@ -455,6 +455,10 @@ function parsescenario!(byline::ByLineParser)
 
     # Here we parse a normal Scenario instead.
     scenario_match = match(r"Scenario: (?<description>.+)", byline.current)
+    if scenario_match === nothing
+        return BadParseResult{Scenario}(:invalid_scenario_header, :scenario_or_outline, :invalid_header)
+    end
+
     description = scenario_match[:description]
     consume!(byline)
 
@@ -508,6 +512,9 @@ Feature: Some feature description
 """
 function parsefeature(text::String; options :: ParseOptions = ParseOptions()) :: ParseResult{Feature}
     byline = ByLineParser(text, options)
+
+    # Skip any leading blank lines or comments
+    consumeemptylines!(byline)
 
     # The feature header includes all feature level tags, the description, and the long multiline
     # description.
