@@ -14,10 +14,16 @@ else
     num_failed = num_files - num_success
     println("Files failed parsing:")
     for rs in results
-        println(rs.filename)
-        println(" reason: ", rs.result.reason)
-        println(" expected: ", rs.result.expected)
-        println(" actual: ", rs.result.actual)
+        print(rs.filename)
+
+        if rs.success
+            println(": OK")
+        else
+            println()
+            println(" reason: ", rs.result.reason)
+            println(" expected: ", rs.result.expected)
+            println(" actual: ", rs.result.actual)
+        end
     end
     println("Parsing failed: ", num_failed)
     println("Total number of files: ", num_files)
