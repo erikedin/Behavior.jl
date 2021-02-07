@@ -484,6 +484,21 @@ using ExecutableSpecifications.Gherkin:
             @test !issuccessful(result)
             @test result.reason == :invalid_step
         end
+
+        @testset "Background has no description; Description is empty" begin
+            text = """
+            Feature: This feature has a Background section
+
+                Background:
+                    Given some background precondition
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result)
+            feature = result.value
+            @test feature.background.description == ""
+        end
     end
 
     @testset "Comments" begin

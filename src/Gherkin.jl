@@ -555,7 +555,7 @@ end
 function parsebackground!(byline::ByLineParser) :: ParseResult{Background}
     consumeemptylines!(byline)
 
-    background_match = match(r"Background: (?<description>.+)", byline.current)
+    background_match = match(r"Background:(?<description>.*)", byline.current)
     if background_match !== nothing
         consume!(byline)
 
@@ -566,8 +566,9 @@ function parsebackground!(byline::ByLineParser) :: ParseResult{Background}
                                               steps_result.actual)
         end
         steps = steps_result.value
+        description = strip(background_match[:description])
 
-        return OKParseResult{Background}(Background(background_match[:description], steps))
+        return OKParseResult{Background}(Background(description, steps))
     end
 
     OKParseResult{Background}(Background())
