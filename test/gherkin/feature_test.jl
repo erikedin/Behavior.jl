@@ -1,6 +1,6 @@
 using ExecutableSpecifications.Gherkin:
     parsefeature, issuccessful, ParseOptions,
-    Given
+    Given, When, Then
 
 @testset "Feature              " begin
     @testset "Feature description" begin
@@ -514,6 +514,130 @@ using ExecutableSpecifications.Gherkin:
             @test issuccessful(result)
             feature = result.value
             @test feature.header.description == "This is a feature"
+        end
+
+        @testset "Comments within a Background; Ignored" begin
+            text = """
+            Feature: This is a feature
+
+                Background: Some description
+                    Given some precondition 1
+                    # Comment line 1
+                    # Comment line 2
+                    Given some precondition 2
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result)
+            feature = result.value
+            @test feature.background.steps == [
+                Given("some precondition 1"),
+                Given("some precondition 2"),
+            ]
+        end
+
+        @testset "Comments within a Scenario; Ignored" begin
+            text = """
+            Feature: This is a feature
+
+                Scenario: Some description
+                    Given some precondition 1
+                    # Comment line 1
+                    # Comment line 2
+                    Given some precondition 2
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result)
+            feature = result.value
+            @test feature.scenarios[1].steps == [
+                Given("some precondition 1"),
+                Given("some precondition 2"),
+            ]
+        end
+
+        @testset "Comments between a Background and a Scenario; Ignored" begin
+            text = """
+            Feature: This is a feature
+
+                Background: Some background description
+                    Given some background precondition
+
+                # Comment line 1
+                # Comment line 2
+
+                Scenario: Some description
+                    Given some precondition 1
+                    When some action
+                    Then some postcondition
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result)
+            feature = result.value
+            @test feature.background.steps == [
+                Given("some background precondition"),
+            ]
+            @test feature.scenarios[1].steps == [
+                Given("some precondition 1"),
+                When("some action"),
+                Then("some postcondition"),
+            ]
+        end
+
+        @testset "Comments between a Background and a Scenario without blank lines; Ignored" begin
+            text = """
+            Feature: This is a feature
+
+                Background: Some background description
+                    Given some background precondition
+                # Comment line 1
+                # Comment line 2
+                Scenario: Some description
+                    Given some precondition 1
+                    When some action
+                    Then some postcondition
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result)
+            feature = result.value
+            @test feature.background.steps == [
+                Given("some background precondition"),
+            ]
+            @test feature.scenarios[1].steps == [
+                Given("some precondition 1"),
+                When("some action"),
+                Then("some postcondition"),
+            ]
+        end
+
+        @testset "Comments at the end of a Feature; Ignored" begin
+            text = """
+            Feature: This is a feature
+
+                Scenario: Some description
+                    Given some precondition 1
+                    When some action
+                    Then some postcondition
+
+                # Comment line 1
+                # Comment line 2
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result)
+            feature = result.value
+            @test feature.scenarios[1].steps == [
+                Given("some precondition 1"),
+                When("some action"),
+                Then("some postcondition"),
+            ]
         end
     end
 end
