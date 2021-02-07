@@ -177,6 +177,9 @@ using ExecutableSpecifications.Gherkin:
             result = parsefeature(text)
 
             @test issuccessful(result)
+            if !issuccessful(result)
+                println("Error: $(result.reason): $(result.expected) but got $(result.actual)")
+            end
             feature = result.value
             @test length(feature.scenarios) == 1
         end
@@ -200,6 +203,9 @@ using ExecutableSpecifications.Gherkin:
             result = parsefeature(text)
 
             @test issuccessful(result)
+            if !issuccessful(result)
+                println("Error: $(result.reason): $(result.expected) but got $(result.actual)")
+            end
             feature = result.value
             @test length(feature.scenarios) == 2
         end
@@ -218,6 +224,23 @@ using ExecutableSpecifications.Gherkin:
 
 
 
+                Scenario: This is another scenario
+                    Given a precondition
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result)
+            feature = result.value
+            @test length(feature.scenarios) == 2
+        end
+
+        @testset "No empty lines between scenarios; Two scenarios found" begin
+            text = """
+            Feature: This feature has many empty lines between scenarios
+
+                Scenario: This is one scenario
+                    Given a precondition
                 Scenario: This is another scenario
                     Given a precondition
             """

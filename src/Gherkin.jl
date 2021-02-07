@@ -207,6 +207,35 @@ macro untilemptyline(ex::Expr)
     end)
 end
 
+function iscurrentlineasection(p::ByLineParser)
+    m = match(r"(Scenario|Scenario Outline|Examples):.*", p.current)
+    m !== nothing
+end
+
+"""
+    @untilnextsection(byline::Symbol,)
+
+Execute the function for each line, until another section is encountered, or no further lines are
+available.
+A section is another Scenario, Scenario Outline.
+Also skips empty lines and comment lines.
+"""
+macro untilnextsection(ex::Expr)
+    esc(quote
+        while !isempty(byline)
+            if iscurrentlineasection(byline)
+                break
+            end
+            if iscurrentlineempty(byline)
+                consume!(byline)
+                continue
+            end
+            $ex
+            consume!(byline)
+        end
+    end)
+end
+
 """
     ignoringemptylines!(f::Function, byline::ByLineParser)
 
@@ -342,7 +371,7 @@ function parsescenariosteps!(byline::ByLineParser; valid_step_types::String = "G
     steps = []
     allowed_step_types = Set([Given, When, Then])
 
-    @untilemptyline begin
+    @untilnextsection begin
         # Match Given, When, or Then on the line, or match a block text.
         # Note: This is a place where English Gherkin is hard coded.
         step_match = match(Regex("(?<step_type>$(valid_step_types)|And|But|\\*) (?<step_definition>.+)"), byline.current)
