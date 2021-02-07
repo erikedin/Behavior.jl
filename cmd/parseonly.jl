@@ -1,11 +1,14 @@
 using ExecutableSpecifications: parseonly
+using ExecutableSpecifications.Gherkin: ParseOptions
 
 if length(ARGS) !== 1
     println("Usage: julia parseonly.jl <root-directory>")
     exit(1)
 end
 
-results = parseonly(ARGS[1])
+parseoptions = ParseOptions(allow_any_step_order=true)
+
+results = parseonly(ARGS[1], parseoptions=parseoptions)
 num_files = length(results)
 num_success = count(x -> x.success === true, results)
 if num_success === num_files
