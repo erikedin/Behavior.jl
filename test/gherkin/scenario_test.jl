@@ -97,6 +97,28 @@ using ExecutableSpecifications.Gherkin: issuccessful, parsescenario!, Given, Whe
                                                  Then("another postcondition")]
     end
 
+    @testset "Blank lines" begin
+        text = """
+        Scenario: Some description
+            Given some precondition
+
+            When some action
+
+            Then some postcondition
+        """
+
+        byline = ByLineParser(text)
+        result = parsescenario!(byline)
+
+        @test issuccessful(result)
+        scenario = result.value
+
+        @test scenario.steps == ScenarioStep[Given("some precondition"),
+                                             When("some action"),
+                                             Then("some postcondition"),
+                                             ]
+    end
+
     @testset "But and * keywords" begin
         @testset "But follows Given/When/Then; Each But step is same as the preceding" begin
             text = """
