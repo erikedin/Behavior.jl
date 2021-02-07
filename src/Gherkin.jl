@@ -189,6 +189,50 @@ function consume!(p::ByLineParser)
 end
 
 """
+    lookaheadfor(byline::ByLineParser, istarget::Function, isallowedprefix::Function)
+
+Look ahead to see if all lines match isallowedprefix until we reach a line
+matching istarget.
+
+Example: Here the tags mark the start of the scenario
+    @tag1
+    @tag2
+    @tag3
+    Scenario: Some scenario
+
+    `lookaheadfor(byline, iscurrentlineasection, istagline) -> true` 
+
+Example: Here the tags _do_ not mark the start of the scenario
+    @tag1
+    @tag2
+    @tag3
+
+    This is some free text.
+
+    Scenario: Some scenario
+
+    `lookaheadfor(byline, iscurrentlineasection, istagline) -> false` 
+"""
+function lookaheadfor(byline::ByLineParser, istarget::Function, isallowedprefix::Function) :: Bool
+    for nextline in byline.rest
+        if istarget(nextline)
+            return true
+        end
+
+        if isallowedprefix(nextline)
+            continue
+        end
+
+        # The line matched neither istarget or isallowedprefix.
+        # Therefore the current line did not mark the beginning of an
+        # istarget line.
+        break
+    end
+
+    false
+end
+
+"""
     @untilemptyline(byline::Symbol,)
 
 Execute the function for each line, until an empty line is encountered, or no further lines are
@@ -207,8 +251,8 @@ macro untilemptyline(ex::Expr)
     end)
 end
 
-function iscurrentlineasection(p::ByLineParser)
-    m = match(r"(Background|Scenario|Scenario Outline|Examples):.*", p.current)
+function iscurrentlineasection(s::String)
+    m = match(r"(Background|Scenario|Scenario Outline|Examples):.*", s)
     m !== nothing
 end
 
@@ -223,7 +267,10 @@ Also skips empty lines and comment lines.
 macro untilnextsection(ex::Expr)
     esc(quote
         while !isempty(byline)
-            if iscurrentlineasection(byline)
+            if iscurrentlineasection(byline.current)
+                break
+            end
+            if istagsline(byline.current) && lookaheadfor(byline, iscurrentlineasection, istagsline)
                 break
             end
             if iscurrentlineempty(byline)
@@ -271,6 +318,14 @@ function consumeemptylines!(p::ByLineParser)
         consume!(p)
     end
 end
+
+
+"""
+    istagsline(current::String)
+
+True if this is a line containing only tags, false otherwise.
+"""
+istagsline(current::String) = match(r"@[^\s]+( +@[^\s]+)*", current) !== nothing
 
 """
     parsetags!(byline::ByLineParser)

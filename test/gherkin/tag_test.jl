@@ -1,5 +1,5 @@
 using Test
-using ExecutableSpecifications.Gherkin: hastag, parsefeature, issuccessful
+using ExecutableSpecifications.Gherkin: hastag, parsefeature, issuccessful, istagsline
 
 @testset "Tags                 " begin
     @testset "Feature tags" begin
@@ -87,6 +87,25 @@ using ExecutableSpecifications.Gherkin: hastag, parsefeature, issuccessful
             @test issuccessful(result)
             @test hastag(result.value.scenarios[1], "@tag1") == false
         end
+
+        @testset "Second Scenario has one tag; The second scenario has tag1" begin
+            text = """
+            Feature: Some description
+
+                Scenario: The first scenario with no tags
+                    Given a precondition
+
+                @tag1
+                Scenario: Some description
+                    Given a precondition
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result)
+            feature = result.value
+            @test hastag(feature.scenarios[2], "@tag1")
+        end
     end
 
     @testset "Robustness" begin
@@ -102,5 +121,26 @@ using ExecutableSpecifications.Gherkin: hastag, parsefeature, issuccessful
             feature = result.value
             @test hastag(feature, "@tag1-2")
         end
+
+        @testset "Feature has a list of tags in its free text header, and no scenarios; The tags are in the free text header" begin
+            text = """
+            Feature: Some description
+                @tag1
+                @tag2
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result)
+            feature = result.value
+            @test "@tag1" in feature.header.long_description
+            @test "@tag2" in feature.header.long_description
+        end
+    end
+
+    @testset "Is tags" begin
+        @testset "One tag; Yes" begin
+            @test istagsline("@tag")
+        end        
     end
 end
