@@ -237,7 +237,7 @@ using ExecutableSpecifications.Gherkin:
 
         @testset "No empty lines between scenarios; Two scenarios found" begin
             text = """
-            Feature: This feature has many empty lines between scenarios
+            Feature: This feature has no empty lines between scenarios
 
                 Scenario: This is one scenario
                     Given a precondition
@@ -250,6 +250,83 @@ using ExecutableSpecifications.Gherkin:
             @test issuccessful(result)
             feature = result.value
             @test length(feature.scenarios) == 2
+        end
+
+        @testset "No empty lines between a Scenario and a Scenario Outline; Two scenarios found" begin
+            text = """
+            Feature: This feature has no empty lines between scenarios
+
+                Scenario: This is one scenario
+                    Given a precondition
+                Scenario Outline: This is one scenario outline
+                    Given a precondition with field <Foo>
+
+                Examples:
+                    | Foo |
+                    | 1   |
+                    | 2   |
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result)
+            feature = result.value
+            @test length(feature.scenarios) == 2
+        end
+
+        @testset "No empty lines between a Scenario Outline and a Scenario; Two scenarios found" begin
+            text = """
+            Feature: This feature has no empty lines between scenarios
+
+                Scenario Outline: This is one scenario outline
+                    Given a precondition with field <Foo>
+
+                Examples:
+                    | Foo |
+                    | 1   |
+                    | 2   |
+                Scenario: This is one scenario
+                    Given a precondition
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result)
+            feature = result.value
+            @test length(feature.scenarios) == 2
+        end
+
+        @testset "No empty lines between a Scenario Outline and the examples; One scenario found" begin
+            text = """
+            Feature: This feature has no empty lines between scenarios
+
+                Scenario Outline: This is one scenario outline
+                    Given a precondition with field <Foo>
+                Examples:
+                    | Foo |
+                    | 1   |
+                    | 2   |
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result)
+            feature = result.value
+            @test length(feature.scenarios) == 1
+        end
+
+        @testset "No empty lines between a Feature and a Scenario; Scenario found" begin
+            text = """
+            Feature: This feature has no empty lines between scenarios
+                Scenario: This is one scenario
+                    Given a precondition
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result)
+            feature = result.value
+            @test length(feature.scenarios) == 1
         end
     end
 

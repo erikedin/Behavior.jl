@@ -208,7 +208,7 @@ macro untilemptyline(ex::Expr)
 end
 
 function iscurrentlineasection(p::ByLineParser)
-    m = match(r"(Scenario|Scenario Outline|Examples):.*", p.current)
+    m = match(r"(Background|Scenario|Scenario Outline|Examples):.*", p.current)
     m !== nothing
 end
 
@@ -319,13 +319,10 @@ function parsefeatureheader!(byline::ByLineParser) :: ParseResult{FeatureHeader}
     end
     consume!(byline)
 
-    # Consume all lines after the `Feature:` row as a long description, until an empty line is
+    # Consume all lines after the `Feature:` row as a long description, until a keyword is
     # encountered.
     long_description_lines = []
-    # untilemptyline!(byline) do
-    #     push!(long_description_lines, strip(byline.current))
-    # end
-    @untilemptyline begin
+    @untilnextsection begin
         push!(long_description_lines, strip(byline.current))
     end
 
@@ -470,7 +467,7 @@ function parsescenario!(byline::ByLineParser)
         # Parse the examples, until we hit an empty line.
         # TODO: This needs to be updated to allow for multiple Examples sections.
         examples = Array{String,2}(undef, length(placeholders), 0)
-        @untilemptyline begin
+        @untilnextsection begin
             # Each variable is in a column, separated by |
             example = split(strip(byline.current), "|")
             filter!(x -> !isempty(x), example)
