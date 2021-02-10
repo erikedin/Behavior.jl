@@ -525,7 +525,11 @@ function parsescenario!(byline::ByLineParser)
         @untilnextsection begin
             # Each variable is in a column, separated by |
             example = split(strip(byline.current), "|")
-            filter!(x -> !isempty(x), example)
+
+            # The split will have two empty elements at either end, which are before and
+            # after the | separators. We need to strip them away.
+            example = example[2:length(example) - 1]
+
             # Remove surrounding whitespace around each value.
             example = map(strip, example)
             examples = [examples example]

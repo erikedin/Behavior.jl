@@ -157,6 +157,26 @@ using ExecutableSpecifications.Gherkin: parsescenario!, issuccessful, Given, Whe
             @test scenario.examples[:,1] == ["word"]
             @test scenario.examples[:,2] == ["two words"]
         end
+
+        @testset "Example with an empty element; The empty line results in an empty value" begin
+            text = """
+            Scenario Outline: This is one scenario outline
+                Given a precondition with placeholder <Foo>
+
+            Examples:
+                | Foo       |
+                ||
+                | two words |
+            """
+            byline = ByLineParser(text)
+
+            result = parsescenario!(byline)
+
+            @test issuccessful(result)
+            scenario = result.value
+            @test scenario.examples[:,1] == [""]
+            @test scenario.examples[:,2] == ["two words"]
+        end
     end
 
     @testset "Malformed Scenario Outlines" begin
