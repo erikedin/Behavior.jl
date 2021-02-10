@@ -37,26 +37,32 @@ end
 "Hash scenario steps by their text and block text."
 hash(a::T, h::UInt) where {T <: ScenarioStep} = hash((a.text, a.block_text), h)
 
+const DataTableRow = Vector{String}
+const DataTable = Array{DataTableRow, 1}
+
 "A Given scenario step."
 struct Given <: ScenarioStep
     text::String
     block_text::String
+    datatable::DataTable
 
-    Given(text::AbstractString; block_text = "") = new(text, block_text)
+    Given(text::AbstractString; block_text = "", datatable=DataTable()) = new(text, block_text, datatable)
 end
 "A When scenario step."
 struct When <: ScenarioStep
     text::String
     block_text::String
+    datatable::DataTable
 
-    When(text::AbstractString; block_text="") = new(text, block_text)
+    When(text::AbstractString; block_text="", datatable=DataTable()) = new(text, block_text, datatable)
 end
 "A Then scenario step."
 struct Then <: ScenarioStep
     text::String
     block_text::String
+    datatable::DataTable
 
-    Then(text::AbstractString; block_text="") = new(text, block_text)
+    Then(text::AbstractString; block_text="", datatable=DataTable()) = new(text, block_text, datatable)
 end
 
 "An AbstractScenario is a Scenario or a Scenario Outline in Gherkin."
@@ -415,6 +421,42 @@ function parseblocktext!(byline::ByLineParser)
 end
 
 """
+    parsetable!(byline::ByLineParser)
+
+Parse a table delimited by |.
+
+# Example
+```Gherkin
+Scenario: Table
+    Given a data table
+        | header 1 | header 2 |
+        | foo      | bar      |
+        | baz      | quux     |
+```
+
+If `parsetable!` is called on the line containing the headers,
+then all lines of the table will be returned.
+"""
+function parsetable!(byline::ByLineParser) :: ParseResult{DataTable}
+    table = DataTable()
+
+    @untilnextsection begin
+        # Each variable is in a column, separated by |
+        row = split(strip(byline.current), "|")
+
+        # The split will have two empty elements at either end, which are before and
+        # after the | separators. We need to strip them away.
+        row = row[2:length(row) - 1]
+
+        # Remove surrounding whitespace around each value.
+        row = map(strip, row)
+        push!(table, row)
+    end
+
+    OKParseResult{DataTable}(table)
+end
+
+"""
     parsescenariosteps!(byline::ByLineParser)
 
 Parse all scenario steps following a Scenario or Scenario Outline.
@@ -428,10 +470,20 @@ function parsescenariosteps!(byline::ByLineParser; valid_step_types::String = "G
         # Note: This is a place where English Gherkin is hard coded.
         step_match = match(Regex("(?<step_type>$(valid_step_types)|And|But|\\*) (?<step_definition>.+)"), byline.current)
         block_text_start_match = match(r"\"\"\"", byline.current)
-        # A line must either be a new scenario step, or a block text following the previous scenario
+        data_table_start_match = match(r"^\|", strip(byline.current))
+
+        # A line must either be a new scenario step, data table, or a block text following the previous scenario
         # step.
-        if step_match == nothing && block_text_start_match == nothing
+        if step_match === nothing && block_text_start_match === nothing && data_table_start_match === nothing
             return BadParseResult{Vector{ScenarioStep}}(:invalid_step, :step_definition, :invalid_step_definition)
+        end
+
+        if data_table_start_match !== nothing
+            table_result = parsetable!(byline)
+
+            prev_step_type = typeof(steps[end])
+            steps[end] = prev_step_type(steps[end].text; datatable=table_result.value)
+            continue
         end
 
         # The current line starts a block text. Parse the rest of the block text and continue with
