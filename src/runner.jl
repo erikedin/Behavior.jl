@@ -34,9 +34,13 @@ function parseonly(featurepath::String; parseoptions::ParseOptions=ParseOptions(
     # Parse all feature files and collect results to an array of named tuples
     results = []
     for featurefile in featurefiles
-        parseddata = parsefeature(readfile(driver.os, featurefile), options=parseoptions)
-        isbad = parseddata isa BadParseResult
-        push!(results, (filename = featurefile, success = !isbad, result = parseddata))
+        try
+            parseddata = parsefeature(readfile(driver.os, featurefile), options=parseoptions)
+            isbad = parseddata isa BadParseResult
+            push!(results, (filename = featurefile, success = !isbad, result = parseddata))
+        catch ex
+            push!(results, (filename = featurefile, success = false, result = BadParseResult{Feature}(:exception, :nothing, Symbol("$ex"))))
+        end
     end
     return results
 end
