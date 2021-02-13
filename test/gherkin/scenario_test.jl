@@ -271,21 +271,6 @@ using ExecutableSpecifications.Gherkin: issuccessful, parsescenario!, Given, Whe
             @test result.actual == :When
         end
 
-        @testset "Invalid step definition NotAStep; Expected a valid step definition" begin
-            text = """
-            Scenario: Some description
-                NotAStep some more text
-            """
-
-            byline = ByLineParser(text)
-            result = parsescenario!(byline)
-
-            @test !issuccessful(result)
-            @test result.reason == :invalid_step
-            @test result.expected == :step_definition
-            @test result.actual == :invalid_step_definition
-        end
-
         @testset "A step definition without text; Expected a valid step definition" begin
             text = """
             Scenario: Some description
@@ -448,4 +433,40 @@ using ExecutableSpecifications.Gherkin: issuccessful, parsescenario!, Given, Whe
             @test scenario.steps[1] == Then("some postcondition"; block_text="""This is block text.""")
         end
     end
+
+    @testset "Long descriptions" begin
+        text = """
+        Scenario: Some description
+            This is a longer description
+            Given some precondition
+
+            When some action
+
+            Then some postcondition
+        """
+
+        byline = ByLineParser(text)
+        result = parsescenario!(byline)
+
+        @test issuccessful(result)
+        scenario = result.value
+
+        @test scenario.long_description == "This is a longer description"
+    end
+
+    @testset "Long description without steps; Zero steps and a long description" begin
+        text = """
+        Scenario: Some description
+            NotAStep some more text
+        """
+
+        byline = ByLineParser(text)
+        result = parsescenario!(byline)
+        @test issuccessful(result)
+        scenario = result.value
+
+        @test isempty(scenario.steps)
+        @test scenario.long_description == "NotAStep some more text"
+    end
+
 end

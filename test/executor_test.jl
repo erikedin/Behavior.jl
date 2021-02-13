@@ -26,7 +26,7 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
     @testset "Execute a one-step scenario; No matching step found; Result is NoStepDefinitionFound" begin
         stepdefmatcher = ThrowingStepDefinitionMatcher(ExecutableSpecifications.NoMatchingStepDefinition())
         executor = ExecutableSpecifications.Executor(stepdefmatcher)
-        scenario = Scenario("Description", [], [Given("some precondition")])
+        scenario = Scenario("Description", String[], ScenarioStep[Given("some precondition")])
 
         scenarioresult = ExecutableSpecifications.executescenario(executor, scenario)
 
@@ -37,7 +37,7 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
         given = Given("Some precondition")
         stepdefmatcher = FakeStepDefinitionMatcher(Dict(given => successful_step_definition))
         executor = ExecutableSpecifications.Executor(stepdefmatcher)
-        scenario = Scenario("Description", [], [given])
+        scenario = Scenario("Description", String[], ScenarioStep[given])
 
         scenarioresult = ExecutableSpecifications.executescenario(executor, scenario)
 
@@ -48,7 +48,7 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
         given = Given("Some precondition")
         stepdefmatcher = FakeStepDefinitionMatcher(Dict(given => failed_step_definition))
         executor = ExecutableSpecifications.Executor(stepdefmatcher)
-        scenario = Scenario("Description", [], [given])
+        scenario = Scenario("Description", String[], ScenarioStep[given])
 
         scenarioresult = ExecutableSpecifications.executescenario(executor, scenario)
 
@@ -59,7 +59,7 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
         given = Given("Some precondition")
         stepdefmatcher = FakeStepDefinitionMatcher(Dict(given => error_step_definition))
         executor = ExecutableSpecifications.Executor(stepdefmatcher)
-        scenario = Scenario("Description", [], [given])
+        scenario = Scenario("Description", String[], ScenarioStep[given])
 
         scenarioresult = ExecutableSpecifications.executescenario(executor, scenario)
 
@@ -72,7 +72,7 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
         stepdefmatcher = FakeStepDefinitionMatcher(Dict(given => error_step_definition,
                                                         when => successful_step_definition))
         executor = ExecutableSpecifications.Executor(stepdefmatcher)
-        scenario = Scenario("Description", [], [given, when])
+        scenario = Scenario("Description", String[], ScenarioStep[given, when])
 
         scenarioresult = ExecutableSpecifications.executescenario(executor, scenario)
 
@@ -85,7 +85,7 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
         stepdefmatcher = FakeStepDefinitionMatcher(Dict(given => failed_step_definition,
                                                         when => successful_step_definition))
         executor = ExecutableSpecifications.Executor(stepdefmatcher)
-        scenario = Scenario("Description", [], [given, when])
+        scenario = Scenario("Description", String[], ScenarioStep[given, when])
 
         scenarioresult = ExecutableSpecifications.executescenario(executor, scenario)
 
@@ -98,7 +98,7 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
         stepdefmatcher = FakeStepDefinitionMatcher(Dict(given => successful_step_definition,
                                                         when => successful_step_definition))
         executor = ExecutableSpecifications.Executor(stepdefmatcher)
-        scenario = Scenario("Description", [], [given, when])
+        scenario = Scenario("Description", String[], ScenarioStep[given, when])
 
         scenarioresult = ExecutableSpecifications.executescenario(executor, scenario)
 
@@ -114,7 +114,7 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
                                                         when => successful_step_definition,
                                                         then => successful_step_definition))
         executor = ExecutableSpecifications.Executor(stepdefmatcher)
-        scenario = Scenario("Description", [], [given, when, then])
+        scenario = Scenario("Description", String[], ScenarioStep[given, when, then])
 
         scenarioresult = ExecutableSpecifications.executescenario(executor, scenario)
 
@@ -127,7 +127,7 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
         given = Given("Some precondition")
         stepdefmatcher = FakeStepDefinitionMatcher(Dict(given => successful_step_definition))
         executor = ExecutableSpecifications.Executor(stepdefmatcher)
-        scenario = Scenario("This is a scenario", [], [given])
+        scenario = Scenario("This is a scenario", String[], ScenarioStep[given])
 
         scenarioresult = ExecutableSpecifications.executescenario(executor, scenario)
 
@@ -137,7 +137,7 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
     @testset "Execute a scenario; No unique step definition found; Result is NonUniqueMatch" begin
         stepdefmatcher = ThrowingStepDefinitionMatcher(ExecutableSpecifications.NonUniqueStepDefinition([]))
         executor = ExecutableSpecifications.Executor(stepdefmatcher)
-        scenario = Scenario("Description", [], [Given("some precondition")])
+        scenario = Scenario("Description", String[], ScenarioStep[Given("some precondition")])
 
         scenarioresult = ExecutableSpecifications.executescenario(executor, scenario)
 
@@ -198,7 +198,7 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
             end
             stepdefmatcher = FakeStepDefinitionMatcher(Dict(given => check_block_text_step_definition))
             executor = ExecutableSpecifications.Executor(stepdefmatcher)
-            scenario = Scenario("Description", [], [given])
+            scenario = Scenario("Description", String[], ScenarioStep[given])
 
             scenarioresult = ExecutableSpecifications.executescenario(executor, scenario)
 
@@ -219,7 +219,7 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
                 given => successful_step_definition,
                 when => check_block_text_step_definition))
             executor = ExecutableSpecifications.Executor(stepdefmatcher)
-            scenario = Scenario("Description", [], [given, when])
+            scenario = Scenario("Description", String[], [given, when])
 
             scenarioresult = ExecutableSpecifications.executescenario(executor, scenario)
 
@@ -250,7 +250,7 @@ stepresult(p::FakeRealTimePresenter, step::ScenarioStep) = p.results[step]
         matcher = FakeStepDefinitionMatcher(Dict())
         executor = Executor(matcher, presenter)
 
-        scenario = Scenario("Some scenario", [], [])
+        scenario = Scenario("Some scenario", String[], ScenarioStep[])
         ExecutableSpecifications.executescenario(executor, scenario)
 
         @test presenter.scenarios[1] == scenario
@@ -262,7 +262,7 @@ stepresult(p::FakeRealTimePresenter, step::ScenarioStep) = p.results[step]
         matcher = FakeStepDefinitionMatcher(Dict(given => successful_step_definition))
         executor = Executor(matcher, presenter)
 
-        scenario = Scenario("Some scenario", [], [given])
+        scenario = Scenario("Some scenario", String[], ScenarioStep[given])
         ExecutableSpecifications.executescenario(executor, scenario)
 
         @test presenter.steps[1] == given
@@ -274,7 +274,7 @@ stepresult(p::FakeRealTimePresenter, step::ScenarioStep) = p.results[step]
         matcher = FakeStepDefinitionMatcher(Dict(given => successful_step_definition))
         executor = Executor(matcher, presenter)
 
-        scenario = Scenario("Some scenario", [], [given])
+        scenario = Scenario("Some scenario", String[], ScenarioStep[given])
         ExecutableSpecifications.executescenario(executor, scenario)
 
         @test stepresult(presenter, given) == ExecutableSpecifications.SuccessfulStepExecution()
@@ -288,7 +288,7 @@ stepresult(p::FakeRealTimePresenter, step::ScenarioStep) = p.results[step]
                                                  when => successful_step_definition))
         executor = Executor(matcher, presenter)
 
-        scenario = Scenario("Some scenario", [], [given, when])
+        scenario = Scenario("Some scenario", String[], ScenarioStep[given, when])
         ExecutableSpecifications.executescenario(executor, scenario)
 
         @test presenter.steps[2] == when
@@ -302,7 +302,7 @@ stepresult(p::FakeRealTimePresenter, step::ScenarioStep) = p.results[step]
                                                  when => successful_step_definition))
         executor = Executor(matcher, presenter)
 
-        scenario = Scenario("Some scenario", [], [given, when])
+        scenario = Scenario("Some scenario", String[], ScenarioStep[given, when])
         ExecutableSpecifications.executescenario(executor, scenario)
 
         @test stepresult(presenter, when) == ExecutableSpecifications.SkippedStep()
@@ -313,7 +313,7 @@ stepresult(p::FakeRealTimePresenter, step::ScenarioStep) = p.results[step]
         matcher = FakeStepDefinitionMatcher(Dict())
         executor = Executor(matcher, presenter)
 
-        scenario = Scenario("Some scenario", [], [])
+        scenario = Scenario("Some scenario", String[], ScenarioStep[])
         feature = Feature(FeatureHeader("", [], []), [scenario])
         ExecutableSpecifications.executefeature(executor, feature)
 
@@ -326,7 +326,7 @@ end
         presenter = QuietRealTimePresenter()
         given = Given("some precondition")
         matcher = FakeStepDefinitionMatcher(Dict(given => successful_step_definition))
-        scenario = Scenario("some scenario", [], [given])
+        scenario = Scenario("some scenario", String[], ScenarioStep[given])
         featureheader = FeatureHeader("Some feature", [], [])
         feature = Feature(featureheader, [scenario])
         executor = Executor(matcher, presenter)
@@ -340,8 +340,8 @@ end
         presenter = QuietRealTimePresenter()
         given = Given("some precondition")
         matcher = FakeStepDefinitionMatcher(Dict(given => successful_step_definition))
-        scenario1 = Scenario("some scenario", [], [given])
-        scenario2 = Scenario("some other scenario", [], [given])
+        scenario1 = Scenario("some scenario", String[], ScenarioStep[given])
+        scenario2 = Scenario("some other scenario", String[], ScenarioStep[given])
         featureheader = FeatureHeader("Some feature", [], [])
         feature = Feature(featureheader, [scenario1, scenario2])
         executor = Executor(matcher, presenter)
@@ -355,9 +355,9 @@ end
         presenter = QuietRealTimePresenter()
         given = Given("some precondition")
         matcher = FakeStepDefinitionMatcher(Dict(given => successful_step_definition))
-        scenario1 = Scenario("some scenario", [], [given])
-        scenario2 = Scenario("some other scenario", [], [given])
-        scenario3 = Scenario("some third scenario", [], [given])
+        scenario1 = Scenario("some scenario", String[], ScenarioStep[given])
+        scenario2 = Scenario("some other scenario", String[], ScenarioStep[given])
+        scenario3 = Scenario("some third scenario", String[], ScenarioStep[given])
         featureheader = FeatureHeader("Some feature", [], [])
         feature = Feature(featureheader, [scenario1, scenario2, scenario3])
         executor = Executor(matcher, presenter)
@@ -373,7 +373,7 @@ end
         presenter = QuietRealTimePresenter()
         given = Given("some precondition")
         matcher = FakeStepDefinitionMatcher(Dict(given => failed_step_definition))
-        scenario = Scenario("some scenario", [], [given])
+        scenario = Scenario("some scenario", String[], ScenarioStep[given])
         featureheader = FeatureHeader("Some feature", [], [])
         feature = Feature(featureheader, [scenario])
         executor = Executor(matcher, presenter)
@@ -388,7 +388,7 @@ end
 
         step1 = Given("step 1")
         step2 = Given("step 2")
-        scenario = Scenario("some scenario", [], [step1])
+        scenario = Scenario("some scenario", String[], ScenarioStep[step1])
         outline = ScenarioOutline("", [], [Given("step <stepnumber>")], ["stepnumber"], ["1" "2"])
         matcher = FakeStepDefinitionMatcher(Dict(step1 => successful_step_definition,
                                                  step2 => successful_step_definition))

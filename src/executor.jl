@@ -206,7 +206,7 @@ function interpolatexample(outline::ScenarioOutline, example::Vector{T}) where {
     # `interpolatestep` just creates a new scenario step of the same type, but with all occurrences
     # of placeholders replace with the example value.
     fromplaceholders = x -> placeholders[x]
-    steps = [interpolatestep(step, fromplaceholders) for step in outline.steps]
+    steps = ScenarioStep[interpolatestep(step, fromplaceholders) for step in outline.steps]
 
     Scenario(outline.description, outline.tags, steps)
 end
