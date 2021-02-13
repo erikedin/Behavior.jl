@@ -5,8 +5,8 @@ using ExecutableSpecifications: transformoutline
 
 @testset "Scenario Outline     " begin
     @testset "Transform; Outline description is \"Some description\"; Result description is same" begin
-        outline = ScenarioOutline("Some description", [],
-            [Given("placeholder <foo>")],
+        outline = ScenarioOutline("Some description", String[],
+            ScenarioStep[Given("placeholder <foo>")],
             ["foo"],
             ["bar"])
 
@@ -17,7 +17,7 @@ using ExecutableSpecifications: transformoutline
 
     @testset "Transform; Outline tags are @foo @bar; Result tags are @foo @bar" begin
         outline = ScenarioOutline("", ["@foo", "@bar"],
-            [Given("some <foo>")],
+            ScenarioStep[Given("some <foo>")],
             ["foo"],
             ["bar"])
 
@@ -27,8 +27,8 @@ using ExecutableSpecifications: transformoutline
     end
 
     @testset "Transform; Scenario Outline has one example; One Scenario" begin
-        outline = ScenarioOutline("", [],
-            [Given("placeholder <foo>")],
+        outline = ScenarioOutline("", String[],
+            ScenarioStep[Given("placeholder <foo>")],
             ["foo"],
             ["bar"])
 
@@ -40,8 +40,8 @@ using ExecutableSpecifications: transformoutline
     end
 
     @testset "Transform; Placeholder is quux; quux is replaced by example" begin
-        outline = ScenarioOutline("", [],
-            [Given("placeholder <quux>")],
+        outline = ScenarioOutline("", String[],
+            ScenarioStep[Given("placeholder <quux>")],
             ["quux"],
             ["baz"])
 
@@ -52,8 +52,8 @@ using ExecutableSpecifications: transformoutline
     end
 
     @testset "Transform; Two placeholders foo, quux; foo and quux are replaced" begin
-        outline = ScenarioOutline("", [],
-            [Given("placeholders <foo> <quux>")],
+        outline = ScenarioOutline("", String[],
+            ScenarioStep[Given("placeholders <foo> <quux>")],
             ["foo", "quux"],
             ["bar"; "baz"])
 
@@ -64,8 +64,8 @@ using ExecutableSpecifications: transformoutline
     end
 
     @testset "Transform; Steps Given and When; Both steps are transformed" begin
-        steps = [Given("placeholder <quux>"), When("other <quux>")]
-        outline = ScenarioOutline("", [],
+        steps = ScenarioStep[Given("placeholder <quux>"), When("other <quux>")]
+        outline = ScenarioOutline("", String[],
             steps,
             ["quux"],
             ["baz"])
@@ -78,8 +78,8 @@ using ExecutableSpecifications: transformoutline
     end
 
     @testset "Transform; Steps Given and When again; Both steps are transformed" begin
-        steps = [Given("placeholder <quux>"), When("another step <quux>")]
-        outline = ScenarioOutline("", [],
+        steps = ScenarioStep[Given("placeholder <quux>"), When("another step <quux>")]
+        outline = ScenarioOutline("", String[],
             steps,
             ["quux"],
             ["baz"])
@@ -92,8 +92,8 @@ using ExecutableSpecifications: transformoutline
     end
 
     @testset "Transform; Step Then; Step is transformed" begin
-        steps = [Then("step <quux>")]
-        outline = ScenarioOutline("", [],
+        steps = ScenarioStep[Then("step <quux>")]
+        outline = ScenarioOutline("", String[],
             steps,
             ["quux"],
             ["baz"])
@@ -105,8 +105,8 @@ using ExecutableSpecifications: transformoutline
     end
 
     @testset "Transform; Two examples; Two scenarios in the result" begin
-        outline = ScenarioOutline("", [],
-            [Given("step <quux>")],
+        outline = ScenarioOutline("", String[],
+            ScenarioStep[Given("step <quux>")],
             ["quux"],
             ["bar" "baz"])
 
@@ -118,7 +118,7 @@ using ExecutableSpecifications: transformoutline
     end
 
     @testset "Transform; Placeholders in the block_text; Placeholders are replaced with examples" begin
-        outline = ScenarioOutline("", [],
+        outline = ScenarioOutline("", String[],
             [Given(""; block_text="given <quux>"),
              When(""; block_text="when <quux>"),
              Then(""; block_text="then <quux>")],
@@ -134,8 +134,8 @@ using ExecutableSpecifications: transformoutline
     end
 
     @testset "Transform; Outline examples are AbstractStrings; Interpolation works" begin
-        outline = ScenarioOutline("Some description", [],
-            [Given("placeholder <foo>")],
+        outline = ScenarioOutline("Some description", String[],
+            ScenarioStep[Given("placeholder <foo>")],
             ["foo"],
             AbstractString["bar"])
 

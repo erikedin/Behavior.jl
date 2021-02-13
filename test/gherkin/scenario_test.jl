@@ -271,21 +271,6 @@ using ExecutableSpecifications.Gherkin: issuccessful, parsescenario!, Given, Whe
             @test result.actual == :When
         end
 
-        @testset "Invalid step definition NotAStep; Expected a valid step definition" begin
-            text = """
-            Scenario: Some description
-                NotAStep some more text
-            """
-
-            byline = ByLineParser(text)
-            result = parsescenario!(byline)
-
-            @test !issuccessful(result)
-            @test result.reason == :invalid_step
-            @test result.expected == :step_definition
-            @test result.actual == :invalid_step_definition
-        end
-
         @testset "A step definition without text; Expected a valid step definition" begin
             text = """
             Scenario: Some description

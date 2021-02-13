@@ -2,7 +2,7 @@ module Gherkin
 
 import Base: ==, hash
 
-export Scenario, ScenarioOutline, Feature, FeatureHeader, Given, When, Then
+export Scenario, ScenarioOutline, Feature, FeatureHeader, Given, When, Then, ScenarioStep
 export parsefeature, hastag, ParseOptions
 
 "A good or bad result when parsing Gherkin."
@@ -92,6 +92,11 @@ struct Scenario <: AbstractScenario
     description::String
     tags::Vector{String}
     steps::Vector{ScenarioStep}
+    long_description::String
+
+    function Scenario(description::AbstractString, tags::Vector{String}, steps::Vector{ScenarioStep}; long_description::AbstractString = "")
+        new(description, tags, steps, long_description)
+    end
 end
 
 """
@@ -112,6 +117,17 @@ struct ScenarioOutline <: AbstractScenario
     steps::Vector{ScenarioStep}
     placeholders::Vector{String}
     examples::AbstractArray
+    long_description::String
+
+    function ScenarioOutline(
+            description::AbstractString,
+            tags::Vector{String},
+            steps::Vector{ScenarioStep},
+            placeholders::AbstractVector{String},
+            examples::AbstractArray;
+            long_description::AbstractString = "")
+        new(description, tags, steps, placeholders, examples, long_description)
+    end
 end
 
 struct Background
@@ -289,6 +305,31 @@ macro untilnextsection(ex::Expr)
     end)
 end
 
+isstoppingline(pattern::Regex, s::AbstractString) = match(pattern, s) !== nothing
+
+"""
+    @untilnextstep(byline::Symbol, steps = "Given|When|Then|And|But")
+
+Execute the function for each line, until a step is encountered, or no further lines are
+available.
+Also skips empty lines and comment lines.
+"""
+macro untilnextstep(ex::Expr, steps = ["Given", "When", "Then", "And", "But"])
+    esc(quote
+        stepsregex = join($steps, "|")
+        regex = "^($(stepsregex)).*"
+        r = Regex(regex)
+
+        while !isempty(byline)
+            if isstoppingline(r, strip(byline.current))
+                break
+            end
+            $ex
+            consume!(byline)
+        end
+    end)
+end
+
 """
     ignoringemptylines!(f::Function, byline::ByLineParser)
 
@@ -339,8 +380,8 @@ istagsline(current::String) = match(r"@[^\s]+( +@[^\s]+)*", current) !== nothing
 Parse all tags on form @tagname until a non-tag is encountered. Return a possibly empty list of
 tags.
 """
-function parsetags!(byline::ByLineParser)
-    tags = []
+function parsetags!(byline::ByLineParser) :: Vector{String}
+    tags = String[]
     while !isempty(byline)
         # Use a regular expression to find all occurrences of @tagname on a line.
         tag_match = collect((m.match for m = eachmatch(r"(@[^\s]+)", byline.current)))
@@ -557,6 +598,13 @@ function parsescenario!(byline::ByLineParser)
         description = scenario_outline_match[:description]
         consume!(byline)
 
+        # Parse longer descriptions
+        long_description_lines = []
+        @untilnextstep begin
+            push!(long_description_lines, strip(byline.current))
+        end
+        long_description = strip(join(long_description_lines, "\n"))
+
         # Parse scenario outline steps.
         steps_result = parsescenariosteps!(byline)
         if !issuccessful(steps_result)
@@ -568,7 +616,7 @@ function parsescenario!(byline::ByLineParser)
         consume!(byline)
 
         # Get the name of each placeholder variable.
-        placeholders = collect((m.match for m = eachmatch(r"(\w+)", byline.current)))
+        placeholders = collect((String(m.match) for m = eachmatch(r"(\w+)", byline.current)))
         consume!(byline)
 
         # Parse the examples, until we hit an empty line.
@@ -587,7 +635,7 @@ function parsescenario!(byline::ByLineParser)
             examples = [examples example]
         end
         return OKParseResult{ScenarioOutline}(
-            ScenarioOutline(description, tags, steps, placeholders, examples))
+            ScenarioOutline(description, tags, steps, placeholders, examples; long_description=long_description))
     end
 
     # Here we parse a normal Scenario instead.
@@ -599,13 +647,20 @@ function parsescenario!(byline::ByLineParser)
     description = scenario_match[:description]
     consume!(byline)
 
+    # Parse longer descriptions
+    long_description_lines = []
+    @untilnextstep begin
+        push!(long_description_lines, strip(byline.current))
+    end
+    long_description = strip(join(long_description_lines, "\n"))
+
     steps_result = parsescenariosteps!(byline)
     if !issuccessful(steps_result)
         return steps_result
     end
     steps = steps_result.value
 
-    OKParseResult{Scenario}(Scenario(description, tags, steps))
+    OKParseResult{Scenario}(Scenario(description, tags, steps, long_description=long_description))
 end
 
 function parsebackground!(byline::ByLineParser) :: ParseResult{Background}

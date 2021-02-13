@@ -45,7 +45,7 @@ end
             # FakeExecutionEnvironment.
             stepdefmatcher = SingleStepDefinitionMatcher(context -> @assert context[:beforescenariowasexecuted])
             executor = Executor(stepdefmatcher; executionenv=env)
-            scenario = Scenario("Description", [], [Given("")])
+            scenario = Scenario("Description", String[], ScenarioStep[Given("")])
 
             # Act
             result = executescenario(executor, scenario)
@@ -58,7 +58,7 @@ end
             # Arrange
             stepdefmatcher = SingleStepDefinitionMatcher(context -> @assert !haskey(context, :beforescenariowasexecuted))
             executor = Executor(stepdefmatcher)
-            scenario = Scenario("Description", [], [Given("")])
+            scenario = Scenario("Description", String[], ScenarioStep[Given("")])
 
             # Act
             result = executescenario(executor, scenario)
@@ -76,7 +76,7 @@ end
             # FakeExecutionEnvironment.
             stepdefmatcher = SingleStepDefinitionMatcher(context -> @assert !haskey(context, :afterscenariowasexecuted))
             executor = Executor(stepdefmatcher; executionenv=env)
-            scenario = Scenario("Description", [], [Given("")])
+            scenario = Scenario("Description", String[], ScenarioStep[Given("")])
 
             # Act
             result = executescenario(executor, scenario)
@@ -95,7 +95,7 @@ end
             # FakeExecutionEnvironment.
             stepdefmatcher = SingleStepDefinitionMatcher(context -> nothing)
             executor = Executor(stepdefmatcher; executionenv=env)
-            scenario = Scenario("Description", [], [Given("")])
+            scenario = Scenario("Description", String[], ScenarioStep[Given("")])
 
             # Act
             result = executescenario(executor, scenario)
@@ -117,7 +117,7 @@ end
             """)
 
             context = StepDefinitionContext()
-            scenario = Gherkin.Scenario("", [], [])
+            scenario = Gherkin.Scenario("", String[], ScenarioStep[])
 
             # Act
             beforescenario(env, context, scenario)
@@ -131,7 +131,7 @@ end
             env = FromSourceExecutionEnvironment("")
 
             context = StepDefinitionContext()
-            scenario = Gherkin.Scenario("", [], [])
+            scenario = Gherkin.Scenario("", String[], ScenarioStep[])
 
             # Act
             beforescenario(env, context, scenario)
@@ -151,7 +151,7 @@ end
             """)
 
             context = StepDefinitionContext()
-            scenario = Gherkin.Scenario("", [], [])
+            scenario = Gherkin.Scenario("", String[], ScenarioStep[])
 
             # Act
             afterscenario(env, context, scenario)
@@ -165,7 +165,7 @@ end
             env = FromSourceExecutionEnvironment("")
 
             context = StepDefinitionContext()
-            scenario = Gherkin.Scenario("", [], [])
+            scenario = Gherkin.Scenario("", String[], ScenarioStep[])
 
             # Act
             afterscenario(env, context, scenario)
