@@ -10,13 +10,18 @@ using Glob
 
 struct OSAL <: ExecutableSpecifications.OSAbstraction end
 function findfileswithextension(::OSAL, path::String, extension::String)
-    [joinpath(path, filename) for filename in readdir(path)
-              if isfile(joinpath(path, filename)) &&
-                 splitext(joinpath(path, filename))[2] == extension]
+    return rglob("*.$extension", path)
 end
 
 readfile(::OSAL, path::String) = read(path, String)
 fileexists(::OSAL, path::String) = isfile(path)
+
+"""
+    rglob(pattern, path)
+
+Find files recursively. 
+"""
+rglob(pattern, path) = Base.Iterators.flatten(map(d -> glob(pattern, d[1]), walkdir(path)))
 
 function parseonly(featurepath::String; parseoptions::ParseOptions=ParseOptions())
 
@@ -27,8 +32,6 @@ function parseonly(featurepath::String; parseoptions::ParseOptions=ParseOptions(
     driver = Driver(os, engine)
     # -----------------------------------------------------------------------------
 
-    # Find all feature files recursively
-    rglob(pat, topdir) = Base.Iterators.flatten(map(d -> glob(pat, d[1]), walkdir(topdir)))
     featurefiles = rglob("*.feature", featurepath)
 
     # Parse all feature files and collect results to an array of named tuples
