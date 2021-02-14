@@ -46,14 +46,25 @@ function parseonly(featurepath::String; parseoptions::ParseOptions=ParseOptions(
 end
 
 """
-    runspec()
+    runspec(rootpath; featurepath, stepspath, execenvpath, parseoptions)
 
-Execute all features found from the current directory, or another specified directory.
+Execute all features found from the `rootpath`.
+
+By default, it looks for feature files in `<rootpath>/features` and step files
+`<rootpath>/features/steps`. An `environment.jl` file may be added to 
+`<rootpath>/features` directory for running certain before/after code.
+You may override the default locations by specifying `featurepath`, 
+`stepspath`, or `execenvpath`.
+
+See also: [Gherkin.ParseOptions](@ref).
 """
-function runspec(rootpath::String = "."; parseoptions::ParseOptions=ParseOptions())
-    featurepath = joinpath(rootpath, "features")
-    stepspath = joinpath(featurepath, "steps")
-    execenvpath = joinpath(featurepath, "environment.jl")
+function runspec(
+    rootpath::String = ".";
+    featurepath = joinpath(rootpath, "features"),
+    stepspath = joinpath(featurepath, "steps"),
+    execenvpath = joinpath(featurepath, "environment.jl"),
+    parseoptions::ParseOptions=ParseOptions()
+)
     os = OSAL()
 
     executionenv = if fileexists(os, execenvpath)
