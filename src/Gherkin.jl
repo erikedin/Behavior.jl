@@ -94,7 +94,7 @@ struct Scenario <: AbstractScenario
     steps::Vector{ScenarioStep}
     long_description::String
 
-    function Scenario(description::AbstractString, tags::Vector{String}, steps::Vector{ScenarioStep}; long_description::String = "")
+    function Scenario(description::AbstractString, tags::Vector{String}, steps::Vector{ScenarioStep}; long_description::AbstractString = "")
         new(description, tags, steps, long_description)
     end
 end
@@ -117,6 +117,17 @@ struct ScenarioOutline <: AbstractScenario
     steps::Vector{ScenarioStep}
     placeholders::Vector{String}
     examples::AbstractArray
+    long_description::String
+
+    function ScenarioOutline(
+            description::AbstractString,
+            tags::Vector{String},
+            steps::Vector{ScenarioStep},
+            placeholders::AbstractVector{String},
+            examples::AbstractArray;
+            long_description::AbstractString = "")
+        new(description, tags, steps, placeholders, examples, long_description)
+    end
 end
 
 struct Background
@@ -312,10 +323,6 @@ macro untilnextstep(ex::Expr, steps = ["Given", "When", "Then", "And", "But"])
         while !isempty(byline)
             if isstoppingline(r, strip(byline.current))
                 break
-            end
-            if iscurrentlineempty(byline)
-                consume!(byline)
-                continue
             end
             $ex
             consume!(byline)
@@ -591,6 +598,13 @@ function parsescenario!(byline::ByLineParser)
         description = scenario_outline_match[:description]
         consume!(byline)
 
+        # Parse longer descriptions
+        long_description_lines = []
+        @untilnextstep begin
+            push!(long_description_lines, strip(byline.current))
+        end
+        long_description = strip(join(long_description_lines, "\n"))
+
         # Parse scenario outline steps.
         steps_result = parsescenariosteps!(byline)
         if !issuccessful(steps_result)
@@ -621,7 +635,7 @@ function parsescenario!(byline::ByLineParser)
             examples = [examples example]
         end
         return OKParseResult{ScenarioOutline}(
-            ScenarioOutline(description, tags, steps, placeholders, examples))
+            ScenarioOutline(description, tags, steps, placeholders, examples; long_description=long_description))
     end
 
     # Here we parse a normal Scenario instead.
@@ -638,7 +652,7 @@ function parsescenario!(byline::ByLineParser)
     @untilnextstep begin
         push!(long_description_lines, strip(byline.current))
     end
-    long_description = join(long_description_lines, "\n")
+    long_description = strip(join(long_description_lines, "\n"))
 
     steps_result = parsescenariosteps!(byline)
     if !issuccessful(steps_result)

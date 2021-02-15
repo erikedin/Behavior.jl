@@ -178,23 +178,4 @@ using ExecutableSpecifications.Gherkin: parsescenario!, issuccessful, Given, Whe
             @test scenario.examples[:,2] == ["two words"]
         end
     end
-
-    @testset "Malformed Scenario Outlines" begin
-        @testset "Invalid step definition; Parse is unsuccessful" begin
-            text = """
-            Scenario Outline: This is one scenario outline
-                NotAStepDefinition with placeholders <Foo>, <Bar>, <Baz>
-
-            Examples:
-                | Foo | Bar | Baz |
-                | 1   | 2   | 3   |
-                | 4   | 5   | 6   |
-            """
-            byline = ByLineParser(text)
-
-            result = parsescenario!(byline)
-
-            @test !issuccessful(result)
-        end
-    end
 end
