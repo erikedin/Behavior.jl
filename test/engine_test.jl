@@ -19,7 +19,7 @@ import ExecutableSpecifications: addmatcher!, findfileswithextension, readfile, 
         """)
         addmatcher!(engine, matcher)
 
-        successfulscenario = Scenario("", [], [Given("successful step")])
+        successfulscenario = Scenario("", String[], ScenarioStep[Given("successful step")])
         feature = Feature(FeatureHeader("", [], []), [successfulscenario])
 
         # Act
@@ -42,7 +42,7 @@ import ExecutableSpecifications: addmatcher!, findfileswithextension, readfile, 
         """)
         addmatcher!(engine, matcher)
 
-        failingscenario = Scenario("", [], [Given("failing step")])
+        failingscenario = Scenario("", String[], ScenarioStep[Given("failing step")])
         feature = Feature(FeatureHeader("", [], []), [failingscenario])
 
         # Act
@@ -67,8 +67,8 @@ import ExecutableSpecifications: addmatcher!, findfileswithextension, readfile, 
         """)
         addmatcher!(engine, matcher)
 
-        failingscenario = Scenario("", [], [Given("failing step")])
-        successfulscenario = Scenario("", [], [Given("successful step")])
+        failingscenario = Scenario("", String[], ScenarioStep[Given("failing step")])
+        successfulscenario = Scenario("", String[], ScenarioStep[Given("successful step")])
         feature1 = Feature(FeatureHeader("fails", [], []), [failingscenario])
         feature2 = Feature(FeatureHeader("succeeds", [], []), [successfulscenario])
 
