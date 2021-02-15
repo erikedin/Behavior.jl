@@ -432,5 +432,25 @@ using ExecutableSpecifications.Gherkin: issuccessful, parsescenario!, Given, Whe
 
             @test scenario.steps[1] == Then("some postcondition"; block_text="""This is block text.""")
         end
+
+        @testset "Block text with a blank line; Block text is present in step" begin
+            text = """
+            Scenario: Some description
+                Then some postcondition
+                \"\"\"
+                This is block text.
+
+                This is another line.
+                \"\"\"
+            """
+
+            byline = ByLineParser(text)
+            result = parsescenario!(byline)
+
+            @test issuccessful(result)
+            scenario = result.value
+
+            @test scenario.steps[1] == Then("some postcondition"; block_text="""This is block text.\n\nThis is another line.""")
+        end
     end
 end

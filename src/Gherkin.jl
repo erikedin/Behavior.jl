@@ -332,7 +332,7 @@ Also skips empty lines and comment lines.
 macro untilnextstep(ex::Expr, steps = ["Given", "When", "Then", "And", "But"])
     esc(quote
         stepsregex = join($steps, "|")
-        regex = "^($(stepsregex)).*"
+        regex = "^($(stepsregex))"
         r = Regex(regex)
 
         while !isempty(byline)
@@ -465,14 +465,11 @@ function parseblocktext!(byline::ByLineParser)
     block_text_lines = []
 
     # Consume and save all lines, until we reach one that is the ending line of three double quotes.
-    @untilemptyline begin
+    @untilnextstep begin
         line = byline.current
-        if occursin(r"\"\"\"", line)
-            consume!(byline)
-            break
-        end
         push!(block_text_lines, strip(line))
-    end
+    end ["\"\"\""]
+    consume!(byline)
     return OKParseResult{String}(join(block_text_lines, "\n"))
 end
 
@@ -546,7 +543,7 @@ function parsescenariosteps!(byline::ByLineParser; valid_step_types::String = "G
         # the following line.
         # Note: The method parseblocktext!(byline) consumes the current line, so it doesn't need to
         # be done here.
-        if block_text_start_match != nothing
+        if block_text_start_match !== nothing
             block_text_result = parseblocktext!(byline)
             prev_step_type = typeof(steps[end])
             steps[end] = prev_step_type(steps[end].text; block_text=block_text_result.value)
