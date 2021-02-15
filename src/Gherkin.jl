@@ -636,7 +636,7 @@ function parsescenario!(byline::ByLineParser)
     # Parse longer descriptions
     long_description_lines = []
     @untilnextstep begin
-        push!(long_description_lines, strip(byline.current))  
+        push!(long_description_lines, strip(byline.current))
     end
     long_description = join(long_description_lines, "\n")
 
