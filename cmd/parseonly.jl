@@ -26,6 +26,7 @@ else
             println(" reason: ", rs.result.reason)
             println(" expected: ", rs.result.expected)
             println(" actual: ", rs.result.actual)
+            println(" line $(rs.result.linenumber): $(rs.result.line)")
         end
     end
     println("Parsing failed: ", num_failed)

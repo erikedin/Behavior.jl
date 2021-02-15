@@ -5,28 +5,6 @@ import Base: ==, hash
 export Scenario, ScenarioOutline, Feature, FeatureHeader, Given, When, Then, ScenarioStep
 export parsefeature, hastag, ParseOptions
 
-"A good or bad result when parsing Gherkin."
-abstract type ParseResult{T} end
-
-"A successful parse that results in the expected value."
-struct OKParseResult{T} <: ParseResult{T}
-    value::T
-end
-
-"An unsuccessful parse that results in an error."
-struct BadParseResult{T} <: ParseResult{T}
-    reason::Symbol
-    expected::Symbol
-    actual::Symbol
-end
-function BadParseResult{T}(inner::BadParseResult{K}) where {T, K} 
-    BadParseResult{T}(inner.reason, inner.expected, inner.actual)
-end
-
-"Was the parsing successful?"
-issuccessful(::OKParseResult{T}) where {T} = true
-issuccessful(::BadParseResult{T}) where {T} = false
-
 "A step in a Gherkin Scenario."
 abstract type ScenarioStep end
 
@@ -185,13 +163,14 @@ mutable struct ByLineParser
     current::String
     rest::Vector{String}
     isempty::Bool
+    linenumber::Union{Nothing, Int}
     options::ParseOptions
 
     function ByLineParser(text::String, options::ParseOptions = ParseOptions())
         lines = split(text, "\n")
         current = lines[1]
         rest = lines[2:end]
-        new(current, rest, false, options)
+        new(current, rest, false, 1, options)
     end
 end
 
@@ -204,11 +183,47 @@ function consume!(p::ByLineParser)
     if isempty(p.rest)
         p.current = ""
         p.isempty = true
+        p.linenumber = nothing
     else
         p.current = p.rest[1]
         p.rest = p.rest[2:end]
+        p.linenumber += 1
     end
 end
+
+"A good or bad result when parsing Gherkin."
+abstract type ParseResult{T} end
+
+"A successful parse that results in the expected value."
+struct OKParseResult{T} <: ParseResult{T}
+    value::T
+end
+
+"An unsuccessful parse that results in an error."
+struct BadParseResult{T} <: ParseResult{T}
+    reason::Symbol
+    expected::Symbol
+    actual::Symbol
+    linenumber::Union{Nothing, Int}
+    line::String
+
+    function BadParseResult{T}(reason::Symbol, expected::Symbol, actual::Symbol, parser::ByLineParser) where {T}
+        new(reason, expected, actual, parser.linenumber, parser.current)
+    end
+
+    function BadParseResult{T}(reason::Symbol, expected::Symbol, actual::Symbol, linenumber::Int, line::String) where {T}
+        new(reason, expected, actual, linenumber, line)
+    end
+end
+
+function BadParseResult{T}(inner::BadParseResult{K}) where {T, K} 
+    BadParseResult{T}(inner.reason, inner.expected, inner.actual, inner.linenumber, inner.line)
+end
+
+"Was the parsing successful?"
+issuccessful(::OKParseResult{T}) where {T} = true
+issuccessful(::BadParseResult{T}) where {T} = false
+
 
 """
     lookaheadfor(byline::ByLineParser, istarget::Function, isallowedprefix::Function)
@@ -417,7 +432,7 @@ function parsefeatureheader!(byline::ByLineParser) :: ParseResult{FeatureHeader}
 
     description_match = match(r"Feature: (?<description>.+)", byline.current)
     if description_match == nothing
-        return BadParseResult{FeatureHeader}(:unexpected_construct, :feature, :scenario)
+        return BadParseResult{FeatureHeader}(:unexpected_construct, :feature, :scenario, byline)
     end
     consume!(byline)
 
@@ -516,7 +531,7 @@ function parsescenariosteps!(byline::ByLineParser; valid_step_types::String = "G
         # A line must either be a new scenario step, data table, or a block text following the previous scenario
         # step.
         if step_match === nothing && block_text_start_match === nothing && data_table_start_match === nothing
-            return BadParseResult{Vector{ScenarioStep}}(:invalid_step, :step_definition, :invalid_step_definition)
+            return BadParseResult{Vector{ScenarioStep}}(:invalid_step, :step_definition, :invalid_step_definition, byline)
         end
 
         if data_table_start_match !== nothing
@@ -548,12 +563,12 @@ function parsescenariosteps!(byline::ByLineParser; valid_step_types::String = "G
         step_definition = step_match[:step_definition]
         if step_type == "Given"
             if !byline.options.allow_any_step_order && !(Given in allowed_step_types)
-                return BadParseResult{Vector{ScenarioStep}}(:bad_step_order, :NotGiven, :Given)
+                return BadParseResult{Vector{ScenarioStep}}(:bad_step_order, :NotGiven, :Given, byline)
             end
             step = Given(step_definition)
         elseif step_type == "When"
             if !byline.options.allow_any_step_order && !(When in allowed_step_types)
-                return BadParseResult{Vector{ScenarioStep}}(:bad_step_order, :NotWhen, :When)
+                return BadParseResult{Vector{ScenarioStep}}(:bad_step_order, :NotWhen, :When, byline)
             end
             step = When(step_definition)
             delete!(allowed_step_types, Given)
@@ -565,7 +580,7 @@ function parsescenariosteps!(byline::ByLineParser; valid_step_types::String = "G
             # A scenario step may be And, in which case it's the same type as the previous step.
             # This means that an And may not be the first scenario step.
             if isempty(steps)
-                return BadParseResult{Vector{ScenarioStep}}(:leading_and, :specific_step, :and_step)
+                return BadParseResult{Vector{ScenarioStep}}(:leading_and, :specific_step, :and_step, byline)
             end
             last_specific_type = typeof(steps[end])
             step = last_specific_type(step_definition)
@@ -641,7 +656,7 @@ function parsescenario!(byline::ByLineParser)
     # Here we parse a normal Scenario instead.
     scenario_match = match(r"Scenario: (?<description>.+)", byline.current)
     if scenario_match === nothing
-        return BadParseResult{Scenario}(:invalid_scenario_header, :scenario_or_outline, :invalid_header)
+        return BadParseResult{Scenario}(:invalid_scenario_header, :scenario_or_outline, :invalid_header, byline)
     end
 
     description = scenario_match[:description]
@@ -674,7 +689,8 @@ function parsebackground!(byline::ByLineParser) :: ParseResult{Background}
         if !issuccessful(steps_result)
             return BadParseResult{Background}(steps_result.reason,
                                               steps_result.expected,
-                                              steps_result.actual)
+                                              steps_result.actual,
+                                              byline)
         end
         steps = steps_result.value
         description = strip(background_match[:description])
@@ -715,7 +731,8 @@ function parsefeature(text::String; options :: ParseOptions = ParseOptions()) ::
     if !issuccessful(feature_header_result)
         return BadParseResult{Feature}(feature_header_result.reason,
                                        feature_header_result.expected,
-                                       feature_header_result.actual)
+                                       feature_header_result.actual,
+                                       byline)
     end
 
     # Optionally read a Background section
@@ -723,7 +740,8 @@ function parsefeature(text::String; options :: ParseOptions = ParseOptions()) ::
     if !issuccessful(background_result)
         return BadParseResult{Feature}(background_result.reason,
                                        background_result.expected,
-                                       background_result.actual)
+                                       background_result.actual,
+                                       byline)
     end
     background = background_result.value
 

@@ -364,6 +364,71 @@ using ExecutableSpecifications.Gherkin:
             @test issuccessful(result) == false
             @test result.reason == :bad_step_order
         end
+
+        @testset "Invalid step keyword; Syntax error on line 5" begin
+            text = """
+            Feature: This feature has one scenario
+
+                Scenario: This scenario has out-of-order steps
+                    When an action
+                    Given a precondition
+            """
+
+            result = parsefeature(text)
+
+            @test !issuccessful(result)
+            @test result.linenumber == 5
+        end
+
+        @testset "Scenario found before feature; Parser fails on line 1" begin
+            text = """
+                Scenario: This is one scenario
+                    Given a precondition
+
+            Feature: This feature has one scenario
+
+                Scenario: This is a second scenario
+                    Given a precondition
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result) == false
+            @test result.linenumber == 1
+        end
+
+        @testset "Invalid step keyword; Syntax error includes current line" begin
+            text = """
+            Feature: This feature has one scenario
+
+                Scenario: This scenario has out-of-order steps
+                    When an action
+                    Given a precondition
+            """
+
+            result = parsefeature(text)
+
+            @test !issuccessful(result)
+            @test strip(result.line) == "Given a precondition"
+        end
+
+        @testset "Scenario found before feature; Parser fails on line 1" begin
+            text = """
+                Scenario: This is one scenario
+                    Given a precondition
+
+            Feature: This feature has one scenario
+
+                Scenario: This is a second scenario
+                    Given a precondition
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result) == false
+            @test strip(result.line) == "Scenario: This is one scenario"
+        end
+
     end
 
     @testset "Lenient parser" begin

@@ -42,7 +42,7 @@ function parseonly(featurepath::String; parseoptions::ParseOptions=ParseOptions(
             isbad = parseddata isa BadParseResult
             push!(results, (filename = featurefile, success = !isbad, result = parseddata))
         catch ex
-            push!(results, (filename = featurefile, success = false, result = BadParseResult{Feature}(:exception, :nothing, Symbol("$ex"))))
+            push!(results, (filename = featurefile, success = false, result = BadParseResult{Feature}(:exception, :nothing, Symbol("$ex"), 0, "")))
         end
     end
     return results
