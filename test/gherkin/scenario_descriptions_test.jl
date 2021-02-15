@@ -106,7 +106,7 @@ using ExecutableSpecifications.Gherkin: parsescenario!, issuccessful, Given, Whe
     end
 end
 
-@testset "Outline descriptions" begin
+@testset "Outline descriptions " begin
     @testset "Scenario long description, one line; Long description is available" begin
         text = """
         Scenario Outline: Some description
@@ -212,22 +212,20 @@ end
         @test scenario.long_description == "This is a longer description\n\nThis is another line.\nThis is a third line."
     end
 
-    @testset "Long description without steps; Zero steps and a long description" begin
-        text = """
-        Scenario Outline: Some description
-            NotAStep some more text
-        
-        Examples:
-            | foo |
-            |  1  |
-        """
-
-        byline = ByLineParser(text)
-        result = parsescenario!(byline)
-        @test issuccessful(result)
-        scenario = result.value
-
-        @test isempty(scenario.steps)
-        @test scenario.long_description == "NotAStep some more text"
-    end
+    # @testset "Long description without steps; Undefined" begin
+    #     # We have problems supporting empty Scenario Outlines because I don't want
+    #     # to make "Examples" an unallowed word in scenario descriptions.
+    #     # If this turns out to be a problem, we'll have to come up with a solution.
+    #     text = """
+    #     Scenario Outline: Some description
+    #         NotAStep some more text
+    #     
+    #     Examples:
+    #         | foo |
+    #         |  1  |
+    #     """
+    #
+    #     byline = ByLineParser(text)
+    #     result = parsescenario!(byline)
+    # end
 end

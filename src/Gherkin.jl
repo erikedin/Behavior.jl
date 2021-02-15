@@ -616,7 +616,7 @@ function parsescenario!(byline::ByLineParser)
         consume!(byline)
 
         # Get the name of each placeholder variable.
-        placeholders = collect((m.match for m = eachmatch(r"(\w+)", byline.current)))
+        placeholders = collect((String(m.match) for m = eachmatch(r"(\w+)", byline.current)))
         consume!(byline)
 
         # Parse the examples, until we hit an empty line.
