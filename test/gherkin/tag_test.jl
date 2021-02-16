@@ -136,6 +136,40 @@ using ExecutableSpecifications.Gherkin: hastag, parsefeature, issuccessful, ista
             @test "@tag1" in feature.header.long_description
             @test "@tag2" in feature.header.long_description
         end
+
+        @testset "Issue #58: Scenario with an @ in the description but no tags; Scenario has no tags" begin
+            text = """
+            Feature: Some description
+
+                Scenario: Some description with @tag that looks like a tag but is not
+                    Given a precondition
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result)
+            feature = result.value
+            @test isempty(feature.scenarios[1].tags)
+        end
+
+        @testset "Issue #58: Last step has a @ but is not a tags line; Next scenario follows without a blank line and is properly parsed" begin
+            text = """
+            Feature: Some description
+
+                Scenario: Some description
+                    When some action
+                    Then some @tag
+                Scenario: Some other scenario
+                    Given some precondtion
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result)
+            feature = result.value
+            @test isempty(feature.scenarios[1].tags)
+            @test isempty(feature.scenarios[2].tags)
+        end
     end
 
     @testset "Is tags" begin

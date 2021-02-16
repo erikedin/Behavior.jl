@@ -387,7 +387,13 @@ end
 
 True if this is a line containing only tags, false otherwise.
 """
-istagsline(current::String) = match(r"@[^\s]+( +@[^\s]+)*", current) !== nothing
+function istagsline(current::String)
+    tagsandwhitespace = split(current, r"\s+")
+    thesetags = filter(x -> !isempty(x), tagsandwhitespace)
+    # the all function will match an empty list, which would happen on blank lines,
+    # so we have to manually check for an empty list.
+    !isempty(thesetags) && all(startswith("@"), thesetags)
+end
 
 """
     parsetags!(byline::ByLineParser)
@@ -398,16 +404,16 @@ tags.
 function parsetags!(byline::ByLineParser) :: Vector{String}
     tags = String[]
     while !isempty(byline)
-        # Use a regular expression to find all occurrences of @tagname on a line.
-        tag_match = collect((m.match for m = eachmatch(r"(@[^\s]+)", byline.current)))
-
+        tagsandwhitespace = split(byline.current, r"\s+")
+        thesetags = filter(x -> !isempty(x), tagsandwhitespace)
+        istags = all(startswith("@"), thesetags)
         # Break if something that isn't a list of tags is encountered.
-        if isempty(tag_match)
+        if !istags
             break
         end
 
         consume!(byline)
-        append!(tags, tag_match)
+        append!(tags, thesetags)
     end
 
     tags
