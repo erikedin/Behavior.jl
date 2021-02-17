@@ -293,6 +293,8 @@ function iscurrentlineasection(s::String)
     m !== nothing
 end
 
+iscomment(s::AbstractString) = startswith(strip(s), "#")
+
 """
     @untilnextsection(byline::Symbol,)
 
@@ -307,7 +309,7 @@ macro untilnextsection(ex::Expr)
             if iscurrentlineasection(byline.current)
                 break
             end
-            if istagsline(byline.current) && lookaheadfor(byline, iscurrentlineasection, istagsline)
+            if istagsline(byline.current) && lookaheadfor(byline, iscurrentlineasection, x -> istagsline(x) || iscomment(x))
                 break
             end
             if iscurrentlineempty(byline)
@@ -404,6 +406,10 @@ tags.
 function parsetags!(byline::ByLineParser) :: Vector{String}
     tags = String[]
     while !isempty(byline)
+        if iscomment(byline.current)
+            consume!(byline)
+            continue
+        end
         tagsandwhitespace = split(byline.current, r"\s+")
         thesetags = filter(x -> !isempty(x), tagsandwhitespace)
         istags = all(startswith("@"), thesetags)

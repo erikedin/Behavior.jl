@@ -106,6 +106,26 @@ using ExecutableSpecifications.Gherkin: hastag, parsefeature, issuccessful, ista
             feature = result.value
             @test hastag(feature.scenarios[2], "@tag1")
         end
+
+        @testset "Scenario tags followed by comment; Comment is ignored" begin
+            text = """
+            Feature: Some description
+
+                Scenario: The first scenario with no tags
+                    Given a precondition
+
+                @tag4
+                # Comment
+                Scenario: Some description with tag after comment
+                    Given a precondition
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result)
+            feature = result.value
+            @test hastag(feature.scenarios[2], "@tag4")
+        end
     end
 
     @testset "Robustness" begin
