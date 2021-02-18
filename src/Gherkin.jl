@@ -640,7 +640,10 @@ function parsescenario!(byline::ByLineParser)
         consume!(byline)
 
         # Get the name of each placeholder variable.
-        placeholders = collect((String(m.match) for m = eachmatch(r"(\w+)", byline.current)))
+        placeholders = split(strip(byline.current), "|")
+        placeholders = placeholders[2:length(placeholders) - 1]
+        placeholders = map(strip, placeholders)
+        placeholders = map(String, placeholders)
         consume!(byline)
 
         # Parse the examples, until we hit an empty line.
@@ -731,42 +734,45 @@ Feature: Some feature description
 function parsefeature(text::String; options :: ParseOptions = ParseOptions()) :: ParseResult{Feature}
     byline = ByLineParser(text, options)
 
-    # Skip any leading blank lines or comments
-    consumeemptylines!(byline)
+    try
+        # Skip any leading blank lines or comments
+        consumeemptylines!(byline)
 
-    # The feature header includes all feature level tags, the description, and the long multiline
-    # description.
-    feature_header_result = parsefeatureheader!(byline)
-    if !issuccessful(feature_header_result)
-        return BadParseResult{Feature}(feature_header_result.reason,
-                                       feature_header_result.expected,
-                                       feature_header_result.actual,
-                                       byline)
-    end
-
-    # Optionally read a Background section
-    background_result = parsebackground!(byline)
-    if !issuccessful(background_result)
-        return BadParseResult{Feature}(background_result.reason,
-                                       background_result.expected,
-                                       background_result.actual,
-                                       byline)
-    end
-    background = background_result.value
-
-    # Each `parsescenario!`
-    scenarios = AbstractScenario[]
-    @ignoringemptylines begin
-        scenario_parse_result = parsescenario!(byline)
-        if issuccessful(scenario_parse_result)
-            push!(scenarios, scenario_parse_result.value)
-        else
-            return BadParseResult{Feature}(scenario_parse_result)
+        # The feature header includes all feature level tags, the description, and the long multiline
+        # description.
+        feature_header_result = parsefeatureheader!(byline)
+        if !issuccessful(feature_header_result)
+            return BadParseResult{Feature}(feature_header_result.reason,
+                                           feature_header_result.expected,
+                                           feature_header_result.actual,
+                                           byline)
         end
-    end
 
-    OKParseResult{Feature}(
-        Feature(feature_header_result.value, background, scenarios))
+        # Optionally read a Background section
+        background_result = parsebackground!(byline)
+        if !issuccessful(background_result)
+            return BadParseResult{Feature}(background_result.reason,
+                                           background_result.expected,
+                                           background_result.actual,
+                                           byline)
+        end
+        background = background_result.value
+
+        # Each `parsescenario!`
+        scenarios = AbstractScenario[]
+        @ignoringemptylines begin
+            scenario_parse_result = parsescenario!(byline)
+            if issuccessful(scenario_parse_result)
+                push!(scenarios, scenario_parse_result.value)
+            else
+                return BadParseResult{Feature}(scenario_parse_result)
+            end
+        end
+        OKParseResult{Feature}(
+            Feature(feature_header_result.value, background, scenarios))
+    catch ex
+        BadParseResult{Feature}(:exception, :nothing, Symbol(ex), byline)
+    end
 end
 
 """

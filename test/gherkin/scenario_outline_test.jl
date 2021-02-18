@@ -177,5 +177,24 @@ using ExecutableSpecifications.Gherkin: parsescenario!, issuccessful, Given, Whe
             @test scenario.examples[:,1] == [""]
             @test scenario.examples[:,2] == ["two words"]
         end
+
+        @testset "A placeholder is non-alphanumerical; The placeholders are correct" begin
+            text = """
+            Scenario Outline: This is one scenario outline
+                Given a precondition with placeholders <Foo>, <Bar-baz>, <>
+
+            Examples:
+                | Foo | Bar-baz |
+                | 1   | 2       |
+                | 4   | 5       |
+            """
+            byline = ByLineParser(text)
+
+            result = parsescenario!(byline)
+
+            @test issuccessful(result)
+            scenario = result.value
+            @test scenario.placeholders == ["Foo", "Bar-baz"]
+        end
     end
 end
