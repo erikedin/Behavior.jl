@@ -82,6 +82,11 @@ function runspec(
     readstepdefinitions!(driver, stepspath)
     resultaccumulator = runfeatures!(driver, featurepath, parseoptions=parseoptions)
 
+    if isempty(resultaccumulator)
+        println("No features found.")
+        return true
+    end
+
     #
     # Present number of scenarios that succeeded and failed for each feature
     #

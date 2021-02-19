@@ -125,4 +125,23 @@ using ExecutableSpecifications:
         @test featureresults(accumulator)[2].n_success > 0
         @test featureresults(accumulator)[2].n_failure == 0
     end
+
+    @testset "Accumulate results; One feature with a successful scenario; Results accumulator is not empty" begin
+        accumulator = ResultAccumulator()
+
+        feature = Gherkin.Feature(FeatureHeader("", [], []), Scenario[])
+        given = Given("some precondition")
+        successfulscenario = ScenarioResult([SuccessfulStepExecution()], Scenario("Some scenario", String[], ScenarioStep[given]))
+        featureresult = FeatureResult(feature, [successfulscenario])
+
+        accumulateresult!(accumulator, featureresult)
+
+        @test !isempty(accumulator)
+    end
+
+    @testset "Accumulate results; No features; Results accumulator is empty" begin
+        accumulator = ResultAccumulator()
+
+        @test isempty(accumulator)
+    end
 end

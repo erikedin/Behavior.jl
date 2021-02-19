@@ -58,3 +58,10 @@ A public getter for the results of all features.
 function featureresults(accumulator::ResultAccumulator)
     accumulator.features
 end
+
+"""
+    isempty(r::ResultAccumulator) :: Bool
+
+True if no results have been accumulated, false otherwise.
+"""
+Base.isempty(r::ResultAccumulator) :: Bool = isempty(r.features)
