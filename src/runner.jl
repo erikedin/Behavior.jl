@@ -10,7 +10,7 @@ using Glob
 
 struct OSAL <: ExecutableSpecifications.OSAbstraction end
 function findfileswithextension(::OSAL, path::String, extension::String)
-    return rglob("*.$extension", path)
+    return rglob("*$extension", path)
 end
 
 readfile(::OSAL, path::String) = read(path, String)
