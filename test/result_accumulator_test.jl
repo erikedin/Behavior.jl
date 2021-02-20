@@ -9,7 +9,11 @@ using ExecutableSpecifications:
 
         feature = Gherkin.Feature(FeatureHeader("", [], []), Scenario[])
         given = Given("some precondition")
-        successfulscenario = ScenarioResult([SuccessfulStepExecution()], Scenario("Some scenario", String[], ScenarioStep[given]))
+        successfulscenario = ScenarioResult(
+            [SuccessfulStepExecution()],
+            Scenario("Some scenario", String[], ScenarioStep[given]),
+            Background(),
+            ScenarioStep[])
         featureresult = FeatureResult(feature, [successfulscenario])
 
         accumulateresult!(accumulator, featureresult)
@@ -22,7 +26,11 @@ using ExecutableSpecifications:
 
         feature = Gherkin.Feature(FeatureHeader("", [], []), Scenario[])
         given = Given("some precondition")
-        scenario = ScenarioResult([StepFailed("")], Scenario("Some scenario", String[], ScenarioStep[given]))
+        scenario = ScenarioResult(
+            [StepFailed("")],
+            Scenario("Some scenario", String[], ScenarioStep[given]),
+            Background(),
+            ScenarioStep[])
         featureresult = FeatureResult(feature, [scenario])
 
         accumulateresult!(accumulator, featureresult)
@@ -36,7 +44,11 @@ using ExecutableSpecifications:
         feature = Gherkin.Feature(FeatureHeader("", [], []), Scenario[])
         given = Given("some precondition")
         when = When("some action")
-        scenario = ScenarioResult([SuccessfulStepExecution(), StepFailed("")], Scenario("Some scenario", String[], ScenarioStep[given, when]))
+        scenario = ScenarioResult(
+            [SuccessfulStepExecution(), StepFailed("")],
+            Scenario("Some scenario", String[], ScenarioStep[given, when]),
+            Background(),
+            ScenarioStep[])
         featureresult = FeatureResult(feature, [scenario])
 
         accumulateresult!(accumulator, featureresult)
@@ -50,8 +62,16 @@ using ExecutableSpecifications:
         feature = Gherkin.Feature(FeatureHeader("", [], []), Scenario[])
         given = Given("some precondition")
         when = When("some action")
-        successfulscenario = ScenarioResult([SuccessfulStepExecution()], Scenario("Some scenario", String[], ScenarioStep[given]))
-        failingscenario = ScenarioResult([StepFailed("")], Scenario("Some other scenario", String[],  ScenarioStep[when]))
+        successfulscenario = ScenarioResult(
+            [SuccessfulStepExecution()],
+            Scenario("Some scenario", String[], ScenarioStep[given]),
+            Background(),
+            ScenarioStep[])
+        failingscenario = ScenarioResult(
+            [StepFailed("")],
+            Scenario("Some other scenario", String[],  ScenarioStep[when]),
+            Background(),
+            ScenarioStep[])
         featureresult = FeatureResult(feature, [successfulscenario, failingscenario])
 
         accumulateresult!(accumulator, featureresult)
@@ -64,7 +84,11 @@ using ExecutableSpecifications:
 
         feature = Gherkin.Feature(FeatureHeader("", [], []), Scenario[])
         given = Given("some precondition")
-        successfulscenario = ScenarioResult([SuccessfulStepExecution()], Scenario("Some scenario", String[], ScenarioStep[given]))
+        successfulscenario = ScenarioResult(
+            [SuccessfulStepExecution()],
+            Scenario("Some scenario", String[], ScenarioStep[given]),
+            Background(),
+            ScenarioStep[])
         featureresult = FeatureResult(feature, [successfulscenario])
 
         accumulateresult!(accumulator, featureresult)
@@ -79,8 +103,16 @@ using ExecutableSpecifications:
         feature = Gherkin.Feature(FeatureHeader("", [], []), Scenario[])
         given = Given("some precondition")
         when = When("some action")
-        successfulscenario = ScenarioResult([SuccessfulStepExecution()], Scenario("Some scenario", String[], ScenarioStep[given]))
-        failingscenario = ScenarioResult([StepFailed("")], Scenario("Some other scenario", String[],  ScenarioStep[when]))
+        successfulscenario = ScenarioResult(
+            [SuccessfulStepExecution()],
+            Scenario("Some scenario", String[], ScenarioStep[given]),
+            Background(),
+            ScenarioStep[])
+        failingscenario = ScenarioResult(
+            [StepFailed("")],
+            Scenario("Some other scenario", String[],  ScenarioStep[when]),
+            Background(),
+            ScenarioStep[])
         featureresult = FeatureResult(feature, [successfulscenario, failingscenario])
 
         accumulateresult!(accumulator, featureresult)
@@ -95,8 +127,16 @@ using ExecutableSpecifications:
         feature = Gherkin.Feature(FeatureHeader("", [], []), Scenario[])
         given = Given("some precondition")
         when = When("some action")
-        successfulscenario = ScenarioResult([SuccessfulStepExecution()], Scenario("Some scenario", String[], ScenarioStep[given]))
-        failingscenario = ScenarioResult([StepFailed("")], Scenario("Some other scenario", String[],  ScenarioStep[when]))
+        successfulscenario = ScenarioResult(
+            [SuccessfulStepExecution()],
+            Scenario("Some scenario", String[], ScenarioStep[given]),
+            Background(),
+            ScenarioStep[])
+        failingscenario = ScenarioResult(
+            [StepFailed("")],
+            Scenario("Some other scenario", String[],  ScenarioStep[when]),
+            Background(),
+            ScenarioStep[])
         featureresult = FeatureResult(feature,
             [successfulscenario, successfulscenario, successfulscenario, successfulscenario, successfulscenario,
              failingscenario, failingscenario])
@@ -113,7 +153,11 @@ using ExecutableSpecifications:
         feature1 = Gherkin.Feature(FeatureHeader("1", [], []), Scenario[])
         feature2 = Gherkin.Feature(FeatureHeader("1", [], []), Scenario[])
         given = Given("some precondition")
-        successfulscenario = ScenarioResult([SuccessfulStepExecution()], Scenario("Some scenario", String[], ScenarioStep[given]))
+        successfulscenario = ScenarioResult(
+            [SuccessfulStepExecution()],
+            Scenario("Some scenario", String[], ScenarioStep[given]),
+            Background(),
+            ScenarioStep[])
         featureresult1 = FeatureResult(feature1, [successfulscenario])
         featureresult2 = FeatureResult(feature1, [successfulscenario])
 
@@ -131,7 +175,11 @@ using ExecutableSpecifications:
 
         feature = Gherkin.Feature(FeatureHeader("", [], []), Scenario[])
         given = Given("some precondition")
-        successfulscenario = ScenarioResult([SuccessfulStepExecution()], Scenario("Some scenario", String[], ScenarioStep[given]))
+        successfulscenario = ScenarioResult(
+            [SuccessfulStepExecution()],
+            Scenario("Some scenario", String[], ScenarioStep[given]),
+            Background(),
+            ScenarioStep[])
         featureresult = FeatureResult(feature, [successfulscenario])
 
         accumulateresult!(accumulator, featureresult)

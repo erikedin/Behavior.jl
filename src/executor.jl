@@ -53,42 +53,32 @@ issuccess(::StepExecutionResult) = false
 struct ScenarioResult
     steps::Vector{StepExecutionResult}
     scenario::Scenario
+    background::Gherkin.Background
+    backgroundresult::Vector{StepExecutionResult}
 end
 
-"""
-    executescenario(::Executor, ::Gherkin.Scenario)
-
-Execute each step in a `Scenario`. Present the results in real time.
-Returns a `ScenarioResult`.
-"""
-function executescenario(executor::Executor, background::Gherkin.Background, scenario::Gherkin.Scenario)
-    # Tell the presenter of the start of a scenario execution.
-    present(executor.presenter, scenario)
-
-    # The `context` object for a scenario execution is provided to each step,
-    # so they may store intermediate values.
-    context = StepDefinitionContext()
-
-    beforescenario(executor.executionenv, context, scenario)
-
+function executesteps(executor::Executor, context::StepDefinitionContext, steps::Vector{ScenarioStep}, isfailedyet::Bool)
     # The `steps` vector contains the results for all steps. At initialization,
     # they are all `Skipped`, because if one step fails then we stop the execution of the following
     # steps.
-    steps = Vector{StepExecutionResult}(undef, length(scenario.steps))
-    fill!(steps, SkippedStep())
-
-    # Keep track of which the last executed step is. This could be removed if the code was shuffled
-    # a bit below.
-    lastexecutedstep = 0
+    results = Vector{StepExecutionResult}(undef, length(steps))
+    fill!(results, SkippedStep())
 
     # Find a unique step definition for each step and execute it.
     # Present each step, first as it is about to be executed, and then once more with the result.
-    for i = 1:length(scenario.steps)
-        step = scenario.steps[i]
+    for i = 1:length(steps)
+        # If any previous step has failed, then skip all the steps that follow.
+        if isfailedyet
+            present(executor.presenter, steps[i])
+            present(executor.presenter, steps[i], results[i])
+            continue
+        end
+
+        step = steps[i]
         # Tell the presenter that this step is about to be executed.
         present(executor.presenter, step)
 
-        steps[i] = try
+        results[i] = try
             # Find a step definition matching the step text.
             stepdefinition = findstepdefinition(executor.stepdefmatcher, step)
 
@@ -112,24 +102,43 @@ function executescenario(executor::Executor, background::Gherkin.Background, sce
             end
         end
         # Present the result after execution.
-        present(executor.presenter, step, steps[i])
-        lastexecutedstep = i
+        present(executor.presenter, step, results[i])
 
         # If this step failed, then we skip any remaining steps.
-        if !issuccess(steps[i])
-            break
+        if !issuccess(results[i])
+            isfailedyet = true
         end
     end
 
-    # Present any remaining steps as skipped.
-    for k = lastexecutedstep + 1:length(scenario.steps)
-        present(executor.presenter, scenario.steps[k])
-        present(executor.presenter, scenario.steps[k], steps[k])
-    end
+    results, isfailedyet
+end
+
+"""
+    executescenario(::Executor, ::Gherkin.Scenario)
+
+Execute each step in a `Scenario`. Present the results in real time.
+Returns a `ScenarioResult`.
+"""
+function executescenario(executor::Executor, background::Gherkin.Background, scenario::Gherkin.Scenario)
+    # Tell the presenter of the start of a scenario execution.
+    present(executor.presenter, scenario)
+
+    # The `context` object for a scenario execution is provided to each step,
+    # so they may store intermediate values.
+    context = StepDefinitionContext()
+
+    beforescenario(executor.executionenv, context, scenario)
+
+    # Execute the Background section
+    isfailedyet = false
+    backgroundresults, isfailedyet = executesteps(executor, context, background.steps, isfailedyet)
+
+    # Execute the Scenario
+    results, _isfailedyet = executesteps(executor, context, scenario.steps, isfailedyet)
 
     afterscenario(executor.executionenv, context, scenario)
 
-    ScenarioResult(steps, scenario)
+    ScenarioResult(results, scenario, background, backgroundresults)
 end
 
 """

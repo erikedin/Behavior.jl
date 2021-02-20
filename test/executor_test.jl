@@ -14,7 +14,13 @@ struct FakeStepDefinitionMatcher <: ExecutableSpecifications.StepDefinitionMatch
     steps::Dict{ExecutableSpecifications.Gherkin.ScenarioStep, Function}
 end
 
-ExecutableSpecifications.findstepdefinition(s::FakeStepDefinitionMatcher, step::ExecutableSpecifications.Gherkin.ScenarioStep) = StepDefinition("some text", s.steps[step], StepDefinitionLocation("", 0))
+function ExecutableSpecifications.findstepdefinition(s::FakeStepDefinitionMatcher, step::ExecutableSpecifications.Gherkin.ScenarioStep)
+    if step in keys(s.steps)
+        StepDefinition("some text", s.steps[step], StepDefinitionLocation("", 0))
+    else
+        throw(ExecutableSpecifications.NoMatchingStepDefinition())
+    end
+end
 
 struct ThrowingStepDefinitionMatcher <: ExecutableSpecifications.StepDefinitionMatcher
     ex::Exception
@@ -225,5 +231,76 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
 
             @test isa(scenarioresult.steps[2], ExecutableSpecifications.SuccessfulStepExecution)
         end
+    end
+
+    @testset "Backgrounds" begin
+        @testset "Execute a one-step Background; No matching step found; Result is NoStepDefinitionFound" begin
+            given = Given("some precondition")
+            stepdefmatcher = FakeStepDefinitionMatcher(Dict(given => successful_step_definition))
+
+            background = Background("A background", ScenarioStep[Given("some background precondition")])
+
+            executor = ExecutableSpecifications.Executor(stepdefmatcher)
+            scenario = Scenario("Description", String[], ScenarioStep[Given("some precondition")])
+
+            scenarioresult = ExecutableSpecifications.executescenario(executor, background, scenario)
+
+            @test isa(scenarioresult.backgroundresult[1], ExecutableSpecifications.NoStepDefinitionFound)
+        end
+
+        @testset "Execute a one-step Background; A successful match found; Background result is Success" begin
+            given = Given("some precondition")
+            bgiven = Given("some background precondition")
+            stepdefmatcher = FakeStepDefinitionMatcher(
+                Dict(
+                    given => successful_step_definition,
+                    bgiven => successful_step_definition,
+                ))
+
+            background = Background("A background", ScenarioStep[Given("some background precondition")])
+
+            executor = ExecutableSpecifications.Executor(stepdefmatcher)
+            scenario = Scenario("Description", String[], ScenarioStep[Given("some precondition")])
+
+            scenarioresult = ExecutableSpecifications.executescenario(executor, background, scenario)
+
+            @test isa(scenarioresult.backgroundresult[1], ExecutableSpecifications.SuccessfulStepExecution)
+        end
+
+        @testset "Execute a one-step background; The matching step fails; Result is Failed" begin
+            given = Given("Some precondition")
+            bgiven = Given("some background precondition")
+            stepdefmatcher = FakeStepDefinitionMatcher(
+                Dict(
+                    given => successful_step_definition,
+                    bgiven => failed_step_definition,
+                ))
+            executor = ExecutableSpecifications.Executor(stepdefmatcher)
+            scenario = Scenario("Description", String[], ScenarioStep[given])
+            background = Background("Background description", ScenarioStep[bgiven])
+
+            scenarioresult = ExecutableSpecifications.executescenario(executor, background, scenario)
+
+            @test isa(scenarioresult.backgroundresult[1], ExecutableSpecifications.StepFailed)
+        end
+
+        @testset "Execute a one-step background; The background step fails; The Scenario step is skipped" begin
+            given = Given("Some precondition")
+            bgiven = Given("some background precondition")
+            stepdefmatcher = FakeStepDefinitionMatcher(
+                Dict(
+                    given => successful_step_definition,
+                    bgiven => failed_step_definition,
+                ))
+            executor = ExecutableSpecifications.Executor(stepdefmatcher)
+            scenario = Scenario("Description", String[], ScenarioStep[given])
+            background = Background("Background description", ScenarioStep[bgiven])
+
+            scenarioresult = ExecutableSpecifications.executescenario(executor, background, scenario)
+
+            @test isa(scenarioresult.steps[1], ExecutableSpecifications.SkippedStep)
+        end
+
+        # TODO Additional tests to ensure that Backgrounds work as any Scenario section does
     end
 end
