@@ -6,6 +6,8 @@ include("gherkin/tag_test.jl")
 include("gherkin/data_tables_test.jl")
 
 include("executor_test.jl")
+include("executor_presentation_test.jl")
+include("executor_feature_test.jl")
 include("step_def_test.jl")
 include("result_accumulator_test.jl")
 include("asserts_test.jl")
