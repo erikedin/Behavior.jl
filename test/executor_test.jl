@@ -1,6 +1,6 @@
 using Test
 using ExecutableSpecifications.Gherkin
-using ExecutableSpecifications.Gherkin: ScenarioStep
+using ExecutableSpecifications.Gherkin: ScenarioStep, Background
 using ExecutableSpecifications
 using ExecutableSpecifications: StepDefinitionContext, StepDefinition, StepDefinitionLocation
 using ExecutableSpecifications: Executor, StepExecutionResult, QuietRealTimePresenter, executefeature
@@ -28,7 +28,7 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
         executor = ExecutableSpecifications.Executor(stepdefmatcher)
         scenario = Scenario("Description", String[], ScenarioStep[Given("some precondition")])
 
-        scenarioresult = ExecutableSpecifications.executescenario(executor, scenario)
+        scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
 
         @test isa(scenarioresult.steps[1], ExecutableSpecifications.NoStepDefinitionFound)
     end
@@ -39,7 +39,7 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
         executor = ExecutableSpecifications.Executor(stepdefmatcher)
         scenario = Scenario("Description", String[], ScenarioStep[given])
 
-        scenarioresult = ExecutableSpecifications.executescenario(executor, scenario)
+        scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
 
         @test isa(scenarioresult.steps[1], ExecutableSpecifications.SuccessfulStepExecution)
     end
@@ -50,7 +50,7 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
         executor = ExecutableSpecifications.Executor(stepdefmatcher)
         scenario = Scenario("Description", String[], ScenarioStep[given])
 
-        scenarioresult = ExecutableSpecifications.executescenario(executor, scenario)
+        scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
 
         @test isa(scenarioresult.steps[1], ExecutableSpecifications.StepFailed)
     end
@@ -61,7 +61,7 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
         executor = ExecutableSpecifications.Executor(stepdefmatcher)
         scenario = Scenario("Description", String[], ScenarioStep[given])
 
-        scenarioresult = ExecutableSpecifications.executescenario(executor, scenario)
+        scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
 
         @test isa(scenarioresult.steps[1], ExecutableSpecifications.UnexpectedStepError)
     end
@@ -74,7 +74,7 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
         executor = ExecutableSpecifications.Executor(stepdefmatcher)
         scenario = Scenario("Description", String[], ScenarioStep[given, when])
 
-        scenarioresult = ExecutableSpecifications.executescenario(executor, scenario)
+        scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
 
         @test isa(scenarioresult.steps[2], ExecutableSpecifications.SkippedStep)
     end
@@ -87,7 +87,7 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
         executor = ExecutableSpecifications.Executor(stepdefmatcher)
         scenario = Scenario("Description", String[], ScenarioStep[given, when])
 
-        scenarioresult = ExecutableSpecifications.executescenario(executor, scenario)
+        scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
 
         @test isa(scenarioresult.steps[2], ExecutableSpecifications.SkippedStep)
     end
@@ -100,7 +100,7 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
         executor = ExecutableSpecifications.Executor(stepdefmatcher)
         scenario = Scenario("Description", String[], ScenarioStep[given, when])
 
-        scenarioresult = ExecutableSpecifications.executescenario(executor, scenario)
+        scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
 
         @test isa(scenarioresult.steps[1], ExecutableSpecifications.SuccessfulStepExecution)
         @test isa(scenarioresult.steps[2], ExecutableSpecifications.SuccessfulStepExecution)
@@ -116,7 +116,7 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
         executor = ExecutableSpecifications.Executor(stepdefmatcher)
         scenario = Scenario("Description", String[], ScenarioStep[given, when, then])
 
-        scenarioresult = ExecutableSpecifications.executescenario(executor, scenario)
+        scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
 
         @test isa(scenarioresult.steps[1], ExecutableSpecifications.SuccessfulStepExecution)
         @test isa(scenarioresult.steps[2], ExecutableSpecifications.SuccessfulStepExecution)
@@ -129,7 +129,7 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
         executor = ExecutableSpecifications.Executor(stepdefmatcher)
         scenario = Scenario("This is a scenario", String[], ScenarioStep[given])
 
-        scenarioresult = ExecutableSpecifications.executescenario(executor, scenario)
+        scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
 
         @test scenarioresult.scenario == scenario
     end
@@ -139,7 +139,7 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
         executor = ExecutableSpecifications.Executor(stepdefmatcher)
         scenario = Scenario("Description", String[], ScenarioStep[Given("some precondition")])
 
-        scenarioresult = ExecutableSpecifications.executescenario(executor, scenario)
+        scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
 
         @test isa(scenarioresult.steps[1], ExecutableSpecifications.NonUniqueMatch)
     end
@@ -152,7 +152,7 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
                                                         step2 => successful_step_definition))
         executor = ExecutableSpecifications.Executor(stepdefmatcher)
 
-        outlineresult = ExecutableSpecifications.executescenario(executor, outline)
+        outlineresult = ExecutableSpecifications.executescenario(executor, Background(), outline)
 
         @test length(outlineresult) == 2
     end
@@ -165,7 +165,7 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
                                                         step2 => failed_step_definition))
         executor = ExecutableSpecifications.Executor(stepdefmatcher)
 
-        outlineresult = ExecutableSpecifications.executescenario(executor, outline)
+        outlineresult = ExecutableSpecifications.executescenario(executor, Background(), outline)
 
         @test outlineresult[1].steps[1] isa ExecutableSpecifications.SuccessfulStepExecution
         @test outlineresult[2].steps[1] isa ExecutableSpecifications.StepFailed
@@ -181,7 +181,7 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
                                                         step3 => successful_step_definition))
         executor = ExecutableSpecifications.Executor(stepdefmatcher)
 
-        outlineresult = ExecutableSpecifications.executescenario(executor, outline)
+        outlineresult = ExecutableSpecifications.executescenario(executor, Background(), outline)
 
         @test length(outlineresult) == 3
     end
@@ -200,7 +200,7 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
             executor = ExecutableSpecifications.Executor(stepdefmatcher)
             scenario = Scenario("Description", String[], ScenarioStep[given])
 
-            scenarioresult = ExecutableSpecifications.executescenario(executor, scenario)
+            scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
 
             @test isa(scenarioresult.steps[1], ExecutableSpecifications.SuccessfulStepExecution)
         end
@@ -221,7 +221,7 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
             executor = ExecutableSpecifications.Executor(stepdefmatcher)
             scenario = Scenario("Description", String[], [given, when])
 
-            scenarioresult = ExecutableSpecifications.executescenario(executor, scenario)
+            scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
 
             @test isa(scenarioresult.steps[2], ExecutableSpecifications.SuccessfulStepExecution)
         end

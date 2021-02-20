@@ -61,7 +61,7 @@ end
 Execute each step in a `Scenario`. Present the results in real time.
 Returns a `ScenarioResult`.
 """
-function executescenario(executor::Executor, scenario::Gherkin.Scenario)
+function executescenario(executor::Executor, background::Gherkin.Background, scenario::Gherkin.Scenario)
     # Tell the presenter of the start of a scenario execution.
     present(executor.presenter, scenario)
 
@@ -139,9 +139,9 @@ Execute a `Scenario Outline`, which contains one or more examples. Each example 
 a regular `Scenario`, and it's executed.
 Reeturns a list of `ScenarioResult`s.
 """
-function executescenario(executor::Executor, outline::Gherkin.ScenarioOutline)
+function executescenario(executor::Executor, background::Gherkin.Background, outline::Gherkin.ScenarioOutline)
     scenarios = transformoutline(outline)
-    [executescenario(executor, scenario)
+    [executescenario(executor, background, scenario)
      for scenario in scenarios]
 end
 
@@ -161,7 +161,7 @@ function executefeature(executor::Executor, feature::Gherkin.Feature)
     present(executor.presenter, feature)
 
     # Execute each scenario and scenario outline in the feature.
-    scenarioresults = [executescenario(executor, s) for s in feature.scenarios]
+    scenarioresults = [executescenario(executor, feature.background, s) for s in feature.scenarios]
 
     # Return a list of `ScenarioResults`.
     # Since regular scenarios return a `ScenarioResult` directly, and scenario outlines return lists
