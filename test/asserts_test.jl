@@ -21,9 +21,9 @@ using ExecutableSpecifications.Gherkin
         given = Gherkin.Given("some precondition")
         context = ExecutableSpecifications.StepDefinitionContext()
 
-        stepdefinition = ExecutableSpecifications.findstepdefinition(matcher, given)
+        m = ExecutableSpecifications.findstepdefinition(matcher, given)
 
-        stepfailed = stepdefinition.definition(context)
+        stepfailed = m.stepdefinition.definition(context)
 
         @test stepfailed.assertion == "1 == 2"
     end
@@ -39,9 +39,9 @@ using ExecutableSpecifications.Gherkin
         given = Gherkin.Given("some precondition")
         context = ExecutableSpecifications.StepDefinitionContext()
 
-        stepdefinition = ExecutableSpecifications.findstepdefinition(matcher, given)
+        m = ExecutableSpecifications.findstepdefinition(matcher, given)
 
-        stepfailed = stepdefinition.definition(context)
+        stepfailed = m.stepdefinition.definition(context)
 
         @test stepfailed.assertion == "isempty([1])"
     end

@@ -2,7 +2,7 @@ using Test
 using ExecutableSpecifications.Gherkin
 using ExecutableSpecifications.Gherkin: ScenarioStep, Background
 using ExecutableSpecifications
-using ExecutableSpecifications: StepDefinitionContext, StepDefinition, StepDefinitionLocation
+using ExecutableSpecifications: StepDefinitionContext, StepDefinition, StepDefinitionLocation, StepDefinitionMatch
 using ExecutableSpecifications: Executor, StepExecutionResult, QuietRealTimePresenter, executefeature
 import ExecutableSpecifications: present
 
@@ -16,7 +16,7 @@ end
 
 function ExecutableSpecifications.findstepdefinition(s::FakeStepDefinitionMatcher, step::ExecutableSpecifications.Gherkin.ScenarioStep)
     if step in keys(s.steps)
-        StepDefinition("some text", s.steps[step], StepDefinitionLocation("", 0))
+        StepDefinitionMatch(StepDefinition("some text", s.steps[step], StepDefinitionLocation("", 0)))
     else
         throw(ExecutableSpecifications.NoMatchingStepDefinition())
     end

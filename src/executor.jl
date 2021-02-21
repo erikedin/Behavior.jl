@@ -80,7 +80,7 @@ function executesteps(executor::Executor, context::StepDefinitionContext, steps:
 
         results[i] = try
             # Find a step definition matching the step text.
-            stepdefinition = findstepdefinition(executor.stepdefmatcher, step)
+            stepdefinitionmatch = findstepdefinition(executor.stepdefmatcher, step)
 
             # The block text is provided to the step definition via the context.
             context[:block_text] = step.block_text
@@ -88,7 +88,7 @@ function executesteps(executor::Executor, context::StepDefinitionContext, steps:
             try
                 # Execute the step definition. Note that it's important to use `Base.invokelatest` here,
                 # because otherwise it might not find that function defined yet.
-                Base.invokelatest(stepdefinition.definition, context)
+                Base.invokelatest(stepdefinitionmatch.stepdefinition.definition, context)
             catch ex
                 UnexpectedStepError(ex, stacktrace(catch_backtrace()))
             end

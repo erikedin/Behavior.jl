@@ -31,7 +31,7 @@ function ExecutableSpecifications.findstepdefinition(
         s.stepbody(context)
         SuccessfulStepExecution()
     end
-    StepDefinition("some text", stepdefinition, StepDefinitionLocation("", 0))
+    StepDefinitionMatch(StepDefinition("some text", stepdefinition, StepDefinitionLocation("", 0)))
 end
 
 @testset "Execution Environment" begin

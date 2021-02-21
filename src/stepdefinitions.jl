@@ -29,6 +29,12 @@ struct StepDefinition
     location::StepDefinitionLocation
 end
 
+struct StepDefinitionMatch
+    stepdefinition::StepDefinition
+    variables::Dict{Symbol, Any}
+
+    StepDefinitionMatch(s::StepDefinition) = new(s, Dict{Symbol, Any}())
+end
 
 """
 The context in which a step definition executes. This context is used to share data between
@@ -36,19 +42,19 @@ different step definitions. It is created newly for each scenario. Thus, two sce
 data.
 """
 struct StepDefinitionContext
-    variables::Dict{Symbol, Any}
+    storage::Dict{Symbol, Any}
 
     StepDefinitionContext() = new(Dict{Symbol, Any}())
 end
 
 "Find a variable value given a symbol name."
-Base.getindex(context::StepDefinitionContext, sym::Symbol) = context.variables[sym]
+Base.getindex(context::StepDefinitionContext, sym::Symbol) = context.storage[sym]
 
 "Set a variable value given a symbol name and a value."
-Base.setindex!(context::StepDefinitionContext, value::Any, sym::Symbol) = context.variables[sym] = value
+Base.setindex!(context::StepDefinitionContext, value::Any, sym::Symbol) = context.storage[sym] = value
 
 "Check for a mapping for a given key"
-Base.haskey(context::StepDefinitionContext, sym::Symbol) = haskey(context.variables, sym)
+Base.haskey(context::StepDefinitionContext, sym::Symbol) = haskey(context.storage, sym)
 
 #
 # Global state
@@ -130,6 +136,14 @@ struct FromMacroStepDefinitionMatcher <: StepDefinitionMatcher
     end
 end
 
+function matchdefinition(stepdefinition::StepDefinition, description::String) :: Union{StepDefinitionMatch,Nothing}
+    if stepdefinition.description == description 
+        StepDefinitionMatch(stepdefinition)
+    else
+        nothing
+    end
+end
+
 """
     findstepdefinition(matcher::FromMacroStepDefinitionMatcher, step::Gherkin.ScenarioStep)
 
@@ -137,18 +151,18 @@ Find a step definition that has a description that matches the provided scenario
 If no such step definition is found, throw a `NoMatchingStepDefinition`.
 If more than one such step definition is found, throw a `NonUniqueStepDefinition`.
 """
-function findstepdefinition(matcher::FromMacroStepDefinitionMatcher, step::Gherkin.ScenarioStep)
-    matchingindexes = findall(x -> x.description == step.text, matcher.stepdefinitions)
-    matchingstepdefinitions = [matcher.stepdefinitions[i] for i in matchingindexes]
-    if isempty(matchingstepdefinitions)
+function findstepdefinition(matcher::FromMacroStepDefinitionMatcher, step::Gherkin.ScenarioStep) :: StepDefinitionMatch
+    allsteps = map(x -> matchdefinition(x, step.text), matcher.stepdefinitions)
+    matches = filter(x -> x !== nothing, allsteps)
+    if isempty(matches)
         throw(NoMatchingStepDefinition())
     end
-    if length(matchingstepdefinitions) > 1
-        locations = map(stepdefinition -> StepDefinitionLocation(matcher.filename, 0),
-                        matchingstepdefinitions)
+    if length(matches) > 1
+        locations = map(m -> StepDefinitionLocation(matcher.filename, 0),
+                        matches)
         throw(NonUniqueStepDefinition(locations))
     end
-    matchingstepdefinitions[1]
+    matches[1]
 end
 
 #
@@ -164,17 +178,17 @@ mutable struct CompositeStepDefinitionMatcher <: StepDefinitionMatcher
 end
 
 function findstepdefinition(composite::CompositeStepDefinitionMatcher, step::Gherkin.ScenarioStep)
-    matching = StepDefinition[]
+    matching = StepDefinitionMatch[]
     nonuniquesfound = StepDefinitionLocation[]
     # Recursively call `findstepdefinition(...)` on all sub-matchers.
     # When they throw a `NonUniqueStepDefinition`, record the location so it can be shown to the
     # user where the step definitions are.
     # Ignore `NonUniqueStepDefinition` exceptions, as normally all but one of the matchers will
     # throw it.
-    for m in composite.matchers
+    for matcher in composite.matchers
         try
-            stepdefinition = findstepdefinition(m, step)
-            push!(matching, stepdefinition)
+            stepdefinitionmatch = findstepdefinition(matcher, step)
+            push!(matching, stepdefinitionmatch)
         catch ex
             if ex isa NonUniqueStepDefinition
                 append!(nonuniquesfound, ex.locations)
@@ -182,7 +196,7 @@ function findstepdefinition(composite::CompositeStepDefinitionMatcher, step::Ghe
         end
     end
     if length(matching) > 1 || !isempty(nonuniquesfound)
-        locations = vcat(nonuniquesfound, [d.location for d in matching])
+        locations = vcat(nonuniquesfound, [d.stepdefinition.location for d in matching])
         throw(NonUniqueStepDefinition(locations))
     end
     if isempty(matching)

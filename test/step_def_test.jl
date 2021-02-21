@@ -16,7 +16,8 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
                 end
             """)
 
-            stepdefinition = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
+            stepmatch = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
+            stepdefinition = stepmatch.stepdefinition
             @test isa(stepdefinition.definition, Function)
         end
 
@@ -43,7 +44,8 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
                 end
             """)
 
-            stepdefinition = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
+            stepmatch = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
+            stepdefinition = stepmatch.stepdefinition
             @test isa(stepdefinition.definition, Function)
         end
 
@@ -80,7 +82,8 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             """)
 
             context = ExecutableSpecifications.StepDefinitionContext()
-            stepdefinition = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
+            stepmatch = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
+            stepdefinition = stepmatch.stepdefinition
             stepdefinition.definition(context)
 
             @test context[:x] == 1
@@ -97,7 +100,8 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             """)
 
             context = ExecutableSpecifications.StepDefinitionContext()
-            stepdefinition = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
+            stepmatch = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
+            stepdefinition = stepmatch.stepdefinition
             stepdefinition.definition(context)
 
             @test context[:x] == "Some string"
@@ -115,7 +119,8 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
 
             context = ExecutableSpecifications.StepDefinitionContext()
             context[:x] = 1
-            stepdefinition = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
+            stepmatch = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
+            stepdefinition = stepmatch.stepdefinition
 
             @test stepdefinition.definition(context) == ExecutableSpecifications.SuccessfulStepExecution()
         end
@@ -131,7 +136,8 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             """)
 
             context = ExecutableSpecifications.StepDefinitionContext()
-            stepdefinition = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
+            stepmatch = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
+            stepdefinition = stepmatch.stepdefinition
             @test stepdefinition.definition(context) == ExecutableSpecifications.SuccessfulStepExecution()
         end
 
@@ -146,7 +152,8 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             """)
 
             context = ExecutableSpecifications.StepDefinitionContext()
-            stepdefinition = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
+            stepmatch = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
+            stepdefinition = stepmatch.stepdefinition
             @test stepdefinition.definition(context) isa ExecutableSpecifications.StepFailed
         end
 
@@ -161,7 +168,8 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             """)
 
             context = ExecutableSpecifications.StepDefinitionContext()
-            stepdefinition = ExecutableSpecifications.findstepdefinition(stepdef_matcher, when)
+            stepmatch = ExecutableSpecifications.findstepdefinition(stepdef_matcher, when)
+            stepdefinition = stepmatch.stepdefinition
             @test stepdefinition.definition(context) == ExecutableSpecifications.SuccessfulStepExecution()
         end
 
@@ -176,7 +184,8 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             """)
 
             context = ExecutableSpecifications.StepDefinitionContext()
-            stepdefinition = ExecutableSpecifications.findstepdefinition(stepdef_matcher, then)
+            stepmatch = ExecutableSpecifications.findstepdefinition(stepdef_matcher, then)
+            stepdefinition = stepmatch.stepdefinition
             @test stepdefinition.definition(context) == ExecutableSpecifications.SuccessfulStepExecution()
         end
 
@@ -191,7 +200,8 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             """)
 
             context = ExecutableSpecifications.StepDefinitionContext()
-            stepdefinition = findstepdefinition(stepdef_matcher, given)
+            stepmatch = findstepdefinition(stepdef_matcher, given)
+            stepdefinition = stepmatch.stepdefinition
             @test_throws ErrorException stepdefinition.definition(context)
         end
 
@@ -208,7 +218,8 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             """)
 
             context = ExecutableSpecifications.StepDefinitionContext()
-            stepdefinition = ExecutableSpecifications.findstepdefinition(stepdef_matcher, when)
+            stepmatch = ExecutableSpecifications.findstepdefinition(stepdef_matcher, when)
+            stepdefinition = stepmatch.stepdefinition
             @test stepdefinition.definition(context) == ExecutableSpecifications.SuccessfulStepExecution()
         end
     end
@@ -304,7 +315,8 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
 
             compositematcher = CompositeStepDefinitionMatcher(matcher1)
 
-            stepdefinition = findstepdefinition(compositematcher, given)
+            stepmatch = findstepdefinition(compositematcher, given)
+            stepdefinition = stepmatch.stepdefinition
             @test stepdefinition.definition isa Function
             @test stepdefinition.description == "some precondition"
         end
@@ -324,7 +336,8 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
 
             compositematcher = CompositeStepDefinitionMatcher(matcher1, matcher2)
 
-            stepdefinition = findstepdefinition(compositematcher, given)
+            stepmatch = findstepdefinition(compositematcher, given)
+            stepdefinition = stepmatch.stepdefinition
             @test stepdefinition.definition isa Function
             @test stepdefinition.description == "some other precondition"
         end
@@ -354,11 +367,13 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
 
             compositematcher = CompositeStepDefinitionMatcher(matcher1, matcher2, matcher3)
 
-            stepdefinition = findstepdefinition(compositematcher, given)
+            stepmatch = findstepdefinition(compositematcher, given)
+            stepdefinition = stepmatch.stepdefinition
             @test stepdefinition.definition isa Function
             @test stepdefinition.description == "some other precondition"
 
-            stepdefinition = findstepdefinition(compositematcher, when)
+            stepmatch = findstepdefinition(compositematcher, when)
+            stepdefinition = stepmatch.stepdefinition
             @test stepdefinition.description == "some action"
         end
 
@@ -507,7 +522,8 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             compositematcher = CompositeStepDefinitionMatcher()
             addmatcher!(compositematcher, matcher1)
 
-            stepdefinition = findstepdefinition(compositematcher, given)
+            stepmatch = findstepdefinition(compositematcher, given)
+            stepdefinition = stepmatch.stepdefinition
             @test stepdefinition.definition isa Function
             @test stepdefinition.description == "some precondition"
         end
@@ -534,11 +550,13 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             addmatcher!(compositematcher, matcher1)
             addmatcher!(compositematcher, matcher2)
 
-            stepdefinition = findstepdefinition(compositematcher, given)
+            stepmatch = findstepdefinition(compositematcher, given)
+            stepdefinition = stepmatch.stepdefinition
             @test stepdefinition.definition isa Function
             @test stepdefinition.description == "some other precondition"
 
-            stepdefinition = findstepdefinition(compositematcher, when)
+            stepmatch = findstepdefinition(compositematcher, when)
+            stepdefinition = stepmatch.stepdefinition
             @test stepdefinition.description == "some action"
         end
     end
