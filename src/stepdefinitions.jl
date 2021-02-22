@@ -22,11 +22,27 @@ abstract type StepDefinitionMatcher end
 # A StepDefinitionMatcher should define a method
 # findstepdefinition(::StepDefinitionMatcher, ::Gherkin.ScenarioStep)
 
+
+#
+# Matching utilities
+#
+
+function makedescriptionregex(s::String) :: Regex
+    s = replace(s, r"{foo}" => s"(?<foo>.*)")
+    Regex("^$(s)\$")
+end
+
 "A step definition has a description, which is used to find it, a function to execute, and a location."
 struct StepDefinition
     description::String
+    descriptionregex::Regex
     definition::Function
     location::StepDefinitionLocation
+
+    function StepDefinition(description::String, definition::Function, location::StepDefinitionLocation)
+        descriptionregex = makedescriptionregex(description)
+        new(description, descriptionregex, definition, location)
+    end
 end
 
 struct StepDefinitionMatch
@@ -34,6 +50,9 @@ struct StepDefinitionMatch
     variables::Dict{Symbol, Any}
 
     StepDefinitionMatch(s::StepDefinition) = new(s, Dict{Symbol, Any}())
+    function StepDefinitionMatch(s::StepDefinition, variables::Dict{Symbol, Any})
+        new(s, variables)
+    end
 end
 
 """
@@ -71,10 +90,14 @@ function step_definition_(description::String, definition::Expr)
     # The step definition function takes a context and executes a bit of code supplied by the
     # test writer. The bit of code is in $definition.
     definitionfunction = :(context -> $definition)
+    descriptionregex = makedescriptionregex(description)
     quote
         # Push a given step definition to the global state so it can be found by the
         # `StepDefinitionMatcher`.
-        push!(currentdefinitions, StepDefinition($description, (context) -> begin
+        push!(currentdefinitions,
+            StepDefinition(
+                $description,
+                (context) -> begin
                 try
                     # Escape the step definition code so it gets the proper scope.
                     $(esc(definitionfunction))(context)
@@ -137,8 +160,14 @@ struct FromMacroStepDefinitionMatcher <: StepDefinitionMatcher
 end
 
 function matchdefinition(stepdefinition::StepDefinition, description::String) :: Union{StepDefinitionMatch,Nothing}
-    if stepdefinition.description == description 
-        StepDefinitionMatch(stepdefinition)
+    m = match(stepdefinition.descriptionregex, description)
+    foovalue = if m !== nothing && !isempty(m.captures)
+        m[:foo]
+    else
+        nothing
+    end
+    if m !== nothing
+        StepDefinitionMatch(stepdefinition, Dict{Symbol, Any}(:foo => foovalue))
     else
         nothing
     end
