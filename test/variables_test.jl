@@ -41,4 +41,18 @@ using ExecutableSpecifications: FromMacroStepDefinitionMatcher, findstepdefiniti
 
         @test stepdefinitionmatch.variables[:quux] == "fnord"
     end
+
+    @testset "Matching against variables; Definition has vars foo and quux; foo=bar and quux=fnord" begin
+        given = Given("some bar and fnord")
+        stepdef_matcher = FromMacroStepDefinitionMatcher("""
+            using ExecutableSpecifications: @given
+
+            @given "some {foo} and {quux}" begin end
+        """)
+
+        stepdefinitionmatch = findstepdefinition(stepdef_matcher, given)
+
+        @test stepdefinitionmatch.variables[:foo] == "bar"
+        @test stepdefinitionmatch.variables[:quux] == "fnord"
+    end
 end

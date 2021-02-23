@@ -27,14 +27,15 @@ abstract type StepDefinitionMatcher end
 # Matching utilities
 #
 
-function makedescriptionregex(s::String) :: Tuple{Regex, Symbol}
-    variablematch = match(r"{(.*)}", s)
-    variable = Symbol("")
-    if variablematch !== nothing
-        variable = Symbol(variablematch[1])
-        s = replace(s, r"{(.*)}" => s"(?<\1>.*)")
+function makedescriptionregex(s::String) :: Tuple{Regex, AbstractVector{Symbol}}
+    variablematches = eachmatch(r"{([^{}]+)}", s)
+    if variablematches !== nothing
+        variables = [Symbol(m[1]) for m in variablematches]
+        s = replace(s, r"{([^{}]+)}" => s"(?<\1>.*)")
+        Regex("^$(s)\$"), variables
+    else
+        Regex("^$(s)\$"), Symbol[]
     end
-    Regex("^$(s)\$"), variable
 end
 
 "A step definition has a description, which is used to find it, a function to execute, and a location."
@@ -43,11 +44,11 @@ struct StepDefinition
     descriptionregex::Regex
     definition::Function
     location::StepDefinitionLocation
-    variable::Symbol
+    variables::Vector{Symbol}
 
     function StepDefinition(description::String, definition::Function, location::StepDefinitionLocation)
-        descriptionregex, variable = makedescriptionregex(description)
-        new(description, descriptionregex, definition, location, variable)
+        descriptionregex, variables = makedescriptionregex(description)
+        new(description, descriptionregex, definition, location, variables)
     end
 end
 
@@ -168,12 +169,9 @@ end
 function matchdefinition(stepdefinition::StepDefinition, description::String) :: Union{StepDefinitionMatch,Nothing}
     m = match(stepdefinition.descriptionregex, description)
     if m !== nothing
-        value = if !isempty(m.captures)
-            m[1]
-        else
-            nothing
-        end
-        StepDefinitionMatch(stepdefinition, Dict{Symbol, Any}(stepdefinition.variable => value))
+        variables = [variablesym => m[variablesym]
+                     for variablesym in stepdefinition.variables]
+        StepDefinitionMatch(stepdefinition, Dict{Symbol, Any}(variables))
     else
         nothing
     end
