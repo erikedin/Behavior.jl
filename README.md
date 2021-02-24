@@ -72,20 +72,18 @@ See "Current state" for limitations.
 # Current state
 The package has minimal functionality, but is under active development.
 
-These are some current limitations, that will be lifted as development progresses:
+These are some current limitations and missing features, that will be lifted as development progresses:
 
-- Reads feature and step definition files from a single hardcoded directory.
+- [ ] Presenting the results of scenarios is very rudimentary.
+- [ ] Step definition variables do not yet have type information.
+- [ ] Gherkin Rules support
 
-    Today only the directory `features` is searched for feature files. Step files are only read from
-    `features/steps/*.jl`. Going forward, all feature files and all step files will be read of
-    course.
+## Completed
 
-- Presenting the results of scenarios is very rudimentary.
-- No variables in step definition strings
+- [x] Reads feature files from anywhere under `features`.
+- [x] Reads step files from anywhere under `features/steps`.
+- [x] Variables in step definition strings.
 
-    One would like to be able to define a variable in a step definition like
-    `@given "some value {foo}" begin`. Without this, scenario outlines may become difficult to use,
-    since you have to define a separate step definition for each value used in the outline.
 
 # License
 ExecutableSpecifications.jl is licensed under the Apache License version 2.0.
