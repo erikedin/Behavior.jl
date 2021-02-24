@@ -6,9 +6,9 @@ using ExecutableSpecifications: StepDefinitionContext, StepDefinition, StepDefin
 using ExecutableSpecifications: Executor, StepExecutionResult, QuietRealTimePresenter, executefeature
 import ExecutableSpecifications: present
 
-successful_step_definition(::StepDefinitionContext) = ExecutableSpecifications.SuccessfulStepExecution()
-failed_step_definition(::StepDefinitionContext) = ExecutableSpecifications.StepFailed("")
-error_step_definition(::StepDefinitionContext) = error("Some error")
+successful_step_definition(::StepDefinitionContext, args) = ExecutableSpecifications.SuccessfulStepExecution()
+failed_step_definition(::StepDefinitionContext, args) = ExecutableSpecifications.StepFailed("")
+error_step_definition(::StepDefinitionContext, args) = error("Some error")
 
 struct FakeStepDefinitionMatcher <: ExecutableSpecifications.StepDefinitionMatcher
     steps::Dict{ExecutableSpecifications.Gherkin.ScenarioStep, Function}
@@ -195,7 +195,7 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
     @testset "Block text" begin
         @testset "Scenario step has a block text; Context contains the block text" begin
             given = Given("Some precondition", block_text="Some block text")
-            function check_block_text_step_definition(context::StepDefinitionContext)
+            function check_block_text_step_definition(context::StepDefinitionContext, _args)
                 if context[:block_text] == "Some block text"
                     ExecutableSpecifications.SuccessfulStepExecution()
                 else
@@ -214,7 +214,7 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
         @testset "First step has block text, but second doesn't; The block text is cleared in the second step" begin
             given = Given("Some precondition", block_text="Some block text")
             when = When("some action")
-            function check_block_text_step_definition(context::StepDefinitionContext)
+            function check_block_text_step_definition(context::StepDefinitionContext, _args)
                 if context[:block_text] == ""
                     ExecutableSpecifications.SuccessfulStepExecution()
                 else

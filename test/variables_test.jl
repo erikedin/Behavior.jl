@@ -1,5 +1,5 @@
 using Test
-using ExecutableSpecifications.Gherkin: Given
+using ExecutableSpecifications.Gherkin: Given, When
 using ExecutableSpecifications: FromMacroStepDefinitionMatcher, findstepdefinition
 
 @testset "Variables            " begin
@@ -54,5 +54,64 @@ using ExecutableSpecifications: FromMacroStepDefinitionMatcher, findstepdefiniti
 
         @test stepdefinitionmatch.variables[:foo] == "bar"
         @test stepdefinitionmatch.variables[:quux] == "fnord"
+    end
+
+    @testset "Scenario step has a variable foo; Args has :foo => bar" begin
+        stepdefmatcher = FromMacroStepDefinitionMatcher("""
+            using ExecutableSpecifications: @given
+
+            @given "some value {foo}" begin
+                @expect args[:foo] == "bar"
+            end
+        """)
+        executor = ExecutableSpecifications.Executor(stepdefmatcher)
+
+        given = Given("some value bar")
+        scenario = Scenario("Description", String[], ScenarioStep[given])
+
+        scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
+
+        @test isa(scenarioresult.steps[1], ExecutableSpecifications.SuccessfulStepExecution)
+    end
+
+    @testset "Scenario step has vars foo, quux; Args has :foo => bar, :quux => fnord" begin
+        stepdefmatcher = FromMacroStepDefinitionMatcher("""
+            using ExecutableSpecifications: @given
+
+            @given "some values {foo} and {quux}" begin
+                @expect args[:foo] == "bar"
+                @expect args[:quux] == "fnord"
+            end
+        """)
+        executor = ExecutableSpecifications.Executor(stepdefmatcher)
+
+        given = Given("some values bar and fnord")
+        scenario = Scenario("Description", String[], ScenarioStep[given])
+
+        scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
+
+        @test isa(scenarioresult.steps[1], ExecutableSpecifications.SuccessfulStepExecution)
+    end
+
+    @testset "Scenario step 2 has no vars; Args does not have :foo => bar, :quux => fnord" begin
+        stepdefmatcher = FromMacroStepDefinitionMatcher("""
+            using ExecutableSpecifications: @given
+
+            @given "some values {foo} and {quux}" begin end
+
+            @when "some action" begin
+                @expect !haskey(args, :foo)
+                @expect !haskey(args, :quux)
+            end
+        """)
+        executor = ExecutableSpecifications.Executor(stepdefmatcher)
+
+        given = Given("some values bar and fnord")
+        when = When("some action")
+        scenario = Scenario("Description", String[], ScenarioStep[given, when])
+
+        scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
+
+        @test isa(scenarioresult.steps[1], ExecutableSpecifications.SuccessfulStepExecution)
     end
 end

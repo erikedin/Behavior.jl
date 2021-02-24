@@ -23,7 +23,8 @@ using ExecutableSpecifications.Gherkin
 
         m = ExecutableSpecifications.findstepdefinition(matcher, given)
 
-        stepfailed = m.stepdefinition.definition(context)
+        args = Dict{Symbol, Any}()
+        stepfailed = m.stepdefinition.definition(context, args)
 
         @test stepfailed.assertion == "1 == 2"
     end
@@ -41,7 +42,8 @@ using ExecutableSpecifications.Gherkin
 
         m = ExecutableSpecifications.findstepdefinition(matcher, given)
 
-        stepfailed = m.stepdefinition.definition(context)
+        args = Dict{Symbol, Any}()
+        stepfailed = m.stepdefinition.definition(context, args)
 
         @test stepfailed.assertion == "isempty([1])"
     end

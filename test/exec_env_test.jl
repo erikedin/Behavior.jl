@@ -27,8 +27,8 @@ end
 function ExecutableSpecifications.findstepdefinition(
         s::SingleStepDefinitionMatcher,
         step::ExecutableSpecifications.Gherkin.ScenarioStep)
-    stepdefinition = context -> begin
-        s.stepbody(context)
+    stepdefinition = (context, args) -> begin
+        s.stepbody(context, args)
         SuccessfulStepExecution()
     end
     StepDefinitionMatch(StepDefinition("some text", stepdefinition, StepDefinitionLocation("", 0)))
@@ -43,7 +43,7 @@ end
             # This step definition tests that the symbol :beforescenariowasexecuted is present in
             # the context at execution time. This symbol should be set by the
             # FakeExecutionEnvironment.
-            stepdefmatcher = SingleStepDefinitionMatcher(context -> @assert context[:beforescenariowasexecuted])
+            stepdefmatcher = SingleStepDefinitionMatcher((context, args) -> @assert context[:beforescenariowasexecuted])
             executor = Executor(stepdefmatcher; executionenv=env)
             scenario = Scenario("Description", String[], ScenarioStep[Given("")])
 
@@ -56,7 +56,7 @@ end
 
         @testset "beforescenario is the default noop; beforescenario is not executed before the scenario" begin
             # Arrange
-            stepdefmatcher = SingleStepDefinitionMatcher(context -> @assert !haskey(context, :beforescenariowasexecuted))
+            stepdefmatcher = SingleStepDefinitionMatcher((context, args) -> @assert !haskey(context, :beforescenariowasexecuted))
             executor = Executor(stepdefmatcher)
             scenario = Scenario("Description", String[], ScenarioStep[Given("")])
 
@@ -74,7 +74,7 @@ end
             # This step definition tests that the symbol :beforescenariowasexecuted is present in
             # the context at execution time. This symbol should be set by the
             # FakeExecutionEnvironment.
-            stepdefmatcher = SingleStepDefinitionMatcher(context -> @assert !haskey(context, :afterscenariowasexecuted))
+            stepdefmatcher = SingleStepDefinitionMatcher((context, args) -> @assert !haskey(context, :afterscenariowasexecuted))
             executor = Executor(stepdefmatcher; executionenv=env)
             scenario = Scenario("Description", String[], ScenarioStep[Given("")])
 
@@ -93,7 +93,7 @@ end
             # This step definition tests that the symbol :beforescenariowasexecuted is present in
             # the context at execution time. This symbol should be set by the
             # FakeExecutionEnvironment.
-            stepdefmatcher = SingleStepDefinitionMatcher(context -> nothing)
+            stepdefmatcher = SingleStepDefinitionMatcher((context, args) -> nothing)
             executor = Executor(stepdefmatcher; executionenv=env)
             scenario = Scenario("Description", String[], ScenarioStep[Given("")])
 

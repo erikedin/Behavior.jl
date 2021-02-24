@@ -96,7 +96,7 @@ currentfilename = ""
 function step_definition_(description::String, definition::Expr)
     # The step definition function takes a context and executes a bit of code supplied by the
     # test writer. The bit of code is in $definition.
-    definitionfunction = :(context -> $definition)
+    definitionfunction = :((context, args) -> $definition)
     descriptionregex = makedescriptionregex(description)
     quote
         # Push a given step definition to the global state so it can be found by the
@@ -104,10 +104,10 @@ function step_definition_(description::String, definition::Expr)
         push!(currentdefinitions,
             StepDefinition(
                 $description,
-                (context) -> begin
+                (context, args) -> begin
                 try
                     # Escape the step definition code so it gets the proper scope.
-                    $(esc(definitionfunction))(context)
+                    $(esc(definitionfunction))(context, args)
                     # Any step definition that does not throw an exception is successful.
                     SuccessfulStepExecution()
                 catch ex

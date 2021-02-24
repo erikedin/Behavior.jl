@@ -84,7 +84,8 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             context = ExecutableSpecifications.StepDefinitionContext()
             stepmatch = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
             stepdefinition = stepmatch.stepdefinition
-            stepdefinition.definition(context)
+            args = Dict{Symbol, Any}()
+            stepdefinition.definition(context, args)
 
             @test context[:x] == 1
         end
@@ -102,7 +103,8 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             context = ExecutableSpecifications.StepDefinitionContext()
             stepmatch = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
             stepdefinition = stepmatch.stepdefinition
-            stepdefinition.definition(context)
+            args = Dict{Symbol, Any}()
+            stepdefinition.definition(context, args)
 
             @test context[:x] == "Some string"
         end
@@ -121,8 +123,9 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             context[:x] = 1
             stepmatch = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
             stepdefinition = stepmatch.stepdefinition
+            args = Dict{Symbol, Any}()
 
-            @test stepdefinition.definition(context) == ExecutableSpecifications.SuccessfulStepExecution()
+            @test stepdefinition.definition(context, args) == ExecutableSpecifications.SuccessfulStepExecution()
         end
 
         @testset "Execute a step definition; An empty step definition; Success is returned" begin
@@ -138,7 +141,8 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             context = ExecutableSpecifications.StepDefinitionContext()
             stepmatch = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
             stepdefinition = stepmatch.stepdefinition
-            @test stepdefinition.definition(context) == ExecutableSpecifications.SuccessfulStepExecution()
+            args = Dict{Symbol, Any}()
+            @test stepdefinition.definition(context, args) == ExecutableSpecifications.SuccessfulStepExecution()
         end
 
         @testset "Execute a step definition; An assert fails; StepFailed is returned" begin
@@ -154,7 +158,8 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             context = ExecutableSpecifications.StepDefinitionContext()
             stepmatch = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
             stepdefinition = stepmatch.stepdefinition
-            @test stepdefinition.definition(context) isa ExecutableSpecifications.StepFailed
+            args = Dict{Symbol, Any}()
+            @test stepdefinition.definition(context, args) isa ExecutableSpecifications.StepFailed
         end
 
         @testset "Execute a step definition; An empty When step; Success is returned" begin
@@ -170,7 +175,8 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             context = ExecutableSpecifications.StepDefinitionContext()
             stepmatch = ExecutableSpecifications.findstepdefinition(stepdef_matcher, when)
             stepdefinition = stepmatch.stepdefinition
-            @test stepdefinition.definition(context) == ExecutableSpecifications.SuccessfulStepExecution()
+            args = Dict{Symbol, Any}()
+            @test stepdefinition.definition(context, args) == ExecutableSpecifications.SuccessfulStepExecution()
         end
 
         @testset "Execute a step definition; An empty Then step; Success is returned" begin
@@ -186,7 +192,8 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             context = ExecutableSpecifications.StepDefinitionContext()
             stepmatch = ExecutableSpecifications.findstepdefinition(stepdef_matcher, then)
             stepdefinition = stepmatch.stepdefinition
-            @test stepdefinition.definition(context) == ExecutableSpecifications.SuccessfulStepExecution()
+            args = Dict{Symbol, Any}()
+            @test stepdefinition.definition(context, args) == ExecutableSpecifications.SuccessfulStepExecution()
         end
 
         @testset "Execute a step definition; Step throws an exception; The error is not caught" begin
@@ -202,7 +209,8 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             context = ExecutableSpecifications.StepDefinitionContext()
             stepmatch = findstepdefinition(stepdef_matcher, given)
             stepdefinition = stepmatch.stepdefinition
-            @test_throws ErrorException stepdefinition.definition(context)
+            args = Dict{Symbol, Any}()
+            @test_throws ErrorException stepdefinition.definition(context, args)
         end
 
         @testset "Execute a step definition; Call a method defined in the steps file; Method is in scope" begin
@@ -220,7 +228,8 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             context = ExecutableSpecifications.StepDefinitionContext()
             stepmatch = ExecutableSpecifications.findstepdefinition(stepdef_matcher, when)
             stepdefinition = stepmatch.stepdefinition
-            @test stepdefinition.definition(context) == ExecutableSpecifications.SuccessfulStepExecution()
+            args = Dict{Symbol, Any}()
+            @test stepdefinition.definition(context, args) == ExecutableSpecifications.SuccessfulStepExecution()
         end
     end
 

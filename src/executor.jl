@@ -88,7 +88,7 @@ function executesteps(executor::Executor, context::StepDefinitionContext, steps:
             try
                 # Execute the step definition. Note that it's important to use `Base.invokelatest` here,
                 # because otherwise it might not find that function defined yet.
-                Base.invokelatest(stepdefinitionmatch.stepdefinition.definition, context)
+                Base.invokelatest(stepdefinitionmatch.stepdefinition.definition, context, stepdefinitionmatch.variables)
             catch ex
                 UnexpectedStepError(ex, stacktrace(catch_backtrace()))
             end
