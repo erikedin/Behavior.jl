@@ -207,6 +207,36 @@ using ExecutableSpecifications.Gherkin: issuccessful, parsescenario!, Given, Whe
         @test issuccessful(result)
     end
 
+    @testset "A given step multiple spaces before the step description; The parsed given is stripped" begin
+        text = """
+        Scenario: Some description
+            Given      a precondition
+        """
+
+        byline = ByLineParser(text)
+        result = parsescenario!(byline)
+
+        @test issuccessful(result)
+        scenario = result.value
+
+        @test scenario.steps == ScenarioStep[Given("a precondition")]
+    end
+
+    @testset "A given step multiple spaces after the step description; The parsed given is stripped" begin
+        text = """
+        Scenario: Some description
+            Given a precondition                     
+        """
+
+        byline = ByLineParser(text)
+        result = parsescenario!(byline)
+
+        @test issuccessful(result)
+        scenario = result.value
+
+        @test scenario.steps == ScenarioStep[Given("a precondition")]
+    end
+
     @testset "Malformed scenarios" begin
         @testset "And as a first step; Expected Given, When, or Then before that" begin
             text = """

@@ -569,7 +569,7 @@ function parsescenariosteps!(byline::ByLineParser; valid_step_types::String = "G
         # This is what `allowed_step_types` keeps track of.
         # Options: allow_any_step_order disables this check.
         step_type = step_match[:step_type]
-        step_definition = step_match[:step_definition]
+        step_definition = strip(step_match[:step_definition])
         if step_type == "Given"
             if !byline.options.allow_any_step_order && !(Given in allowed_step_types)
                 return BadParseResult{Vector{ScenarioStep}}(:bad_step_order, :NotGiven, :Given, byline)
