@@ -179,6 +179,29 @@ function executefeature(executor::Executor, feature::Gherkin.Feature)
 end
 
 #
+# Finding missing step implementations
+#
+
+function findmissingsteps(executor::Executor, steps::Vector{ScenarioStep}) :: Vector{ScenarioStep}
+    findstep = step -> begin
+        try
+            findstepdefinition(executor.stepdefmatcher, step)
+        catch ex
+            if ex isa NoMatchingStepDefinition
+                NoStepDefinitionFound(step)
+            else
+                rethrow(ex)
+            end
+        end
+    end
+    filter(step -> findstep(step) isa NoStepDefinitionFound, steps)
+end
+
+function findmissingsteps(executor::Executor, feature::Feature) :: Vector{ScenarioStep}
+    findmissingsteps(executor, feature.scenarios[1].steps)
+end
+
+#
 # Interpolation of Scenario Outlines
 #
 
