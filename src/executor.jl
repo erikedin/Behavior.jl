@@ -198,7 +198,17 @@ function findmissingsteps(executor::Executor, steps::Vector{ScenarioStep}) :: Ve
 end
 
 function findmissingsteps(executor::Executor, feature::Feature) :: Vector{ScenarioStep}
-    findmissingsteps(executor, feature.scenarios[1].steps)
+    backgroundmissingsteps = findmissingsteps(executor, feature.background.steps)
+
+    # findmissingstep(executor, scenario.steps) returns a list of missing steps,
+    # so we're creating a list of lists here. We flatten it into one list of missing steps.
+    missingsteps  = Iterators.flatten([
+        findmissingsteps(executor, scenario.steps)
+        for scenario in feature.scenarios
+    ])
+
+    # We call unique to remove duplicate steps.
+    unique(vcat(collect(missingsteps), backgroundmissingsteps))
 end
 
 #
