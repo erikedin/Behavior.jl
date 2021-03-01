@@ -208,7 +208,31 @@ function findmissingsteps(executor::Executor, feature::Feature) :: Vector{Scenar
     ])
 
     # We call unique to remove duplicate steps.
-    unique(vcat(collect(missingsteps), backgroundmissingsteps))
+    # We check uniqueness using only the step text, ignoring block text 
+    # and data tables.
+    unique(step -> step.text, vcat(collect(missingsteps), backgroundmissingsteps))
+end
+
+stepimplementationsuggestion(steptype::String, text::String) :: String = """$steptype \"\"\"$(escape_string(text))\"\"\" begin end"""
+stepimplementationsuggestion(given::Given) :: String = stepimplementationsuggestion("@given", given.text)
+stepimplementationsuggestion(when::When) :: String = stepimplementationsuggestion("@when", when.text)
+stepimplementationsuggestion(then::Then) :: String = stepimplementationsuggestion("@then", then.text)
+
+function suggestmissingsteps(executor::Executor, feature::Feature) :: String
+    missingsteps = findmissingsteps(executor, feature)
+
+    missingstepimpls = [
+        stepimplementationsuggestion(step)
+        for step in missingsteps
+    ]
+
+    missingstepcode = join(missingstepimpls, "\n\n")
+
+    """
+    using ExecutableSpecifications
+
+    $(missingstepcode)
+    """
 end
 
 #

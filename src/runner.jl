@@ -117,3 +117,39 @@ function runspec(
 
     istotalsuccess
 end
+
+"""
+    suggestmissingsteps(featurepath::String, stepspath::String; parseoptions::ParseOptions=ParseOptions())
+
+Find missing steps from the feature and print suggestions on step implementations to
+match those missing steps.
+"""
+function suggestmissingsteps(
+    featurepath::String,
+    stepspath = joinpath(dirname(featurepath), "steps");
+    parseoptions::ParseOptions=ParseOptions())
+
+    # All of the below is quite hacky, which I'm motivating by the fact that
+    # I just want something working. It most definitely indicates that I need to rework the whole
+    # Driver/ExecutorEngine design.
+
+    # -----------------------------------------------------------------------------
+    # borrowed code from runspec; should be refactored later
+    os = OSAL()
+    engine = ExecutorEngine(QuietRealTimePresenter(); executionenv=NoExecutionEnvironment())
+    driver = Driver(os, engine)
+
+    readstepdefinitions!(driver, stepspath)
+    # Parse the feature file and suggest missing steps.
+    parseresult = parsefeature(read(featurepath, String), options=parseoptions)
+    if parseresult isa BadParseResult
+        println("Failed to parse feature file $featurepath")
+        println(parseresult)
+        return
+    end
+
+    feature = parseresult.value
+
+    suggestedcode = suggestmissingsteps(driver.engine.executor, feature)
+    println(suggestedcode)
+end

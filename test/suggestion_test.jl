@@ -1,4 +1,4 @@
-using ExecutableSpecifications: findmissingsteps
+using ExecutableSpecifications: findmissingsteps, ExecutorEngine, suggestmissingsteps
 
 @testset "Suggestions          " begin
     @testset "One step missing; Step is listed as missing in result" begin
@@ -131,5 +131,116 @@ using ExecutableSpecifications: findmissingsteps
 
         # Assert
         @test result == [Given("some missing step")]
+    end
+
+    @testset "Two missing steps with different block texts; Step is only listed once" begin
+        # Arrange
+        matcher = FromMacroStepDefinitionMatcher("""
+            using ExecutableSpecifications
+
+            @given "some precondition" begin end
+        """)
+
+        executor = Executor(matcher, QuietRealTimePresenter())
+
+        scenario1 = Scenario("1", String[], ScenarioStep[Given("some missing step"; block_text="1")])
+        scenario2 = Scenario("2", String[], ScenarioStep[Given("some missing step"; block_text="2")])
+        feature = Feature(FeatureHeader("", [], []), [scenario1, scenario2])
+
+        # Act
+        result = findmissingsteps(executor, feature)
+
+        # Assert
+        @test length(result) == 1
+    end
+
+    @testset "Suggestions" begin
+        @testset "One missing step; Add step according to suggestion; Step is found" begin
+            # Arrange
+            matcher = FromMacroStepDefinitionMatcher("""
+                using ExecutableSpecifications
+
+                @given "successful step" begin end
+            """)
+            executor = Executor(matcher, QuietRealTimePresenter())
+
+            scenario1 = Scenario("1", String[], ScenarioStep[Given("missing step")])
+            feature = Feature(FeatureHeader("", [], []), [scenario1])
+
+            # Act
+            missingstepscode = suggestmissingsteps(executor, feature)
+
+            # Assert
+            missingmatcher = FromMacroStepDefinitionMatcher(missingstepscode)
+            compositematcher = CompositeStepDefinitionMatcher()
+            addmatcher!(compositematcher, matcher)
+            addmatcher!(compositematcher, missingmatcher)
+
+            assertexecutor = Executor(compositematcher, QuietRealTimePresenter())
+
+            result = findmissingsteps(assertexecutor, feature)
+            @test result == []
+        end
+        
+        @testset "Many missing steps; Add steps according to suggestion; Steps are found" begin
+            # Arrange
+            matcher = FromMacroStepDefinitionMatcher("""
+                using ExecutableSpecifications
+
+                @given "successful step" begin end
+            """)
+            executor = Executor(matcher, QuietRealTimePresenter())
+
+            missingsteps = ScenarioStep[
+                Given("missing given"),
+                When("missing when"),
+                Then("missing then"),
+            ]
+            scenario1 = Scenario("1", String[], missingsteps)
+            feature = Feature(FeatureHeader("", [], []), [scenario1])
+
+            # Act
+            missingstepscode = suggestmissingsteps(executor, feature)
+
+            # Assert
+            missingmatcher = FromMacroStepDefinitionMatcher(missingstepscode)
+            compositematcher = CompositeStepDefinitionMatcher()
+            addmatcher!(compositematcher, matcher)
+            addmatcher!(compositematcher, missingmatcher)
+
+            assertexecutor = Executor(compositematcher, QuietRealTimePresenter())
+
+            result = findmissingsteps(assertexecutor, feature)
+            @test result == []
+        end
+        @testset "Missing step ending with a double-quote; Suggestion works" begin
+            # Arrange
+            matcher = FromMacroStepDefinitionMatcher("""
+                using ExecutableSpecifications
+
+                @given "successful step" begin end
+            """)
+            executor = Executor(matcher, QuietRealTimePresenter())
+
+            missingsteps = ScenarioStep[
+                Given("missing given\""),
+            ]
+            scenario1 = Scenario("1", String[], missingsteps)
+            feature = Feature(FeatureHeader("", [], []), [scenario1])
+
+            # Act
+            missingstepscode = suggestmissingsteps(executor, feature)
+
+            # Assert
+            missingmatcher = FromMacroStepDefinitionMatcher(missingstepscode)
+            compositematcher = CompositeStepDefinitionMatcher()
+            addmatcher!(compositematcher, matcher)
+            addmatcher!(compositematcher, missingmatcher)
+
+            assertexecutor = Executor(compositematcher, QuietRealTimePresenter())
+
+            result = findmissingsteps(assertexecutor, feature)
+            @test result == []
+        end
     end
 end
