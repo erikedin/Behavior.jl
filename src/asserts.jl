@@ -39,3 +39,14 @@ macro expect(ex)
         end
     end
 end
+
+"""
+    @fail(message)
+
+Fail a step with a descriptive message.
+"""
+macro fail(message)
+    quote
+        throw(StepAssertFailure($message))
+    end
+end

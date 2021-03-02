@@ -47,4 +47,23 @@ using ExecutableSpecifications.Gherkin
 
         @test stepfailed.assertion == "isempty([1])"
     end
+
+    @testset "Fail assertion used in step, Step is StepFailed with assertion 'Some reason'" begin
+        matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
+            using ExecutableSpecifications
+
+            @given "some precondition" begin
+                @fail "Some reason"
+            end
+        """)
+        given = Gherkin.Given("some precondition")
+        context = ExecutableSpecifications.StepDefinitionContext()
+
+        m = ExecutableSpecifications.findstepdefinition(matcher, given)
+
+        args = Dict{Symbol, Any}()
+        stepfailed = m.stepdefinition.definition(context, args)
+
+        @test stepfailed.assertion == "Some reason"
+    end
 end

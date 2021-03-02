@@ -213,6 +213,7 @@ using ExecutableSpecifications: findmissingsteps, ExecutorEngine, suggestmissing
             result = findmissingsteps(assertexecutor, feature)
             @test result == []
         end
+
         @testset "Missing step ending with a double-quote; Suggestion works" begin
             # Arrange
             matcher = FromMacroStepDefinitionMatcher("""
@@ -241,6 +242,32 @@ using ExecutableSpecifications: findmissingsteps, ExecutorEngine, suggestmissing
 
             result = findmissingsteps(assertexecutor, feature)
             @test result == []
+        end
+
+        @testset "One missing step; Add step according to suggestion; Step fails when executed" begin
+            # Arrange
+            matcher = FromMacroStepDefinitionMatcher("""
+                using ExecutableSpecifications
+            """)
+            executor = Executor(matcher, QuietRealTimePresenter())
+
+            scenario1 = Scenario("1", String[], ScenarioStep[Given("missing step")])
+            feature = Feature(FeatureHeader("", [], []), [scenario1])
+
+            # Act
+            missingstepscode = suggestmissingsteps(executor, feature)
+
+            # Assert
+            missingmatcher = FromMacroStepDefinitionMatcher(missingstepscode)
+            compositematcher = CompositeStepDefinitionMatcher()
+            addmatcher!(compositematcher, matcher)
+            addmatcher!(compositematcher, missingmatcher)
+
+            assertexecutor = Executor(compositematcher, QuietRealTimePresenter())
+
+            featureresult = ExecutableSpecifications.executefeature(assertexecutor, feature)
+            scenarioresult = featureresult.scenarioresults[1]
+            @test scenarioresult.steps[1] isa ExecutableSpecifications.StepFailed
         end
     end
 end
