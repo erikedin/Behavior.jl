@@ -213,7 +213,12 @@ function findmissingsteps(executor::Executor, feature::Feature) :: Vector{Scenar
     unique(step -> step.text, vcat(collect(missingsteps), backgroundmissingsteps))
 end
 
-stepimplementationsuggestion(steptype::String, text::String) :: String = """$steptype \"$(escape_string(text))\" begin @fail "Implement me" end"""
+function stepimplementationsuggestion(steptype::String, text::String) :: String
+    """$steptype \"$(escape_string(text))\" begin
+        @fail "Implement me"
+    end
+    """
+end
 stepimplementationsuggestion(given::Given) :: String = stepimplementationsuggestion("@given", given.text)
 stepimplementationsuggestion(when::When) :: String = stepimplementationsuggestion("@when", when.text)
 stepimplementationsuggestion(then::Then) :: String = stepimplementationsuggestion("@then", then.text)
