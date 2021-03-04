@@ -30,7 +30,8 @@ function accumulateresult!(acc::ResultAccumulator, result::FeatureResult)
     # successful if all its steps are successful.
     for scenarioresult in result.scenarioresults
         arestepssuccessful = [issuccess(step) for step in scenarioresult.steps]
-        isscenariosuccessful = all(arestepssuccessful)
+        arebackgroundstepsgood = [issuccess(result) for result in scenarioresult.backgroundresult]
+        isscenariosuccessful = all(arestepssuccessful) && all(arebackgroundstepsgood)
         if isscenariosuccessful
             n_success += 1
         else
