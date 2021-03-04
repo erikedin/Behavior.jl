@@ -29,13 +29,18 @@ abstract type StepDefinitionMatcher end
 
 function makedescriptionregex(s::String) :: Tuple{Regex, AbstractVector{Symbol}}
     variablematches = eachmatch(r"{([^{}]+)}", s)
-    if variablematches !== nothing
-        variables = [Symbol(m[1]) for m in variablematches]
-        s = replace(s, r"{([^{}]+)}" => s"(?<\1>.*)")
-        Regex("^$(s)\$"), variables
-    else
-        Regex("^$(s)\$"), Symbol[]
-    end
+    variables = [Symbol(m[1]) for m in variablematches]
+
+    # Escaping the string here so that characters that have meaning in a regular expressios
+    # is treated as their actual character, instead of as regular expression characters.
+    # The escaped characters are the PCRE metacharacters.
+    escaped_s = escape_string(s, "\$^()|.[]?*+")
+
+    # Replace variables like {foo} with a regex expression for that
+    # variable like (?<foo>.*)
+    regex_s = replace(escaped_s, r"{([^{}]+)}" => s"(?<\1>.*)")
+
+    Regex("^$(regex_s)\$"), variables
 end
 
 "A step definition has a description, which is used to find it, a function to execute, and a location."

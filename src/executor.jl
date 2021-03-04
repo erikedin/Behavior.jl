@@ -214,7 +214,14 @@ function findmissingsteps(executor::Executor, feature::Feature) :: Vector{Scenar
 end
 
 function stepimplementationsuggestion(steptype::String, text::String) :: String
-    """$steptype \"$(escape_string(text))\" begin
+    # Escaping the string here ensures that the step text is a valid Julia string.
+    # If the text is
+    #   some precondition with $x and a quote "
+    # then the $x will be interpreted as string interpolation by Julia, which is
+    # not what we intend. Also, the " needs to be escaped so we don't have mismatched
+    # double quotes.
+    escaped_text = escape_string(text, "\$\"")
+    """$steptype \"$(escaped_text)\" begin
         @fail "Implement me"
     end
     """
