@@ -328,6 +328,24 @@ using ExecutableSpecifications.Gherkin:
             feature = result.value
             @test length(feature.scenarios) == 1
         end
+
+        @testset "The feature file has three empty scenarios; The Feature has three scenarios" begin
+            text = """
+            Feature: This feature has no empty lines between scenarios
+
+                Scenario: This is one scenario
+
+                Scenario: This is another scenario
+
+                Scenario: This is a third scenario
+            """
+
+            result = parsefeature(text)
+
+            @test issuccessful(result)
+            feature = result.value
+            @test length(feature.scenarios) == 3
+        end
     end
 
     @testset "Malformed features" begin

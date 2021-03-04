@@ -325,13 +325,15 @@ end
 isstoppingline(pattern::Regex, s::AbstractString) = match(pattern, s) !== nothing
 
 """
-    @untilnextstep(byline::Symbol, steps = "Given|When|Then|And|But")
+    @untilnextstep(byline::Symbol[, steps])
 
 Execute the function for each line, until a step is encountered, or no further lines are
 available.
 Also skips empty lines and comment lines.
+
+The optional parameter steps can specify exactly which keywords to stop at.
 """
-macro untilnextstep(ex::Expr, steps = ["Given", "When", "Then", "And", "But"])
+macro untilnextstep(ex::Expr, steps = ["Given", "When", "Then", "And", "But", "Scenario"])
     esc(quote
         stepsregex = join($steps, "|")
         regex = "^($(stepsregex))"
