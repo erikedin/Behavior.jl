@@ -35,7 +35,7 @@ end
 
 Wrapper method for the above runfeature!.
 """
-function runfeature!(engine::ExecutorEngine, parseresult::Gherkin.OKParseResult{Feature})
+function runfeature!(engine::ExecutorEngine, parseresult::Gherkin.OKParseResult{Feature}, _featurefile::String)
     runfeature!(engine, parseresult.value)
 end
 
@@ -44,8 +44,8 @@ end
 
 A feature could not be parsed. Record the result.
 """
-function runfeature!(engine::ExecutorEngine, parsefailure::Gherkin.BadParseResult{Feature})
-    accumulateresult!(engine.accumulator, parsefailure)
+function runfeature!(engine::ExecutorEngine, parsefailure::Gherkin.BadParseResult{Feature}, featurefile::String)
+    accumulateresult!(engine.accumulator, parsefailure, featurefile)
 end
 
 finish(engine::ExecutorEngine) = engine.accumulator
@@ -69,7 +69,7 @@ function runfeatures!(driver::Driver, path::String; parseoptions::ParseOptions =
     featurefiles = findfileswithextension(driver.os, path, ".feature")
     for featurefile in featurefiles
         featureparseresult = parsefeature(readfile(driver.os, featurefile), options=parseoptions)
-        runfeature!(driver.engine, featureparseresult)
+        runfeature!(driver.engine, featureparseresult, featurefile)
     end
     finish(driver.engine)
 end

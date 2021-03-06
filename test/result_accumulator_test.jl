@@ -218,7 +218,7 @@ using ExecutableSpecifications:
 
         parseresult = Gherkin.BadParseResult{Feature}(:somereason, :someexpected, :someactual, 0, "Some line")
 
-        accumulateresult!(accumulator, parseresult)
+        accumulateresult!(accumulator, parseresult, "features/some/path/to/my.feature")
 
         @test issuccess(accumulator) == false
     end

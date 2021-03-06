@@ -49,6 +49,19 @@ function parseonly(featurepath::String; parseoptions::ParseOptions=ParseOptions(
 end
 
 """
+    printbadparseresult(error::BadParseResult{T})
+
+Print parse errors.
+"""
+function printbadparseresult(featurefile::String, err::Gherkin.BadParseResult{T}) where {T}
+    println("ERROR: $(featurefile):$(err.linenumber)")
+    println("      Line: $(err.line)")
+    println("    Reason: $(err.reason)")
+    println("  Expected: $(err.expected)")
+    println("    Actual: $(err.actual)")
+end
+
+"""
     runspec(rootpath; featurepath, stepspath, execenvpath, parseoptions)
 
 Execute all features found from the `rootpath`.
@@ -104,6 +117,16 @@ function runspec(
         printstyled(rpad("$(r.n_success)", 7); color=:green)
         printstyled(" | "; color=:white)
         printstyled(rpad("$(r.n_failure)", 7), "\n"; color=linecolor)
+    end
+
+    println()
+
+    #
+    # Present any syntax errors
+    #
+    for (featurefile, err) in resultaccumulator.errors
+        println()
+        printbadparseresult(featurefile, err)
     end
 
     println()

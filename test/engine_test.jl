@@ -97,8 +97,8 @@ mutable struct FakeEngine <: Engine
 end
 addmatcher!(engine::FakeEngine, m::StepDefinitionMatcher) = push!(engine.matchers, m)
 runfeature!(engine::FakeEngine, feature::Feature) = push!(engine.features, feature)
-runfeature!(engine::FakeEngine, result::Gherkin.OKParseResult{Feature}) = runfeature!(engine, result.value)
-runfeature!(engine::FakeEngine, result::Gherkin.BadParseResult{Feature}) = push!(engine.errors, result)
+runfeature!(engine::FakeEngine, result::Gherkin.OKParseResult{Feature}, featurefile::String) = runfeature!(engine, result.value)
+runfeature!(engine::FakeEngine, result::Gherkin.BadParseResult{Feature}, featurefile::String) = push!(engine.errors, result)
 
 finish(engine::FakeEngine) = engine.finishresult
 
