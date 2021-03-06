@@ -91,11 +91,15 @@ mutable struct FakeEngine <: Engine
     matchers::Vector{StepDefinitionMatcher}
     features::Vector{Feature}
     finishresult::FakeResultAccumulator
+    errors::Vector{Gherkin.BadParseResult{Feature}}
 
-    FakeEngine(; finishresult=FakeResultAccumulator(true)) = new([], [], finishresult)
+    FakeEngine(; finishresult=FakeResultAccumulator(true)) = new([], [], finishresult, [])
 end
 addmatcher!(engine::FakeEngine, m::StepDefinitionMatcher) = push!(engine.matchers, m)
 runfeature!(engine::FakeEngine, feature::Feature) = push!(engine.features, feature)
+runfeature!(engine::FakeEngine, result::Gherkin.OKParseResult{Feature}) = runfeature!(engine, result.value)
+runfeature!(engine::FakeEngine, result::Gherkin.BadParseResult{Feature}) = push!(engine.errors, result)
+
 finish(engine::FakeEngine) = engine.finishresult
 
 struct FakeOSAbstraction <: OSAbstraction
@@ -353,5 +357,30 @@ readfile(os::FakeOSAbstraction, path::String) = os.filecontents[path]
 
         # Assert
         @test length(engine.features) == 1
+    end
+
+    @testset "Running feature files; One feature has a syntax error; No exception is thrown" begin
+        # I need to rewrite these tests properly, because the mock lots of things that I think I'd
+        # like to be part of the test. This test however, should throw an exception, which used to be the
+        # case.
+
+        # Arrange
+        filecontents = Dict("features/file1.feature" => """
+            Feature: Some feature
+
+                Scenario: A scenario
+                     When an action
+                    Given successful step
+            """)
+        engine = FakeEngine()
+        osal = FakeOSAbstraction(fileswithext=[".feature" => ["features/file1.feature"]],
+                                 filecontents = filecontents)
+        driver = Driver(osal, engine)
+
+        # Act
+        runfeatures!(driver, "features")
+
+        # Assert
+        # Not throwing an exception above is enough.
     end
 end

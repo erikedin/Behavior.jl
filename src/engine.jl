@@ -19,9 +19,33 @@ struct ExecutorEngine <: Engine
 end
 
 addmatcher!(engine::ExecutorEngine, matcher::StepDefinitionMatcher) = addmatcher!(engine.matcher, matcher)
+
+"""
+    runfeature!(::ExecutorEngine, ::Feature)
+
+Run the scenarios in a feature and record the result.
+"""
 function runfeature!(engine::ExecutorEngine, feature::Feature)
     result = executefeature(engine.executor, feature)
     accumulateresult!(engine.accumulator, result)
+end
+
+"""
+    runfeature!(::ExecutorEngine, ::Gherkin.OKParseResult{Feature})
+
+Wrapper method for the above runfeature!.
+"""
+function runfeature!(engine::ExecutorEngine, parseresult::Gherkin.OKParseResult{Feature})
+    runfeature!(engine, parseresult.value)
+end
+
+"""
+    runfeature!(::ExecutorEngine, ::Gherkin.BadParseResult{Feature})
+
+A feature could not be parsed. Record the result.
+"""
+function runfeature!(engine::ExecutorEngine, parsefailure::Gherkin.BadParseResult{Feature})
+    accumulateresult!(engine.accumulator, parsefailure)
 end
 
 finish(engine::ExecutorEngine) = engine.accumulator
@@ -45,8 +69,7 @@ function runfeatures!(driver::Driver, path::String; parseoptions::ParseOptions =
     featurefiles = findfileswithextension(driver.os, path, ".feature")
     for featurefile in featurefiles
         featureparseresult = parsefeature(readfile(driver.os, featurefile), options=parseoptions)
-        feature = featureparseresult.value
-        runfeature!(driver.engine, feature)
+        runfeature!(driver.engine, featureparseresult)
     end
     finish(driver.engine)
 end

@@ -212,4 +212,14 @@ using ExecutableSpecifications:
 
         @test isempty(accumulator)
     end
+
+    @testset "Accumulate results; One feature with syntax error; Total result is failure" begin
+        accumulator = ResultAccumulator()
+
+        parseresult = Gherkin.BadParseResult{Feature}(:somereason, :someexpected, :someactual, 0, "Some line")
+
+        accumulateresult!(accumulator, parseresult)
+
+        @test issuccess(accumulator) == false
+    end
 end

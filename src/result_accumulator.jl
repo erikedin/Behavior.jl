@@ -14,8 +14,9 @@ total run is a success of a failure.
 mutable struct ResultAccumulator
     isaccumsuccess::Bool
     features::Vector{FeatureSuccessAndFailure}
+    errors::Vector{Gherkin.BadParseResult{Feature}}
 
-    ResultAccumulator() = new(true, [])
+    ResultAccumulator() = new(true, [], [])
 end
 
 """
@@ -42,6 +43,16 @@ function accumulateresult!(acc::ResultAccumulator, result::FeatureResult)
     end
 
     push!(acc.features, FeatureSuccessAndFailure(result.feature, n_success, n_failure))
+end
+
+"""
+    accumulateresult!(acc::ResultAccumulator, parsefailure::Gherkin.BadParseResult{Feature})
+
+A feature file could not be parsed properly. Record the error.
+"""
+function accumulateresult!(acc::ResultAccumulator, parsefailure::Gherkin.BadParseResult{Feature})
+    push!(acc.errors, parsefailure)
+    acc.isaccumsuccess = false
 end
 
 """
