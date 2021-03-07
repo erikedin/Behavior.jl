@@ -29,7 +29,7 @@ using CoffeeMachine
 
 hascoffee(cup::Cup) = cup[:coffee] > 0.0
 
-@given "that there is a cup in the coffee machine" begin
+@given("that there is a cup in the coffee machine") do context
     cup = Cup()
     machine = Machine()
 
@@ -39,12 +39,12 @@ hascoffee(cup::Cup) = cup[:coffee] > 0.0
     context[:machine] = machine
 end
 
-@when "the \"Coffee\" button is pressed" begin
+@when("the \"Coffee\" button is pressed") do context
     machine = context[:machine]
     coffeewaspressed(machine)
 end
 
-@then "the cup is filled with coffee" begin
+@then("the cup is filled with coffee") do context
     cup = context[:cup]
     @expect hascoffee(cup)
 end
