@@ -26,7 +26,7 @@ using ExecutableSpecifications: findmissingsteps, ExecutorEngine, suggestmissing
             matcher = FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications
             
-                @given "some step" begin end
+                @given("some step") do context end
             """)
 
             executor = Executor(matcher, QuietRealTimePresenter())
@@ -47,8 +47,8 @@ using ExecutableSpecifications: findmissingsteps, ExecutorEngine, suggestmissing
             matcher = FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications
 
-                @given "some precondition" begin end
-                @when "some action" begin end
+                @given("some precondition") do context end
+                @when("some action") do context end
             """)
 
             executor = Executor(matcher, QuietRealTimePresenter())
@@ -75,7 +75,7 @@ using ExecutableSpecifications: findmissingsteps, ExecutorEngine, suggestmissing
             matcher = FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications
 
-                @given "some precondition" begin end
+                @given("some precondition") do context end
             """)
 
             executor = Executor(matcher, QuietRealTimePresenter())
@@ -97,7 +97,7 @@ using ExecutableSpecifications: findmissingsteps, ExecutorEngine, suggestmissing
             matcher = FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications
 
-                @given "some precondition" begin end
+                @given("some precondition") do context end
             """)
 
             executor = Executor(matcher, QuietRealTimePresenter())
@@ -118,7 +118,7 @@ using ExecutableSpecifications: findmissingsteps, ExecutorEngine, suggestmissing
             matcher = FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications
 
-                @given "some precondition" begin end
+                @given("some precondition") do context end
             """)
 
             executor = Executor(matcher, QuietRealTimePresenter())
@@ -139,7 +139,7 @@ using ExecutableSpecifications: findmissingsteps, ExecutorEngine, suggestmissing
             matcher = FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications
 
-                @given "some precondition" begin end
+                @given("some precondition") do context end
             """)
 
             executor = Executor(matcher, QuietRealTimePresenter())
@@ -162,7 +162,7 @@ using ExecutableSpecifications: findmissingsteps, ExecutorEngine, suggestmissing
             matcher = FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications
 
-                @given "successful step" begin end
+                @given("successful step") do context end
             """)
             executor = Executor(matcher, QuietRealTimePresenter())
 
@@ -189,7 +189,7 @@ using ExecutableSpecifications: findmissingsteps, ExecutorEngine, suggestmissing
             matcher = FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications
 
-                @given "successful step" begin end
+                @given("successful step") do context end
             """)
             executor = Executor(matcher, QuietRealTimePresenter())
 
@@ -221,7 +221,7 @@ using ExecutableSpecifications: findmissingsteps, ExecutorEngine, suggestmissing
             matcher = FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications
 
-                @given "successful step" begin end
+                @given("successful step") do context end
             """)
             executor = Executor(matcher, QuietRealTimePresenter())
 

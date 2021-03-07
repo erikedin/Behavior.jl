@@ -11,7 +11,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications: @given
 
-                @given "some definition" begin
+                @given("some definition") do context
                     x = 1
                 end
             """)
@@ -26,7 +26,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications: @given
 
-                @given "some definition" begin
+                @given("some definition") do context
                     x = 1
                 end
             """)
@@ -39,7 +39,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications: @given
 
-                @given "some other definition" begin
+                @given("some other definition") do context
                     x = 1
                 end
             """)
@@ -56,7 +56,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications: @given
 
-                @given "some definition" begin
+                @given("some definition") do context
                     x = 1
                 end
             """)
@@ -76,7 +76,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications: @given
 
-                @given "some definition" begin
+                @given("some definition") do context
                     context[:x] = 1
                 end
             """)
@@ -95,7 +95,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications: @given
 
-                @given "some definition" begin
+                @given("some definition") do context
                     context[:x] = "Some string"
                 end
             """)
@@ -114,7 +114,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications: @then, @expect
 
-                @then ":x has value 1" begin
+                @then(":x has value 1") do context
                     @expect context[:x] == 1
                 end
             """)
@@ -133,7 +133,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications: @given
 
-                @given "some definition" begin
+                @given("some definition") do context
 
                 end
             """)
@@ -150,7 +150,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications: @given, @expect
 
-                @given "some definition" begin
+                @given("some definition") do context
                     @expect 1 == 2
                 end
             """)
@@ -167,7 +167,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications: @when
 
-                @when "some action" begin
+                @when("some action") do context
 
                 end
             """)
@@ -184,7 +184,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications: @then
 
-                @then "some postcondition" begin
+                @then("some postcondition") do context
 
                 end
             """)
@@ -201,7 +201,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications: @given
 
-                @given "some precondition" begin
+                @given("some precondition") do context
                     throw(ErrorException("Some error"))
                 end
             """)
@@ -220,7 +220,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
 
                 foo() = nothing
 
-                @when "calling empty function foo" begin
+                @when("calling empty function foo") do context
                     foo()
                 end
             """)
@@ -239,10 +239,10 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications: @given
 
-                @given "some definition" begin
+                @given("some definition") do context
                 end
 
-                @given "some definition" begin
+                @given("some definition") do context
                 end
             """)
 
@@ -255,10 +255,10 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications: @given
 
-                @given "some definition" begin
+                @given("some definition") do context
                 end
 
-                @given "some definition" begin
+                @given("some definition") do context
                 end
             """; filename="steps.jl")
 
@@ -285,11 +285,11 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
                 using ExecutableSpecifications: @given
 
 
-                @given "some definition" begin
+                @given("some definition") do context
                 end
 
 
-                @given "some definition" begin
+                @given("some definition") do context
                 end
             """; filename="othersteps.jl")
 
@@ -317,7 +317,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             matcher1 = FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications: @given
 
-                @given "some precondition" begin
+                @given("some precondition") do context
 
                 end
             """)
@@ -338,7 +338,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             matcher2 = FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications: @given
 
-                @given "some other precondition" begin
+                @given("some other precondition") do context
 
                 end
             """)
@@ -362,14 +362,14 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             matcher2 = FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications: @given
 
-                @given "some other precondition" begin
+                @given("some other precondition") do context
 
                 end
             """)
             matcher3 = FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications: @when
 
-                @when "some action" begin
+                @when("some action") do context
 
                 end
             """)
@@ -391,14 +391,14 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             matcher1 = FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications: @given
 
-                @given "some precondition" begin
+                @given("some precondition") do context
 
                 end
             """)
             matcher2 = FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications: @given
 
-                @given "some precondition" begin
+                @given("some precondition") do context
 
                 end
             """)
@@ -413,11 +413,11 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             matcher1 = FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications: @given
 
-                @given "some precondition" begin
+                @given("some precondition") do context
 
                 end
 
-                @given "some precondition" begin
+                @given("some precondition") do context
 
                 end
             """)
@@ -435,14 +435,14 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             matcher1 = FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications: @given
 
-                @given "some precondition" begin
+                @given("some precondition") do context
 
                 end
             """; filename="matcher1.jl")
             matcher2 = FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications: @given
 
-                @given "some precondition" begin
+                @given("some precondition") do context
 
                 end
             """; filename="matcher2.jl")
@@ -471,18 +471,18 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             matcher1 = FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications: @given
 
-                @given "some precondition" begin
+                @given("some precondition") do context
 
                 end
 
-                @given "some precondition" begin
+                @given("some precondition") do context
 
                 end
             """; filename="matcher1.jl")
             matcher2 = FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications: @given
 
-                @given "some precondition" begin
+                @given("some precondition") do context
 
                 end
             """; filename="matcher2.jl")
@@ -525,7 +525,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             matcher1 = FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications
 
-                @given "some precondition" begin end
+                @given("some precondition") do context end
             """)
 
             compositematcher = CompositeStepDefinitionMatcher()
@@ -543,14 +543,14 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             matcher1 = FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications: @given
 
-                @given "some other precondition" begin
+                @given("some other precondition") do context
 
                 end
             """)
             matcher2 = FromMacroStepDefinitionMatcher("""
                 using ExecutableSpecifications: @when
 
-                @when "some action" begin
+                @when("some action") do context
 
                 end
             """)

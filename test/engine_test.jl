@@ -15,7 +15,7 @@ import ExecutableSpecifications: addmatcher!, findfileswithextension, readfile, 
         matcher = FromMacroStepDefinitionMatcher("""
             using ExecutableSpecifications
 
-            @given "successful step" begin end
+            @given("successful step") do context end
         """)
         addmatcher!(engine, matcher)
 
@@ -36,7 +36,7 @@ import ExecutableSpecifications: addmatcher!, findfileswithextension, readfile, 
         matcher = FromMacroStepDefinitionMatcher("""
             using ExecutableSpecifications
 
-            @given "failing step" begin
+            @given("failing step") do context
                 @expect 1 == 2
             end
         """)
@@ -59,11 +59,11 @@ import ExecutableSpecifications: addmatcher!, findfileswithextension, readfile, 
         matcher = FromMacroStepDefinitionMatcher("""
             using ExecutableSpecifications
 
-            @given "failing step" begin
+            @given("failing step") do context
                 @expect 1 == 2
             end
 
-            @given "successful step" begin end
+            @given("successful step") do context end
         """)
         addmatcher!(engine, matcher)
 
@@ -200,7 +200,7 @@ readfile(os::FakeOSAbstraction, path::String) = os.filecontents[path]
                                  filecontents = Dict("features/steps/file.jl" => """
                                     using ExecutableSpecifications
 
-                                    @given "successful step" begin end
+                                    @given("successful step") do context end
                                  """))
         driver = Driver(osal, engine)
 

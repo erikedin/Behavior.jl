@@ -14,7 +14,7 @@ using ExecutableSpecifications.Gherkin
         matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
             using ExecutableSpecifications
 
-            @given "some precondition" begin
+            @given("some precondition") do context
                 @expect 1 == 2
             end
         """)
@@ -33,7 +33,7 @@ using ExecutableSpecifications.Gherkin
         matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
             using ExecutableSpecifications
 
-            @given "some precondition" begin
+            @given("some precondition") do context
                 @expect isempty([1])
             end
         """)
@@ -52,7 +52,7 @@ using ExecutableSpecifications.Gherkin
         matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
             using ExecutableSpecifications
 
-            @given "some precondition" begin
+            @given("some precondition") do context
                 @fail "Some reason"
             end
         """)

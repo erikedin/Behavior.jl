@@ -98,10 +98,10 @@ currentfilename = ""
 # Step definition macros
 #
 
-function step_definition_(description::String, definition::Expr)
+function step_definition_(definition::Expr, description::String)
     # The step definition function takes a context and executes a bit of code supplied by the
     # test writer. The bit of code is in $definition.
-    definitionfunction = :((context, args) -> $definition)
+    definitionfunction = :((context, args) -> $definition(context))
     descriptionregex = makedescriptionregex(description)
     quote
         # Push a given step definition to the global state so it can be found by the

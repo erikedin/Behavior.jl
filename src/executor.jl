@@ -221,7 +221,7 @@ function stepimplementationsuggestion(steptype::String, text::String) :: String
     # not what we intend. Also, the " needs to be escaped so we don't have mismatched
     # double quotes.
     escaped_text = escape_string(text, "\$\"")
-    """$steptype \"$(escaped_text)\" begin
+    """$steptype(\"$(escaped_text)\") do context
         @fail "Implement me"
     end
     """

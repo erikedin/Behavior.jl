@@ -8,7 +8,7 @@ using ExecutableSpecifications: FromMacroStepDefinitionMatcher, findstepdefiniti
         stepdef_matcher = FromMacroStepDefinitionMatcher("""
             using ExecutableSpecifications: @given
 
-            @given "some {foo}" begin end
+            @given("some {foo}") do context end
         """)
 
         stepdefinitionmatch = findstepdefinition(stepdef_matcher, given)
@@ -21,7 +21,7 @@ using ExecutableSpecifications: FromMacroStepDefinitionMatcher, findstepdefiniti
         stepdef_matcher = FromMacroStepDefinitionMatcher("""
             using ExecutableSpecifications: @given
 
-            @given "some {foo}" begin end
+            @given("some {foo}") do context end
         """)
 
         stepdefinitionmatch = findstepdefinition(stepdef_matcher, given)
@@ -34,7 +34,7 @@ using ExecutableSpecifications: FromMacroStepDefinitionMatcher, findstepdefiniti
         stepdef_matcher = FromMacroStepDefinitionMatcher("""
             using ExecutableSpecifications: @given
 
-            @given "some {quux}" begin end
+            @given("some {quux}") do context end
         """)
 
         stepdefinitionmatch = findstepdefinition(stepdef_matcher, given)
@@ -47,7 +47,7 @@ using ExecutableSpecifications: FromMacroStepDefinitionMatcher, findstepdefiniti
         stepdef_matcher = FromMacroStepDefinitionMatcher("""
             using ExecutableSpecifications: @given
 
-            @given "some {foo} and {quux}" begin end
+            @given("some {foo} and {quux}") do context end
         """)
 
         stepdefinitionmatch = findstepdefinition(stepdef_matcher, given)
@@ -60,7 +60,7 @@ using ExecutableSpecifications: FromMacroStepDefinitionMatcher, findstepdefiniti
         stepdefmatcher = FromMacroStepDefinitionMatcher("""
             using ExecutableSpecifications: @given
 
-            @given "some value {foo}" begin
+            @given("some value {foo}") do context
                 @expect args[:foo] == "bar"
             end
         """)
@@ -78,7 +78,7 @@ using ExecutableSpecifications: FromMacroStepDefinitionMatcher, findstepdefiniti
         stepdefmatcher = FromMacroStepDefinitionMatcher("""
             using ExecutableSpecifications: @given
 
-            @given "some values {foo} and {quux}" begin
+            @given("some values {foo} and {quux}") do context
                 @expect args[:foo] == "bar"
                 @expect args[:quux] == "fnord"
             end
@@ -97,9 +97,9 @@ using ExecutableSpecifications: FromMacroStepDefinitionMatcher, findstepdefiniti
         stepdefmatcher = FromMacroStepDefinitionMatcher("""
             using ExecutableSpecifications: @given
 
-            @given "some values {foo} and {quux}" begin end
+            @given("some values {foo} and {quux}") do context end
 
-            @when "some action" begin
+            @when("some action") do context
                 @expect !haskey(args, :foo)
                 @expect !haskey(args, :quux)
             end
