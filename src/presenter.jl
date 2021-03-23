@@ -65,7 +65,6 @@ function present(presenter::ColorConsolePresenter, feature::Feature)
 end
 
 function present(presenter::ColorConsolePresenter, scenario::Scenario)
-    println()
     printstyled(presenter.io, "  Scenario: $(scenario.description)\n"; color=:blue)
 end
 

@@ -79,7 +79,8 @@ function runspec(
     featurepath = joinpath(rootpath, "features"),
     stepspath = joinpath(featurepath, "steps"),
     execenvpath = joinpath(featurepath, "environment.jl"),
-    parseoptions::ParseOptions=ParseOptions()
+    parseoptions::ParseOptions=ParseOptions(),
+    presenter::RealTimePresenter=ColorConsolePresenter()
 )
     os = OSAL()
 
@@ -89,7 +90,7 @@ function runspec(
         NoExecutionEnvironment()
     end
 
-    engine = ExecutorEngine(ColorConsolePresenter(); executionenv=executionenv)
+    engine = ExecutorEngine(presenter; executionenv=executionenv)
     driver = Driver(os, engine)
 
     readstepdefinitions!(driver, stepspath)
