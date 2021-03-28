@@ -1,6 +1,7 @@
 module ExecutableSpecifications
 
 include("Gherkin.jl")
+include("Selection.jl")
 
 "Abstraction for presenting results from scenario steps."
 abstract type Presenter end
