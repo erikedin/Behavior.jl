@@ -4,6 +4,7 @@ This is useful if you're only after a final report, after all features have been
 """
 struct QuietRealTimePresenter <: RealTimePresenter end
 present(::QuietRealTimePresenter, ::Scenario) = nothing
+present(::QuietRealTimePresenter, ::Scenario, ::ScenarioResult) = nothing
 present(::QuietRealTimePresenter, ::Gherkin.ScenarioStep) = nothing
 present(::QuietRealTimePresenter, ::Gherkin.ScenarioStep, ::StepExecutionResult) = nothing
 present(::QuietRealTimePresenter, ::Gherkin.Feature) = nothing
@@ -66,6 +67,10 @@ end
 
 function present(presenter::ColorConsolePresenter, scenario::Scenario)
     printstyled(presenter.io, "  Scenario: $(scenario.description)\n"; color=:blue)
+end
+
+function present(presenter::ColorConsolePresenter, scenario::Scenario, ::ScenarioResult)
+    printstyled(presenter.io, "\n")
 end
 
 function present(presenter::ColorConsolePresenter, step::Gherkin.ScenarioStep)

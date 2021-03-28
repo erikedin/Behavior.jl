@@ -18,6 +18,7 @@ function present(terse::TerseRealTimePresenter, scenario::Scenario)
     terse.currentsteps = Gherkin.ScenarioStep[]
     present(terse.inner, scenario)
 end
+present(terse::TerseRealTimePresenter, scenario::Scenario, ::ScenarioResult) = nothing
 
 # Since the terse presenter shall not print any scenario steps unless they fail,
 # we wait until we have a result to determine if it should be presenter or not.

@@ -138,7 +138,11 @@ function executescenario(executor::Executor, background::Gherkin.Background, sce
 
     afterscenario(executor.executionenv, context, scenario)
 
-    ScenarioResult(results, scenario, background, backgroundresults)
+    scenarioresult = ScenarioResult(results, scenario, background, backgroundresults)
+
+    present(executor.presenter, scenario, scenarioresult)
+
+    scenarioresult
 end
 
 """
