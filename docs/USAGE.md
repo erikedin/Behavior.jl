@@ -43,7 +43,10 @@ In the code above, we provide `suggestmissingsteps` with a feature file path, an
 where the step implementations are found. It will find that then `When` step above is missing
 and provide you with a sample step implementation.
 
-Note that currently, `suggestmissingsteps` takes only a single feature file. It would of course
+Note that `suggestmissingsteps` can also optionally take a `ParseOptions` as an optional argument,
+which allows you to configure how strict or lenient the parser should be when reading the feature file.
+
+Also note that currently, `suggestmissingsteps` takes only a single feature file. It would of course
 be possible to have `suggestmissingsteps` find _all_ feature files in the project, but this could
 potentially list too many missing steps to be of use.
 

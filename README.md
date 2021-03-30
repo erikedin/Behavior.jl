@@ -9,7 +9,7 @@ tool for executing such requirements, and creating reports.
 This package is in the early stages of development, and has only minimal functionality.
 
 # Usage
-See `docs/USAGE.md` for more detailed usage.
+See [docs/USAGE.md](docs/USAGE.md) for more detailed usage.
 
 Specifications are written in the Gherkin format, such as
 
