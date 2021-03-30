@@ -20,5 +20,6 @@ include("engine.jl")
 include("runner.jl")
 
 export @given, @when, @then, @expect, @fail, @beforescenario, @afterscenario, runspec
+export suggestmissingsteps
 
 end # module
