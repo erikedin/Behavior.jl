@@ -33,4 +33,20 @@ using ExecutableSpecifications.Selection
         # Act and Assert
         @test select(selector, String["@foo"]) == false
     end
+
+    @testset "Selector is a single tag; Scenario has @foo as the second tag; select returns true" begin
+        # Arrange
+        selector = parsetagselector("@foo")
+
+        # Act and Assert
+        @test select(selector, ["@bar", "@foo"])
+    end
+
+    @testset "Selector is not @foo; Scenario has no tags; select returns true" begin
+        # Arrange
+        selector = parsetagselector("not @foo")
+
+        # Act and Assert
+        @test select(selector, String[])
+    end
 end
