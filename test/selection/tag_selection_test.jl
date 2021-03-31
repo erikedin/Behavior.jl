@@ -49,4 +49,29 @@ using ExecutableSpecifications.Selection
         # Act and Assert
         @test select(selector, String[])
     end
+
+    @testset "Empty selector; @foo matches" begin
+        # Arrange
+        selector = parsetagselector("")
+
+        # Act and Assert
+        @test select(selector, String["@foo"])
+    end
+
+    @testset "Empty selector; select returns true for no tags" begin
+        # Arrange
+        selector = parsetagselector("")
+
+        # Act and Assert
+        @test select(selector, String[])
+    end
+
+    @testset "Only white space selector; select returns true for no tags and @foo" begin
+        # Arrange
+        selector = parsetagselector("  ")
+
+        # Act and Assert
+        @test select(selector, String[])
+        @test select(selector, String["@foo"])
+    end
 end

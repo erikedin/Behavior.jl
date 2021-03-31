@@ -62,7 +62,7 @@ function printbadparseresult(featurefile::String, err::Gherkin.BadParseResult{T}
 end
 
 """
-    runspec(rootpath; featurepath, stepspath, execenvpath, parseoptions)
+    runspec(rootpath; featurepath, stepspath, execenvpath, parseoptions, presenter)
 
 Execute all features found from the `rootpath`.
 

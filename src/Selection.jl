@@ -44,12 +44,20 @@ end
 matches(ex::Not, tags::AbstractVector{String}) = !matches(ex.inner, tags)
 
 """
+All is a tag expression that matches any tags or no tags.
+"""
+struct All <: TagExpression end
+matches(::All, ::AbstractVector{String}) = true
+
+"""
     parsetagexpression(s::String) :: TagExpression
 
 Parse the string `s` into a `TagExpression`.
 """
 function parsetagexpression(s::String) :: TagExpression
-    if startswith(s, "not ")
+    if isempty(strip(s))
+        All()
+    elseif startswith(s, "not ")
         tag = replace(s, "not " => "")
         Not(Tag(tag))
     else
