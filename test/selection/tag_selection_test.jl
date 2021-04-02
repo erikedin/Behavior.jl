@@ -1,77 +1,151 @@
 using Test
 using ExecutableSpecifications.Selection
+using ExecutableSpecifications.Gherkin
+using ExecutableSpecifications.Gherkin: AbstractScenario
 
 @testset "Selection            " begin
-    @testset "Selector is a single tag; Select returns true for that that" begin
-        # Arrange
-        selector = parsetagselector("@foo")
+    @testset "Tag selector" begin
+        @testset "Feature has tag @foo and no scenarios; select returns the feature unchanged" begin
+            # Arrange
+            header = FeatureHeader("Some feature", String[], ["@foo"])
+            feature = Feature(header, AbstractScenario[])
 
-        # Act and Assert
-        @test select(selector, ["@foo"])
-    end
+            # Act
+            selector = parsetagselector("@foo")
+            newfeature = select(selector, feature)
 
-    @testset "Selector is a single tag; Select returns false for no tags" begin
-        # Arrange
-        selector = parsetagselector("@foo")
+            # Assert
+            @test newfeature == feature
+        end
 
-        # Act and Assert
-        @test select(selector, String[]) == false
-    end
+        @testset "Feature has no tags and no scenarios; select returns nothing" begin
+            # Arrange
+            header = FeatureHeader("Some feature", String[], String[])
+            feature = Feature(header, AbstractScenario[])
 
-    @testset "Selector is a single tag; Select returns false for a different tag" begin
-        # Arrange
-        selector = parsetagselector("@foo")
+            # Act
+            selector = parsetagselector("@foo")
+            newfeature = select(selector, feature)
 
-        # Act and Assert
-        @test select(selector, String["@bar"]) == false
-    end
+            # Assert
+            @test newfeature === nothing
+        end
 
-    @testset "Selector is a single tag @bar; Select returns false for a different tag @foo" begin
-        # Arrange
-        selector = parsetagselector("@bar")
+        @testset "Feature has tag @bar; Select for @foo returns nothing" begin
+            # Arrange
+            header = FeatureHeader("Some feature", String[], ["@bar"])
+            feature = Feature(header, AbstractScenario[])
 
-        # Act and Assert
-        @test select(selector, String["@foo"]) == false
-    end
+            # Act
+            selector = parsetagselector("@foo")
+            newfeature = select(selector, feature)
 
-    @testset "Selector is a single tag; Scenario has @foo as the second tag; select returns true" begin
-        # Arrange
-        selector = parsetagselector("@foo")
+            # Assert
+            @test newfeature === nothing
+        end
 
-        # Act and Assert
-        @test select(selector, ["@bar", "@foo"])
-    end
+        @testset "Feature has tag @foo; Select for @bar returns nothing" begin
+            # Arrange
+            header = FeatureHeader("Some feature", String[], ["@foo"])
+            feature = Feature(header, AbstractScenario[])
 
-    @testset "Selector is not @foo; Scenario has no tags; select returns true" begin
-        # Arrange
-        selector = parsetagselector("not @foo")
+            # Act
+            selector = parsetagselector("@bar")
+            newfeature = select(selector, feature)
 
-        # Act and Assert
-        @test select(selector, String[])
-    end
+            # Assert
+            @test newfeature === nothing
+        end
 
-    @testset "Empty selector; @foo matches" begin
-        # Arrange
-        selector = parsetagselector("")
+        @testset "Feature has tags @bar and @foo; Select for @foo returns the feature unchanged" begin
+            # Arrange
+            header = FeatureHeader("Some feature", String[], ["@bar", "@foo"])
+            feature = Feature(header, AbstractScenario[])
 
-        # Act and Assert
-        @test select(selector, String["@foo"])
-    end
+            # Act
+            selector = parsetagselector("@foo")
+            newfeature = select(selector, feature)
 
-    @testset "Empty selector; select returns true for no tags" begin
-        # Arrange
-        selector = parsetagselector("")
+            # Assert
+            @test newfeature == feature
+        end
 
-        # Act and Assert
-        @test select(selector, String[])
-    end
+        @testset "Feature has no tags; Selector is (not @foo); select returns the feature unchanged" begin
+            # Arrange
+            header = FeatureHeader("Some feature", String[], [])
+            feature = Feature(header, AbstractScenario[])
 
-    @testset "Only white space selector; select returns true for no tags and @foo" begin
-        # Arrange
-        selector = parsetagselector("  ")
+            # Act
+            selector = parsetagselector("not @foo")
+            newfeature = select(selector, feature)
 
-        # Act and Assert
-        @test select(selector, String[])
-        @test select(selector, String["@foo"])
+            # Assert
+            @test newfeature == feature
+        end
+
+        @testset "Feature has tag @foo; Selector is (not @foo); select returns nothing" begin
+            # Arrange
+            header = FeatureHeader("Some feature", String[], ["@foo"])
+            feature = Feature(header, AbstractScenario[])
+
+            # Act
+            selector = parsetagselector("not @foo")
+            newfeature = select(selector, feature)
+
+            # Assert
+            @test newfeature === nothing
+        end
+
+        @testset "Feature has tag @foo; Empty selector; Select returns the feature unchanged" begin
+            # Arrange
+            header = FeatureHeader("Some feature", String[], ["@foo"])
+            feature = Feature(header, AbstractScenario[])
+
+            # Act
+            selector = parsetagselector("")
+            newfeature = select(selector, feature)
+
+            # Assert
+            @test newfeature == feature
+        end
+
+        @testset "Feature has no tags; Empty selector; Select returns the feature unchanged" begin
+            # Arrange
+            header = FeatureHeader("Some feature", String[], [])
+            feature = Feature(header, AbstractScenario[])
+
+            # Act
+            selector = parsetagselector("")
+            newfeature = select(selector, feature)
+
+            # Assert
+            @test newfeature == feature
+        end
+
+        @testset "Feature has no tags; Selector is only whitespace; Select returns the feature unchanged" begin
+            # Arrange
+            header = FeatureHeader("Some feature", String[], [])
+            feature = Feature(header, AbstractScenario[])
+
+            # Act
+            selector = parsetagselector("   ")
+            newfeature = select(selector, feature)
+
+            # Assert
+            @test newfeature == feature
+        end
+
+        @testset "Feature has tag @baz; Selector is only whitespace; Select returns the feature unchanged" begin
+            # Arrange
+            header = FeatureHeader("Some feature", String[], [])
+            feature = Feature(header, AbstractScenario[])
+
+            # Act
+            selector = parsetagselector("   ")
+            newfeature = select(selector, feature)
+
+            # Assert
+            @test newfeature == feature
+        end
     end
 end

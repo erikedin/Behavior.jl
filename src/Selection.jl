@@ -9,6 +9,8 @@ Selecting which features and scenarios to run, based on tags.
 """
 module Selection
 
+using ExecutableSpecifications.Gherkin
+
 export select, parsetagselector, TagSelector
 
 """
@@ -76,11 +78,19 @@ struct TagSelector
 end
 
 """
-    select(::TagSelector, tags::AbstractVector{String}) :: Bool
+    select(::TagSelector, feature::Feature) :: Union{Feature,Nothing}
 
-Returns true if a feature or scenario with the given tag set should be selected for execution, false otherwise.
+Filter a feature and its scenarios based on the selected tags.
+Returns a feature with zero or more scenarios, or nothing if the feature
+did not match the tag selector.
 """
-select(ts::TagSelector, tags::AbstractVector{String}) :: Bool = matches(ts.expression, tags)
+function select(ts::TagSelector, feature::Feature) :: Union{Feature,Nothing}
+    if matches(ts.expression, feature.header.tags)
+        feature
+    else
+        nothing
+    end
+end
 
 """
     parsetagselector(s::String) :: TagSelector
