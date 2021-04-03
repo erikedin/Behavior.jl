@@ -29,9 +29,11 @@ step implementation, like the `Given` step does. To get a suggestion for missing
 implementations in a given feature file, you can run
 
 ```julia-repl
-julia> using ExecutableSpecifications
+julia> using ExecutableSpecifications: suggestmissingsteps, ParseOptions
 
-julia> suggestmissingsteps("features/SomeFeature.feature", "features/steps")
+julia> parseoptions = ParseOptions(allow_any_step_order=true)
+
+julia> suggestmissingsteps("features/SomeFeature.feature", "features/steps", parseoptions=parseoptions)
 using ExecutableSpecifications
 
 @when("a step is missing") do context
