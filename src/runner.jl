@@ -62,7 +62,7 @@ function printbadparseresult(featurefile::String, err::Gherkin.BadParseResult{T}
 end
 
 """
-    runspec(rootpath; featurepath, stepspath, execenvpath, parseoptions, presenter, tagselector)
+    runspec(rootpath; featurepath, stepspath, execenvpath, parseoptions, presenter, tags)
 
 Execute all features found from the `rootpath`.
 
@@ -86,7 +86,7 @@ function runspec(
     execenvpath = joinpath(featurepath, "environment.jl"),
     parseoptions::ParseOptions=ParseOptions(),
     presenter::RealTimePresenter=ColorConsolePresenter(),
-    tagselector::String = "",
+    tags::String = "",
 )
     os = OSAL()
 
@@ -97,7 +97,7 @@ function runspec(
     end
 
     # TODO: Handle tag selector errors once the syntax is more complex.
-    selector = Selection.parsetagselector(tagselector)
+    selector = Selection.parsetagselector(tags)
 
     engine = ExecutorEngine(presenter; executionenv=executionenv, selector=selector)
     driver = Driver(os, engine)
@@ -160,9 +160,7 @@ match those missing steps.
 function suggestmissingsteps(
     featurepath::String,
     stepspath = joinpath(dirname(featurepath), "steps");
-    parseoptions::ParseOptions=ParseOptions(),
-    tagselector::String = "",
-    )
+    parseoptions::ParseOptions=ParseOptions())
 
     # All of the below is quite hacky, which I'm motivating by the fact that
     # I just want something working. It most definitely indicates that I need to rework the whole
@@ -172,9 +170,7 @@ function suggestmissingsteps(
     # borrowed code from runspec; should be refactored later
     os = OSAL()
 
-    selector = Selection.parsetagselector(tagselector)
-
-    engine = ExecutorEngine(QuietRealTimePresenter(); executionenv=NoExecutionEnvironment(), selector=selector)
+    engine = ExecutorEngine(QuietRealTimePresenter(); executionenv=NoExecutionEnvironment())
     driver = Driver(os, engine)
 
     readstepdefinitions!(driver, stepspath)

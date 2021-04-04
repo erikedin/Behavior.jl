@@ -171,5 +171,66 @@ Feature: Demonstrate suggestion limitations
         Given some value 42
 ```
 
-## Tag selector
-TODO: Once tag selectors can be used
+## Selecting scenarios by tags
+WARNING: At the time of writing the only supported way of selecting tags is a single tag with an optional "not" expression:
+- `@tag`, or
+- `not @tag`
+The tag selection is a work in progress.
+
+You can select which scenarios to run using the tags specified in the Gherkin files. For example, a feature file can look like this
+```Gherkin
+@foo
+Feature: Describing tags
+
+    @bar @baz
+    Scenario: Some scenario
+        Given some step
+    
+    @ignore
+    Scenario: Ignore this scenario
+        Given some step
+```
+Here we have applied the tag `@foo` to the entire feature file. That is, the `@foo` tag is inherited by all scenarios in the feature file.
+One scenario has the `@bar` and `@baz` tags, and another has the tag `@ignore`.
+
+You can select to run only the scenarios marked with `@foo` by running
+```julia-repl
+julia> using ExecutableSpecifications
+julia> runspec(tags = "@foo")
+```
+This will run both scenarios above, as they both inherit the `@foo` tag from the feature level.
+
+You can run only the scenario marked with `@bar` by running
+```julia-repl
+julia> using ExecutableSpecifications
+julia> runspec(tags = "@bar")
+```
+This will run only the first scenario `Scenario: Some scenario` above, as the second scenario does not have the `@bar` tag.
+
+You can also choose to run scenarios that _do not_ have a given tag, such as `@ignore`.
+```julia-repl
+julia> using ExecutableSpecifications
+julia> runspec(tags = "not @ignore")
+```
+This will also run only the first scenario, as it does not have the `@ignore` tag, but not the second.
+
+If a feature does not have any matching scenarios, then that feature will be excluded from the results, as it had no bearing
+on the result.
+
+### Tag selection syntax
+NOTE: The tag selection syntax is a work in progress.
+
+- `@tag`
+  
+    Select scenarios with the tag `@tag`.
+
+- `not @tag`
+
+    Select scenarios that _do not_ have the tag `@tag`.
+
+### Future syntax
+In the future, you will be able to write a more complex expression using `and`, `or`, and parentheses, like
+```
+@foo and (not @ignore)
+```
+which will run all scenarios with the `@foo` tag that do not also have the `@ignore` tag.
