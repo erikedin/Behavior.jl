@@ -78,18 +78,28 @@ struct TagSelector
 end
 
 """
+    selectscenario(::TagSelector, feature::Feature, scenario::Scenario) :: Boolean
+
+Check if a given scenario ought to be included in the execution. Returns true if that is the case,
+false otherwise.
+"""
+function select(ts::TagSelector, feature::Feature, scenario::Gherkin.AbstractScenario) :: Bool
+    tags = vcat(feature.header.tags, scenario.tags)
+    matches(ts.expression, tags)
+end
+
+"""
     select(::TagSelector, feature::Feature) :: Union{Feature,Nothing}
 
 Filter a feature and its scenarios based on the selected tags.
 Returns a feature with zero or more scenarios, or nothing if the feature
-did not match the tag selector.
+and none of the scenarios matched the tag selector.
 """
-function select(ts::TagSelector, feature::Feature) :: Union{Feature,Nothing}
-    if matches(ts.expression, feature.header.tags)
-        feature
-    else
-        nothing
-    end
+function select(ts::TagSelector, feature::Feature) :: Feature
+    newscenarios = [scenario
+                    for scenario in feature.scenarios
+                    if select(ts, feature, scenario)]
+    Feature(feature, newscenarios)
 end
 
 """

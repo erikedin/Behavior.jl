@@ -141,6 +141,7 @@ struct Feature
 
     Feature(header::FeatureHeader, background::Background, scenarios::Vector{<:AbstractScenario}) = new(header, background, scenarios)
     Feature(header::FeatureHeader, scenarios::Vector{<:AbstractScenario}) = new(header, Background(), scenarios)
+    Feature(feature::Feature, newscenarios::Vector{<:AbstractScenario}) = new(feature.header, feature.background, newscenarios)
 end
 
 """
