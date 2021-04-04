@@ -121,4 +121,6 @@ function parsetagselector(s::String) :: TagSelector
     TagSelector(parsetagexpression(s))
 end
 
+const AllScenarios = TagSelector(All())
+
 end

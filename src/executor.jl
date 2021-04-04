@@ -235,7 +235,8 @@ stepimplementationsuggestion(when::When) :: String = stepimplementationsuggestio
 stepimplementationsuggestion(then::Then) :: String = stepimplementationsuggestion("@then", then.text)
 
 function suggestmissingsteps(executor::Executor, feature::Feature) :: String
-    missingsteps = findmissingsteps(executor, feature)
+    filteredfeature = selector(executor.selector, feature)
+    missingsteps = findmissingsteps(executor, filteredfeature)
 
     missingstepimpls = [
         stepimplementationsuggestion(step)

@@ -62,7 +62,7 @@ function printbadparseresult(featurefile::String, err::Gherkin.BadParseResult{T}
 end
 
 """
-    runspec(rootpath; featurepath, stepspath, execenvpath, parseoptions, presenter)
+    runspec(rootpath; featurepath, stepspath, execenvpath, parseoptions, presenter, tagselector)
 
 Execute all features found from the `rootpath`.
 
@@ -72,6 +72,11 @@ By default, it looks for feature files in `<rootpath>/features` and step files
 You may override the default locations by specifying `featurepath`, 
 `stepspath`, or `execenvpath`.
 
+The `tagselector` option is an expression you can use to select which scenarios to run
+based on tags. For instance, the tag selector `@foo` will run only those scenarios that
+have the tag `@foo`, while `not @ignore` will run only that scenarios that _do not_ have
+the `@ignore` tag.
+
 See also: [Gherkin.ParseOptions](@ref).
 """
 function runspec(
@@ -80,7 +85,8 @@ function runspec(
     stepspath = joinpath(featurepath, "steps"),
     execenvpath = joinpath(featurepath, "environment.jl"),
     parseoptions::ParseOptions=ParseOptions(),
-    presenter::RealTimePresenter=ColorConsolePresenter()
+    presenter::RealTimePresenter=ColorConsolePresenter(),
+    tagselector::String = "",
 )
     os = OSAL()
 
@@ -90,7 +96,10 @@ function runspec(
         NoExecutionEnvironment()
     end
 
-    engine = ExecutorEngine(presenter; executionenv=executionenv)
+    # TODO: Handle tag selector errors once the syntax is more complex.
+    selector = Selection.parsetagselector(tagselector)
+
+    engine = ExecutorEngine(presenter; executionenv=executionenv, selector=selector)
     driver = Driver(os, engine)
 
     readstepdefinitions!(driver, stepspath)
@@ -143,7 +152,7 @@ function runspec(
 end
 
 """
-    suggestmissingsteps(featurepath::String, stepspath::String; parseoptions::ParseOptions=ParseOptions())
+    suggestmissingsteps(featurepath::String, stepspath::String; parseoptions::ParseOptions=ParseOptions(), tagselector::String = "")
 
 Find missing steps from the feature and print suggestions on step implementations to
 match those missing steps.
@@ -151,7 +160,9 @@ match those missing steps.
 function suggestmissingsteps(
     featurepath::String,
     stepspath = joinpath(dirname(featurepath), "steps");
-    parseoptions::ParseOptions=ParseOptions())
+    parseoptions::ParseOptions=ParseOptions(),
+    tagselector::String = "",
+    )
 
     # All of the below is quite hacky, which I'm motivating by the fact that
     # I just want something working. It most definitely indicates that I need to rework the whole
@@ -160,7 +171,10 @@ function suggestmissingsteps(
     # -----------------------------------------------------------------------------
     # borrowed code from runspec; should be refactored later
     os = OSAL()
-    engine = ExecutorEngine(QuietRealTimePresenter(); executionenv=NoExecutionEnvironment())
+
+    selector = Selection.parsetagselector(tagselector)
+
+    engine = ExecutorEngine(QuietRealTimePresenter(); executionenv=NoExecutionEnvironment(), selector=selector)
     driver = Driver(os, engine)
 
     readstepdefinitions!(driver, stepspath)

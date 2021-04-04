@@ -221,5 +221,22 @@ using ExecutableSpecifications.Gherkin: AbstractScenario
             @test length(newfeature.scenarios) == 1
             @test newfeature.scenarios[1] == feature.scenarios[1]
         end
+
+        @testset "One scenario has tag @ignore; selecting on (not @ignore) returns only the feature without that tag" begin
+            # Arrange
+            header = FeatureHeader("Some feature", String[], [])
+            feature = Feature(header, AbstractScenario[
+                Scenario("Some scenario", String["@ignore"], ScenarioStep[]),
+                Scenario("Some other scenario", String["@other"], ScenarioStep[]),
+            ])
+
+            # Act
+            selector = parsetagselector("not @ignore")
+            newfeature = select(selector, feature)
+
+            # Assert
+            @test length(newfeature.scenarios) == 1
+            @test newfeature.scenarios[1] == feature.scenarios[2]
+        end
     end
 end

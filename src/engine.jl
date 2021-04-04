@@ -9,12 +9,14 @@ struct ExecutorEngine <: Engine
     accumulator::ResultAccumulator
     executor::Executor
     matcher::StepDefinitionMatcher
+    selector::Selection.TagSelector
 
     function ExecutorEngine(realtimepresenter::RealTimePresenter;
-                            executionenv=NoExecutionEnvironment())
+                            executionenv=NoExecutionEnvironment(),
+                            selector::Selection.TagSelector = Selection.AllScenarios)
         matcher = CompositeStepDefinitionMatcher()
         executor = Executor(matcher, realtimepresenter; executionenv=executionenv)
-        new(ResultAccumulator(), executor, matcher)
+        new(ResultAccumulator(), executor, matcher, selector)
     end
 end
 
@@ -36,7 +38,16 @@ end
 Wrapper method for the above runfeature!.
 """
 function runfeature!(engine::ExecutorEngine, parseresult::Gherkin.OKParseResult{Feature}, _featurefile::String)
-    runfeature!(engine, parseresult.value)
+    # Filter all features to run only the scenarios chosen by the tag selector, if any.
+    # Any features or scenarios that do not match the tag selector will be removed here.
+    filteredfeature = Selection.select(engine.selector, parseresult.value)
+
+    # If there are no scenarios in this feature, then do not run it at all.
+    # This matters because we don't want it listed in the results view having 0 successes
+    # and 0 failures.
+    if !isempty(filteredfeature.scenarios)
+        runfeature!(engine, filteredfeature)
+    end
 end
 
 """
