@@ -37,6 +37,60 @@ using ExecutableSpecifications
 end
 ```
 
+## Parameters
+NOTE: This is a work in progress, and will see improvement.
+
+A step in Gherkin is matched against step definitions in Julia code. These step definitions
+may have parameters, which match against many values. For instance, the Gherkin
+```Gherkin
+Feature: Demonstrating parameters
+
+  Scenario: Value forty-two
+      Given some value 42
+
+  Scenario: Value seventeen
+      Given some value 17
+```
+we have two steps. Both of these steps will match the step definition
+```julia
+using ExecutableSpecifications
+
+@given("value {String}") do context, value
+    @expect value in ["42", "17"]
+end
+```
+The step definition above has a parameter `{String}`, which matches any string following the
+text `value `. The additional argument `value` in the do-block will have the value `"42"` in the
+first scenario above, and `"17"` in the second.
+
+In the parameter above we specify the type `String`. One can also use an empty
+parameter `{}` which is an alias for `{String}`. The type of the argument `value` will naturally
+be `String`.
+
+One can have several parameters in the step definition. For instance, the step definition
+```julia
+using ExecutableSpecifications
+
+@given("{} {}") do context, key, value
+    @expect key == "value"
+    @expect value in ["42", "17"]
+end
+```
+This step definition will also match the above `Given` step, and the first argument `key` will
+have the value `"value"` in both the scenarios.
+
+Future work: In the near future, other types will be supported, such as `Int` and `Float`.
+
+### Obsolete
+Earlier, parameters were accessible in an object `args` that was provided to all step
+implementations, like so
+```julia
+@given("value {foo}") do context
+    @expect args[:foo] in ["42", "17"]
+end
+```
+This is no longer supported, and the `args` variable is no longer present.
+
 ## Strictness of Gherkin syntax
 There are some ways to configure how strict we wish the Gherkin parser to be,
 when reading a feature file. For instance, ExecutableSpecifications by default

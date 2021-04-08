@@ -344,7 +344,8 @@ using ExecutableSpecifications: findmissingsteps, ExecutorEngine, suggestmissing
                 (ScenarioStep[Given("some +")], "+"),
 
                 # Check {}
-                (ScenarioStep[Given("some {}")], "{}"),
+                (ScenarioStep[Given("some {")], "{"),
+                (ScenarioStep[Given("some }")], "}"),
             ]
 
             @testset "Escaping regular expressions characters: $testdescription" begin

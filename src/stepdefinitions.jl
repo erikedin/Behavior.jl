@@ -28,7 +28,7 @@ abstract type StepDefinitionMatcher end
 #
 
 function makedescriptionregex(s::String) :: Tuple{Regex, AbstractVector{Symbol}}
-    variablematches = eachmatch(r"{([^{}]+)}", s)
+    variablematches = eachmatch(r"{([^{}]*)}", s)
     variables = [Symbol(m[1]) for m in variablematches]
 
     # Escaping the string here so that characters that have meaning in a regular expressios
@@ -38,7 +38,7 @@ function makedescriptionregex(s::String) :: Tuple{Regex, AbstractVector{Symbol}}
 
     # Replace variables like {foo} with a regex expression for that
     # variable like (?<foo>.*)
-    regex_s = replace(escaped_s, r"{([^{}]+)}" => s"(?<\1>.*)")
+    regex_s = replace(escaped_s, r"{([^{}]*)}" => s"(.*)")
 
     Regex("^$(regex_s)\$"), variables
 end
@@ -49,7 +49,7 @@ struct StepDefinition
     descriptionregex::Regex
     definition::Function
     location::StepDefinitionLocation
-    variables::Vector{Symbol}
+    variabletypes::Vector{Symbol}
 
     function StepDefinition(description::String, definition::Function, location::StepDefinitionLocation)
         descriptionregex, variables = makedescriptionregex(description)
@@ -59,10 +59,10 @@ end
 
 struct StepDefinitionMatch
     stepdefinition::StepDefinition
-    variables::Dict{Symbol, Any}
+    variables::Vector{String}
 
-    StepDefinitionMatch(s::StepDefinition) = new(s, Dict{Symbol, Any}())
-    function StepDefinitionMatch(s::StepDefinition, variables::Dict{Symbol, Any})
+    StepDefinitionMatch(s::StepDefinition) = new(s, String[])
+    function StepDefinitionMatch(s::StepDefinition, variables::AbstractArray{String})
         new(s, variables)
     end
 end
@@ -101,7 +101,7 @@ currentfilename = ""
 function step_definition_(definition::Expr, description::String)
     # The step definition function takes a context and executes a bit of code supplied by the
     # test writer. The bit of code is in $definition.
-    definitionfunction = :((context, args) -> $definition(context))
+    definitionfunction = :((context, vars) -> $definition(context, vars...))
     descriptionregex = makedescriptionregex(description)
     quote
         # Push a given step definition to the global state so it can be found by the
@@ -109,10 +109,10 @@ function step_definition_(definition::Expr, description::String)
         push!(currentdefinitions,
             StepDefinition(
                 $description,
-                (context, args) -> begin
+                (context, vars) -> begin
                 try
                     # Escape the step definition code so it gets the proper scope.
-                    $(esc(definitionfunction))(context, args)
+                    $(esc(definitionfunction))(context, vars)
                     # Any step definition that does not throw an exception is successful.
                     SuccessfulStepExecution()
                 catch ex
@@ -174,9 +174,8 @@ end
 function matchdefinition(stepdefinition::StepDefinition, description::String) :: Union{StepDefinitionMatch,Nothing}
     m = match(stepdefinition.descriptionregex, description)
     if m !== nothing
-        variables = [variablesym => m[variablesym]
-                     for variablesym in stepdefinition.variables]
-        StepDefinitionMatch(stepdefinition, Dict{Symbol, Any}(variables))
+        variables = String[String(x) for x in m.captures]
+        StepDefinitionMatch(stepdefinition, variables)
     else
         nothing
     end
