@@ -20,12 +20,14 @@ end
 
 end
 
-@when("foo is set to value 42") do context
-    context[:foo] = 42
-end
-
-@when("foo is set to value -17") do context
-    context[:foo] = -17
+# This demonstrates the use of a String parameter, which will match
+# more than one step.
+# NOTE: At the time of writing, only String parameters are supported.
+#       In the near future, one will be able to write {Int} directly,
+#       and the argument `vstr` will be of type `Int` instead.
+@when("foo is set to value {String}") do context, vstr
+    v = parse(Int, vstr)
+    context[:foo] = v
 end
 
 @then("foo is greater than zero") do context
