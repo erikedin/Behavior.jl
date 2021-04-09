@@ -11,6 +11,8 @@ This package is in the early stages of development, and has only minimal functio
 # Usage
 See [docs/USAGE.md](docs/USAGE.md) for more detailed usage.
 
+See [docs/TUTORIAL.md](docs/TUTORIAL.md) for a step-by-step introduction to this package.
+
 Specifications are written in the Gherkin format, such as
 
 ```gherkin

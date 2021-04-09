@@ -1,5 +1,64 @@
 # Usage
 
+## Package layout
+A Julia package commonly has the following files and directories:
+```
+ExamplePackage/
+├── Manifest.toml
+├── Project.toml
+├── src
+│   └── ExamplePackage.jl
+└── test
+    └── runtests.jl
+```
+To use ExecutableSpecifications.jl, add inside the package
+- a directory `features`
+
+    This directory will contain the Gherkin feature files.
+
+- a directory `features/steps`
+
+    This directory will contain the code that runs the actual
+    test steps.
+
+```
+ExamplePackage/
+├── features
+│   ├── Example.feature
+│   └── steps
+│       └── ExampleSteps.jl
+├── Manifest.toml
+├── Project.toml
+├── src
+│   └── ExamplePackage.jl
+└── test
+    └── runtests.jl
+```
+Above you will see a single Gherkin feature file `features/Example.feature` and a single
+step definition file `features/steps/ExampleSteps.jl`.
+
+### Test organization
+ExecutableSpecifications searches for both feature files and step files recursively. You may
+place them in any subdirectory structure that you like. For instance,
+```
+ExamplePackage/
+├── features
+│   ├── steps
+│   │   ├── ExampleSteps.jl
+│   │   └── substeps
+│   │       └── MoreSteps.jl
+│   ├── subfeature1
+│   │   └── Example.feature
+│   └── subfeature2
+│       └── Other.feature
+├── Manifest.toml
+├── Project.toml
+├── src
+│   └── ExamplePackage.jl
+└── test
+    └── runtests.jl
+```
+
 ## Making assertions
 There are currently two ways of making assertions in a step:
 
