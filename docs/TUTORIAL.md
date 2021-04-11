@@ -1,7 +1,7 @@
 # ExecutableSpecifications Tutorial
 This is a tutorial style introduction to how ExecutableSpecifications.jl works.
 It is not intended as a complete introduction to Behavior Driven Development, but
-rather an introduction to how to start with this package.
+rather as an introduction to how to start with this package.
 
 This tutorial assumes that you have Julia 1.0 or later installed. It also assumes
 you're using Linux, or something similar, but the instructions can be adapted to
@@ -16,8 +16,11 @@ Here is an overview of the steps we'll take:
 5. Implement the steps in the feature
 6. Test the Gherkin feature
 7. Add further scenarios
+8. Scenario Outlines
+9. Parameters
 
-If you have an existing package you wish to use, skip to step 3.
+If you have an existing package you wish to use, skip to step 3, and mentally
+replace the package name `CoffeeMachine` with your package name.
 
 # Step 1: Create a new package
 Go to a path where you want to create your new package, commonly
@@ -56,7 +59,7 @@ Create the package by running
 You now have a brand new package in `~/.julia/dev/CoffeeMachine`.
 
 # Step 2: Add some code
-Open the file `~/.julia/dev/CoffeeMachine/src/CoffeeMachine.jl` add code so that
+Open the file `~/.julia/dev/CoffeeMachine/src/CoffeeMachine.jl` and add code so that
 the `CoffeeMachine` module looks like this (you can remove the default `greet` function):
 ```julia
 module CoffeeMachine
@@ -126,7 +129,7 @@ In a terminal in `~/.julia/dev`, run
 ```bash
 $ git clone https://github.com/erikedin/ExecutableSpecifications.jl ExecutableSpecifications
 ```
-Note that we're cloning it into a repo with the `.jl` prefix, for consistency with the newly generated package.
+Note that we're cloning it into a repo without the `.jl` prefix, for consistency with the newly generated package.
 
 Start Julia in `~/.julia/dev` and activate the CoffeeMachine package, by
 ```
@@ -171,10 +174,10 @@ Path `ExecutableSpecifications` exists and looks like the correct package. Using
 ```
 
 We additionally require the standard `Test` module as a dependency, because we'll use the
-`@test` macro in the `CoffeeMachine/test/runtests.jl` test file later one.
+`@test` macro in the `CoffeeMachine/test/runtests.jl` test file later on.
 ```julia-repl
 (CoffeeMachine) pkg> add Test
-[ .. output not show for brevity .. ]
+[ .. output not shown for brevity .. ]
 ```
 
 # Step 4: Write a Gherkin feature
@@ -279,7 +282,7 @@ Then we call the `makecoffee!` function, provided by the `CoffeeMachine` module,
 We store the returned cup in the context, under the key `:cup`.
 
 Note that each step ought to perform a single well-defined action. For instance, this
-step does not make any assumption above _what_ the return cup actually is. In some cases
+step does not make any assumption above _what_ the returned cup actually is. In some cases
 it will be a `Cup` struct, and in some cases it will be a `Nothing`. This step does not
 care about that, but leaves that to later steps.
 
@@ -351,7 +354,7 @@ SUCCESS
 ```
 `ExecutableSpecifications` will by default print each `Feature`, `Scenario`, and step as they
 are being executed, and show a final result of how many scenarios succeeded, and how many
-failed as part of each `Feature`. Finally, it `SUCCESS` to indicate that no errors were
+failed as part of each `Feature`. Finally, it says `SUCCESS` to indicate that no errors were
 found.
 
 ## Optional: Introduce an error to see failures
@@ -520,7 +523,7 @@ expected that many, if not most, step definitions will be shared by many scenari
 
 # Step 8: Scenario Outlines
 `Scenario Outline`s in Gherkin is a way to run one scenario for many similar values.
-For instance, say that we want to test the machines error messages when it is out
+For instance, say that we want to test the machine's error messages when it is out
 of an ingredient. We could write two different scenarios, one for when the machine is
 out of coffee, and one for when it is out of milk.
 
