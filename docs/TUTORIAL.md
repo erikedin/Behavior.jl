@@ -15,7 +15,7 @@ Here is an overview of the steps we'll take:
 4. Write a Gherkin feature
 5. Implement the steps in the feature
 6. Test the Gherkin feature
-7. Add more BDD scenarios to the feature
+7. Add further scenarios
 
 If you have an existing package you wish to use, skip to step 3.
 
@@ -428,3 +428,207 @@ Furthermore, the entire feature is marked as failed, and we see that `1` scenari
 failed in that feature.
 
 To continue, ensure that you undo the intentional error, so that the tests pass again.
+
+# Step 7: Add further scenarios
+Add the following `Scenario` to `CoffeeMachine/features/MakingCoffee.feature`:
+```Gherkin
+Scenario: Making coffee with milk
+    Given a machine filled with coffee beans
+      And that the machine also has milk
+     When a user makes a cup of coffee with milk
+     Then the cup contains coffee
+      And the cup contains milk
+```
+Note that some of the steps are the same as the previous `Scenario`, while others
+are new.
+
+If you run the tests again, you will get a failure saying
+```
+Scenario: Making coffee with milk
+  Given a machine filled with coffee beans
+  Given that the machine also has milk
+
+      No match for 'Given that the machine also has milk'
+```
+This error occurs because we haven't added any step definition for the step
+`And that the machine also has milk` yet. The Gherking step type `And` means that
+the step type will be whatever came before it, which is a `Given` in this situation.
+So, add a step implementation in `CoffeeMachine/features/steps/makingcoffee.jl`:
+```julia
+@given("that the machine also has milk") do context
+    m = context[:machine]
+    fillwith!(m, milk=5.0)
+end
+```
+This expects that a machine has already been constructed, and simply fills
+it with milk.
+
+Also add step implementations for the other new steps:
+```julia
+@when("a user makes a cup of coffee with milk") do context
+    m = context[:machine]
+    cup = makecoffee!(m, withmilk=true)
+    context[:cup] = cup
+end
+
+@then("the cup contains milk") do context
+    cup = context[:cup]
+
+    @expect cup.milk > 0.0
+end
+```
+The first one calls `makecoffee!`, but this time with the keyword argument
+`withmilk=true`, indicating that we want milk in the coffee.
+
+The second step definition checks that there is milk in the cup.
+
+Runing the tests shows that both scenarios now pass.
+
+```julia-repl
+(CoffeeMachine) pkg> test
+     Testing CoffeeMachine
+     [ .. removed output for brevity .. ]
+     Testing Running tests...
+
+Feature: Making Coffee
+  Scenario: Making a regular coffee
+    Given a machine filled with coffee beans
+     When a user makes a cup of coffee
+     Then the cup contains coffee
+
+  Scenario: Making coffee with milk
+    Given a machine filled with coffee beans
+    Given that the machine also has milk
+     When a user makes a cup of coffee with milk
+     Then the cup contains coffee
+     Then the cup contains milk
+
+                         | Success | Failure
+  Feature: Making Coffee | 2       | 0
+
+
+SUCCESS
+     Testing CoffeeMachine tests passed
+```
+
+Note that step
+```Gherkin
+Then the cup contains coffee
+```
+is reused, as is the initial `Given` that constructs the coffee machine. It is
+expected that many, if not most, step definitions will be shared by many scenarios.
+
+# Step 8: Scenario Outlines
+`Scenario Outline`s in Gherkin is a way to run one scenario for many similar values.
+For instance, say that we want to test the machines error messages when it is out
+of an ingredient. We could write two different scenarios, one for when the machine is
+out of coffee, and one for when it is out of milk.
+
+```Gherkin
+Feature: Displaying messages
+
+    Scenario: Out of coffee
+        Given a machine without coffee
+         When a user makes a cup of coffee with milk
+         Then the machine displays Out of coffee
+
+    Scenario: Out of milk
+        Given a machine without milk
+         When a user makes a cup of coffee with milk
+         Then the machine displays Out of milk
+```
+However, note that the two scenarios above are nearly identical, only differing
+in specific values. The sequence of steps are the same, and the type of situation
+tested is the same. The only differences are which ingredient is missing and which
+error message we expect. This is a situation where you can use a single `Scenario Outline` to
+express more than one `Scenario`.
+
+Create a new feature file `CoffeeMachine/features/Display.feature`:
+```Gherkin
+Feature: Displaying messages
+
+    Scenario Outline: Errors
+        Given a machine without <ingredient>
+         When a user makes a cup of coffee with milk
+         Then the machine displays <message>
+
+        Examples:
+            | ingredient | message       |
+            | coffee     | Out of coffee |
+            | milk       | Out of milk   |
+```
+The above `Scenario Outline` looks like the above `Scenario`s, but introduces two placeholders,
+`<ingredient>` and `<message>` instead of specific values. In the `Examples:` section we
+have a table that lists which error message we expect for a given missing ingredient.
+The first line in the table has the two placeholders `ingredient` and `message` as
+column headers.
+
+This `Scenario Outline` is exactly equivalent to the two `Scenario`s above. To run it,
+create a new step definition file `CoffeeMachine/features/steps/display.jl`:
+```julia
+using ExecutableSpecifications
+using CoffeeMachine
+
+@given("a machine without coffee") do context
+    context[:machine] = Machine(coffee=0.0, milk=5.0)
+end
+
+@given("a machine without milk") do context
+    context[:machine] = Machine(coffee=5.0, milk=0.0)
+end
+
+@then("the machine displays Out of coffee") do context
+    m = context[:machine]
+    @expect readdisplay(m) == "Out of coffee"
+end
+
+@then("the machine displays Out of milk") do context
+    m = context[:machine]
+    @expect readdisplay(m) == "Out of milk"
+end
+```
+You can run the tests to ensure that they pass.
+
+# Step 9: Parameters
+In the above step, we saw how `Scenario Outline`s can be utilized to reduce otherwise
+repetitive `Scenario`s, and improve readability. In the step definition file above, also
+note that we have two repetitive steps
+```julia
+@then("the machine displays Out of coffee") do context
+    m = context[:machine]
+    @expect readdisplay(m) == "Out of coffee"
+end
+
+@then("the machine displays Out of milk") do context
+    m = context[:machine]
+    @expect readdisplay(m) == "Out of milk"
+end
+```
+These two steps check the same aspect of the coffee machine, but for two different values.
+While `Scenario Outline`s can be used to reduce repetition in `.feature` files,
+parameters can be used to reduce repetition in the step definition `.jl` files.
+
+Both steps above can be reduced to a single step
+```julia
+@then("the machine displays {String}") do context, message
+    m = context[:machine]
+    @expect readdisplay(m) == message
+end
+```
+There are two differences here:
+
+1. The step string has a parameter `{String}` which matches any text.
+2. The do-block function now takes two parameters, `context` and `message`.
+
+The value of the `message` argument to the do-block is whatever text is matched by `{String}`.
+So, for the first example above
+```
+Then the machine displays Out of coffee
+```
+this step will match the step definition `"the machine displays {String}"`, and the variable `message` will take on the value `Out of coffee`.
+
+In this way, we can write a single step definition to match many `Scenario` steps.
+
+Note that while the above example uses a `Scenario Outline` to demonstrate parameters in the
+step definition `.jl` file, these are two separate concepts. A step definition with a parameter
+like `{String}` can be used for `Scenario`s as well.
