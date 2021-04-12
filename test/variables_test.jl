@@ -1,5 +1,5 @@
 using Test
-using ExecutableSpecifications.Gherkin: Given, When
+using ExecutableSpecifications.Gherkin: Given, When, ScenarioStep, Scenario, Background
 using ExecutableSpecifications: FromMacroStepDefinitionMatcher, findstepdefinition
 
 @testset "Parameters           " begin
@@ -90,5 +90,72 @@ using ExecutableSpecifications: FromMacroStepDefinitionMatcher, findstepdefiniti
         scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
 
         @test isa(scenarioresult.steps[1], ExecutableSpecifications.SuccessfulStepExecution)
+    end
+
+    @testset "Typed parameters" begin
+        @testset "Definition has one Int parameter; has value 123" begin
+            given = Given("some value 123")
+            stepdef_matcher = FromMacroStepDefinitionMatcher("""
+                using ExecutableSpecifications: @given
+
+                @given("some value {Int}") do context, v end
+            """)
+
+            stepdefinitionmatch = findstepdefinition(stepdef_matcher, given)
+
+            @test stepdefinitionmatch.variables == [123]
+        end
+
+        @testset "Definition has one Float64 parameter; has value 234.0" begin
+            given = Given("some value 234.0")
+            stepdef_matcher = FromMacroStepDefinitionMatcher("""
+                using ExecutableSpecifications: @given
+
+                @given("some value {Float64}") do context, v end
+            """)
+
+            stepdefinitionmatch = findstepdefinition(stepdef_matcher, given)
+
+            @test stepdefinitionmatch.variables == [234.0]
+        end
+
+        @testset "Definition has one Bool parameter; has value true" begin
+            given = Given("some value true")
+            stepdef_matcher = FromMacroStepDefinitionMatcher("""
+                using ExecutableSpecifications: @given
+
+                @given("some value {Bool}") do context, v end
+            """)
+
+            stepdefinitionmatch = findstepdefinition(stepdef_matcher, given)
+
+            @test stepdefinitionmatch.variables == [true]
+        end
+
+        @testset "Definition has one Bool parameter; has value false" begin
+            given = Given("some value false")
+            stepdef_matcher = FromMacroStepDefinitionMatcher("""
+                using ExecutableSpecifications: @given
+
+                @given("some value {Bool}") do context, v end
+            """)
+
+            stepdefinitionmatch = findstepdefinition(stepdef_matcher, given)
+
+            @test stepdefinitionmatch.variables == [false]
+        end
+
+        @testset "Definition has one Bool parameter; has value false" begin
+            given = Given("some value false")
+            stepdef_matcher = FromMacroStepDefinitionMatcher("""
+                using ExecutableSpecifications: @given
+
+                @given("some value {Bool}") do context, v end
+            """)
+
+            stepdefinitionmatch = findstepdefinition(stepdef_matcher, given)
+
+            @test stepdefinitionmatch.variables == [false]
+        end
     end
 end

@@ -27,9 +27,30 @@ abstract type StepDefinitionMatcher end
 # Matching utilities
 #
 
+"""
+    symbolwithdefault(s::AbstractString) :: Symbol
+
+If the string `s` is empty, then it returns the `:String` symbol. Otherwise
+it returns `Symbol(s)`.
+
+This function simply encapsulates the fact that an empty parameter `{}` in a
+step defaults to the `String` type.
+"""
+function symbolwithdefault(s::AbstractString) :: Symbol
+    if s == ""
+        :String
+    else
+        Symbol(s)
+    end
+end
+
 function makedescriptionregex(s::String) :: Tuple{Regex, AbstractVector{Symbol}}
     variablematches = eachmatch(r"{([^{}]*)}", s)
-    variables = [Symbol(m[1]) for m in variablematches]
+    # The variables here are the variable types if the step has parameters.
+    # So if the step is
+    #   Given some value {Int} and some text {String}
+    # the `variables` will hold [:Int, :String]
+    variables = [symbolwithdefault(m[1]) for m in variablematches]
 
     # Escaping the string here so that characters that have meaning in a regular expressios
     # is treated as their actual character, instead of as regular expression characters.
@@ -59,10 +80,10 @@ end
 
 struct StepDefinitionMatch
     stepdefinition::StepDefinition
-    variables::Vector{String}
+    variables::Vector{Any}
 
-    StepDefinitionMatch(s::StepDefinition) = new(s, String[])
-    function StepDefinitionMatch(s::StepDefinition, variables::AbstractArray{String})
+    StepDefinitionMatch(s::StepDefinition) = new(s, Any[])
+    function StepDefinitionMatch(s::StepDefinition, variables::AbstractArray{<:Any})
         new(s, variables)
     end
 end
@@ -171,10 +192,41 @@ struct FromMacroStepDefinitionMatcher <: StepDefinitionMatcher
     end
 end
 
+"""
+    converttypes(typesymbol::Symbol, value) :: Any
+
+Convert `value` to the type named by `typesymbol`.
+This is necessary because `Number` types are converted from strings to its primitive
+type using the `parse` method, while other types are converted from strings using the
+`convert` method.
+
+# Example
+```julia-repl
+julia> converttypes(:Int, "123")
+123
+```
+"""
+function converttypes(typesymbol::Symbol, value) :: Any
+    t = eval(typesymbol)
+    if t <: Number
+        parse(t, value)
+    else
+        convert(t, value)
+    end
+end
+
 function matchdefinition(stepdefinition::StepDefinition, description::String) :: Union{StepDefinitionMatch,Nothing}
     m = match(stepdefinition.descriptionregex, description)
     if m !== nothing
-        variables = String[String(x) for x in m.captures]
+        variablestrings = String[String(x) for x in m.captures]
+        # Combine the parameter values captured in m with their types, that
+        # we have from the stepdefinition.
+        varswithtypes = zip(stepdefinition.variabletypes, variablestrings)
+        # Convert each parameter value to its expected type.
+        # Example: if `varswithtypes = [(:Int, "17"), (:Bool, "true")]`
+        # then `variables` will be `[17, true]`.
+        variables = [converttypes(typesymbol, value)
+                     for (typesymbol, value) in varswithtypes]
         StepDefinitionMatch(stepdefinition, variables)
     else
         nothing
