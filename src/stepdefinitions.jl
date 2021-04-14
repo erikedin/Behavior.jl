@@ -93,10 +93,11 @@ The context in which a step definition executes. This context is used to share d
 different step definitions. It is created newly for each scenario. Thus, two scenarios cannot share
 data.
 """
-struct StepDefinitionContext
+mutable struct StepDefinitionContext
     storage::Dict{Symbol, Any}
+    datatable::Gherkin.DataTable
 
-    StepDefinitionContext() = new(Dict{Symbol, Any}())
+    StepDefinitionContext() = new(Dict{Symbol, Any}(), Gherkin.DataTable())
 end
 
 "Find a variable value given a symbol name."

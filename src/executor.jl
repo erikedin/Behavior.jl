@@ -84,7 +84,7 @@ function executesteps(executor::Executor, context::StepDefinitionContext, steps:
 
             # The block text is provided to the step definition via the context.
             context[:block_text] = step.block_text
-
+            context.datatable = step.datatable
             try
                 # Execute the step definition. Note that it's important to use `Base.invokelatest` here,
                 # because otherwise it might not find that function defined yet.
@@ -294,10 +294,13 @@ function interpolatexample(outline::ScenarioOutline, example::Vector{T}) where {
 end
 
 interpolatestep(step::Given, fromplaceholders::Function) = Given(interpolatesteptext(step.text, fromplaceholders);
-                                                                 block_text=interpolatesteptext(step.block_text, fromplaceholders))
+                                                                 block_text=interpolatesteptext(step.block_text, fromplaceholders),
+                                                                 datatable=step.datatable)
 interpolatestep(step::When, fromplaceholders::Function) = When(interpolatesteptext(step.text, fromplaceholders);
-                                                               block_text=interpolatesteptext(step.block_text, fromplaceholders))
+                                                               block_text=interpolatesteptext(step.block_text, fromplaceholders),
+                                                               datatable=step.datatable)
 interpolatestep(step::Then, fromplaceholders::Function) = Then(interpolatesteptext(step.text, fromplaceholders);
-                                                               block_text=interpolatesteptext(step.block_text, fromplaceholders))
+                                                               block_text=interpolatesteptext(step.block_text, fromplaceholders),
+                                                               datatable=step.datatable)
 
 interpolatesteptext(text::String, fromplaceholders::Function) = replace(text, r"<[^>]*>" => fromplaceholders)
