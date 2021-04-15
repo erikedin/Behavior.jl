@@ -150,6 +150,34 @@ end
 ```
 This is no longer supported, and the `args` variable is no longer present.
 
+## Data tables
+Gherkin supports tabular data associated with each step. For instance, the scenario
+```Gherkin
+Feature: Demonstrating data tables
+
+    Scenario: Has a table
+        Given some users
+            | user id | name                |
+            | 17      | Henry Case          |
+            | 42      | Ainsley Lowbeer     |
+            | 59      | Chevette Washington |
+         When a search for "Henry Case" is made
+         Then user id 17 is found
+```
+The `Given` step above has a data table associated with it. To access the data table
+in a step definition, use the `datatable` field on the `context` object:
+```julia
+using ExecutableSpecifications
+
+@given("some users") do context
+    users = context.datatable
+    println(users[1]) # Prints ["user id", "name"]
+    println(users[2]) # Prints ["17", "Henry Case"]
+    println(users[3]) # Prints ["42", "Ainsley Lowbeer"]
+    println(users[4]) # Prints ["59", "Chevette Washington"]
+end
+```
+
 ## Strictness of Gherkin syntax
 There are some ways to configure how strict we wish the Gherkin parser to be,
 when reading a feature file. For instance, ExecutableSpecifications by default
