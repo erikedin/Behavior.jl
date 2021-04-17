@@ -508,9 +508,22 @@ then all lines of the table will be returned.
 function parsetable!(byline::ByLineParser) :: ParseResult{DataTable}
     table = DataTable()
 
-    @untilnextsection begin
+    while !isempty(byline)
+        # Skip comments and empty lines
+        if iscurrentlineempty(byline) || iscomment(byline.current)
+            consume!(byline)
+            continue
+        end
+
+        # If the line does not contain a | otherwise, then the last
+        # line was the last table line. Break out.
+        line = strip(byline.current)
+        if !startswith(line, "|")
+            break
+        end
+
         # Each variable is in a column, separated by |
-        row = split(strip(byline.current), "|")
+        row = split(line, "|")
 
         # The split will have two empty elements at either end, which are before and
         # after the | separators. We need to strip them away.
@@ -519,6 +532,8 @@ function parsetable!(byline::ByLineParser) :: ParseResult{DataTable}
         # Remove surrounding whitespace around each value.
         row = map(strip, row)
         push!(table, row)
+
+        consume!(byline)
     end
 
     OKParseResult{DataTable}(table)
