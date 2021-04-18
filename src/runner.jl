@@ -2,13 +2,13 @@ using Behavior:
     ExecutorEngine, ColorConsolePresenter, Driver,
     readstepdefinitions!, runfeatures!, issuccess,
     FromSourceExecutionEnvironment, NoExecutionEnvironment
-import ExecutableSpecifications:
+import Behavior:
     findfileswithextension, readfile, fileexists
 
 using Behavior.Gherkin: BadParseResult
 using Glob
 
-struct OSAL <: ExecutableSpecifications.OSAbstraction end
+struct OSAL <: Behavior.OSAbstraction end
 function findfileswithextension(::OSAL, path::String, extension::String)
     return rglob("*$extension", path)
 end

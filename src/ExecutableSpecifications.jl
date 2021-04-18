@@ -1,4 +1,4 @@
-module ExecutableSpecifications
+module Behavior
 
 include("Gherkin.jl")
 include("Selection.jl")
