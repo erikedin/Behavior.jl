@@ -1,6 +1,6 @@
-# ExecutableSpecifications
+# Behavior 
 
-[![codecov.io](http://codecov.io/github/erikedin/ExecutableSpecifications.jl/coverage.svg?branch=master)](http://codecov.io/github/erikedin/ExecutableSpecifications.jl?branch=master)
+[![codecov.io](http://codecov.io/github/erikedin/Behavior.jl/coverage.svg?branch=master)](http://codecov.io/github/erikedin/Behavior.jl?branch=master)
 
 BDD is an acronym for _Behaviour Driven Development_. It is a process for creating and verifying
 requirements, written in such a way that they can be executed as code. This package aims to be a

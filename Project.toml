@@ -1,4 +1,4 @@
-name = "ExecutableSpecifications"
+name = "Behavior"
 uuid = "7a129280-419d-58e9-81ef-4f6801251892"
 authors = ["Erik Edin <erikedin@users.noreply.github.com>"]
 version = "0.1.0"
