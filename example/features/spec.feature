@@ -1,4 +1,4 @@
-Feature: This is an example feature to show how ExecutableSpecifications.jl can be used.
+Feature: This is an example feature to show how Behavior.jl can be used.
     It does not test any other code, but uses test assertions to show what failures and successes
     look like.
     The tests will not all succeed, as some are meant to show what failures look like.
