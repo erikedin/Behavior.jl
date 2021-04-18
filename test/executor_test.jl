@@ -4,72 +4,72 @@ using Behavior.Gherkin: ScenarioStep, Background
 using Behavior
 using Behavior: StepDefinitionContext, StepDefinition, StepDefinitionLocation, StepDefinitionMatch
 using Behavior: Executor, StepExecutionResult, QuietRealTimePresenter, executefeature
-import ExecutableSpecifications: present
+import Behavior: present
 
-successful_step_definition(::StepDefinitionContext, args) = ExecutableSpecifications.SuccessfulStepExecution()
-failed_step_definition(::StepDefinitionContext, args) = ExecutableSpecifications.StepFailed("")
+successful_step_definition(::StepDefinitionContext, args) = Behavior.SuccessfulStepExecution()
+failed_step_definition(::StepDefinitionContext, args) = Behavior.StepFailed("")
 error_step_definition(::StepDefinitionContext, args) = error("Some error")
 
-struct FakeStepDefinitionMatcher <: ExecutableSpecifications.StepDefinitionMatcher
-    steps::Dict{ExecutableSpecifications.Gherkin.ScenarioStep, Function}
+struct FakeStepDefinitionMatcher <: Behavior.StepDefinitionMatcher
+    steps::Dict{Behavior.Gherkin.ScenarioStep, Function}
 end
 
-function ExecutableSpecifications.findstepdefinition(s::FakeStepDefinitionMatcher, step::ExecutableSpecifications.Gherkin.ScenarioStep)
+function Behavior.findstepdefinition(s::FakeStepDefinitionMatcher, step::Behavior.Gherkin.ScenarioStep)
     if step in keys(s.steps)
         StepDefinitionMatch(StepDefinition("some text", s.steps[step], StepDefinitionLocation("", 0)))
     else
-        throw(ExecutableSpecifications.NoMatchingStepDefinition())
+        throw(Behavior.NoMatchingStepDefinition())
     end
 end
 
-struct ThrowingStepDefinitionMatcher <: ExecutableSpecifications.StepDefinitionMatcher
+struct ThrowingStepDefinitionMatcher <: Behavior.StepDefinitionMatcher
     ex::Exception
 end
 
-ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatcher, ::ExecutableSpecifications.Gherkin.ScenarioStep) = throw(matcher.ex)
+Behavior.findstepdefinition(matcher::ThrowingStepDefinitionMatcher, ::Behavior.Gherkin.ScenarioStep) = throw(matcher.ex)
 
 @testset "Executor             " begin
     @testset "Execute a one-step scenario; No matching step found; Result is NoStepDefinitionFound" begin
-        stepdefmatcher = ThrowingStepDefinitionMatcher(ExecutableSpecifications.NoMatchingStepDefinition())
-        executor = ExecutableSpecifications.Executor(stepdefmatcher)
+        stepdefmatcher = ThrowingStepDefinitionMatcher(Behavior.NoMatchingStepDefinition())
+        executor = Behavior.Executor(stepdefmatcher)
         scenario = Scenario("Description", String[], ScenarioStep[Given("some precondition")])
 
-        scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
+        scenarioresult = Behavior.executescenario(executor, Background(), scenario)
 
-        @test isa(scenarioresult.steps[1], ExecutableSpecifications.NoStepDefinitionFound)
+        @test isa(scenarioresult.steps[1], Behavior.NoStepDefinitionFound)
     end
 
     @testset "Execute a one-step scenario; The matching step is successful; Result is Successful" begin
         given = Given("Some precondition")
         stepdefmatcher = FakeStepDefinitionMatcher(Dict(given => successful_step_definition))
-        executor = ExecutableSpecifications.Executor(stepdefmatcher)
+        executor = Behavior.Executor(stepdefmatcher)
         scenario = Scenario("Description", String[], ScenarioStep[given])
 
-        scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
+        scenarioresult = Behavior.executescenario(executor, Background(), scenario)
 
-        @test isa(scenarioresult.steps[1], ExecutableSpecifications.SuccessfulStepExecution)
+        @test isa(scenarioresult.steps[1], Behavior.SuccessfulStepExecution)
     end
 
     @testset "Execute a one-step scenario; The matching step fails; Result is Failed" begin
         given = Given("Some precondition")
         stepdefmatcher = FakeStepDefinitionMatcher(Dict(given => failed_step_definition))
-        executor = ExecutableSpecifications.Executor(stepdefmatcher)
+        executor = Behavior.Executor(stepdefmatcher)
         scenario = Scenario("Description", String[], ScenarioStep[given])
 
-        scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
+        scenarioresult = Behavior.executescenario(executor, Background(), scenario)
 
-        @test isa(scenarioresult.steps[1], ExecutableSpecifications.StepFailed)
+        @test isa(scenarioresult.steps[1], Behavior.StepFailed)
     end
 
     @testset "Execute a one-step scenario; The matching step throws an error; Result is Error" begin
         given = Given("Some precondition")
         stepdefmatcher = FakeStepDefinitionMatcher(Dict(given => error_step_definition))
-        executor = ExecutableSpecifications.Executor(stepdefmatcher)
+        executor = Behavior.Executor(stepdefmatcher)
         scenario = Scenario("Description", String[], ScenarioStep[given])
 
-        scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
+        scenarioresult = Behavior.executescenario(executor, Background(), scenario)
 
-        @test isa(scenarioresult.steps[1], ExecutableSpecifications.UnexpectedStepError)
+        @test isa(scenarioresult.steps[1], Behavior.UnexpectedStepError)
     end
 
     @testset "Execute a two-step scenario; First step throws an error; Second step is Skipped" begin
@@ -77,12 +77,12 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
         when = When("some action")
         stepdefmatcher = FakeStepDefinitionMatcher(Dict(given => error_step_definition,
                                                         when => successful_step_definition))
-        executor = ExecutableSpecifications.Executor(stepdefmatcher)
+        executor = Behavior.Executor(stepdefmatcher)
         scenario = Scenario("Description", String[], ScenarioStep[given, when])
 
-        scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
+        scenarioresult = Behavior.executescenario(executor, Background(), scenario)
 
-        @test isa(scenarioresult.steps[2], ExecutableSpecifications.SkippedStep)
+        @test isa(scenarioresult.steps[2], Behavior.SkippedStep)
     end
 
     @testset "Execute a two-step scenario; First step fails; Second step is Skipped" begin
@@ -90,12 +90,12 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
         when = When("some action")
         stepdefmatcher = FakeStepDefinitionMatcher(Dict(given => failed_step_definition,
                                                         when => successful_step_definition))
-        executor = ExecutableSpecifications.Executor(stepdefmatcher)
+        executor = Behavior.Executor(stepdefmatcher)
         scenario = Scenario("Description", String[], ScenarioStep[given, when])
 
-        scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
+        scenarioresult = Behavior.executescenario(executor, Background(), scenario)
 
-        @test isa(scenarioresult.steps[2], ExecutableSpecifications.SkippedStep)
+        @test isa(scenarioresult.steps[2], Behavior.SkippedStep)
     end
 
     @testset "Execute a two-step scenario; Both steps succeed; All results are Success" begin
@@ -103,13 +103,13 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
         when = When("some action")
         stepdefmatcher = FakeStepDefinitionMatcher(Dict(given => successful_step_definition,
                                                         when => successful_step_definition))
-        executor = ExecutableSpecifications.Executor(stepdefmatcher)
+        executor = Behavior.Executor(stepdefmatcher)
         scenario = Scenario("Description", String[], ScenarioStep[given, when])
 
-        scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
+        scenarioresult = Behavior.executescenario(executor, Background(), scenario)
 
-        @test isa(scenarioresult.steps[1], ExecutableSpecifications.SuccessfulStepExecution)
-        @test isa(scenarioresult.steps[2], ExecutableSpecifications.SuccessfulStepExecution)
+        @test isa(scenarioresult.steps[1], Behavior.SuccessfulStepExecution)
+        @test isa(scenarioresult.steps[2], Behavior.SuccessfulStepExecution)
     end
 
     @testset "Execute a three-step scenario; All steps succeeed; All results are Success" begin
@@ -119,35 +119,35 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
         stepdefmatcher = FakeStepDefinitionMatcher(Dict(given => successful_step_definition,
                                                         when => successful_step_definition,
                                                         then => successful_step_definition))
-        executor = ExecutableSpecifications.Executor(stepdefmatcher)
+        executor = Behavior.Executor(stepdefmatcher)
         scenario = Scenario("Description", String[], ScenarioStep[given, when, then])
 
-        scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
+        scenarioresult = Behavior.executescenario(executor, Background(), scenario)
 
-        @test isa(scenarioresult.steps[1], ExecutableSpecifications.SuccessfulStepExecution)
-        @test isa(scenarioresult.steps[2], ExecutableSpecifications.SuccessfulStepExecution)
-        @test isa(scenarioresult.steps[3], ExecutableSpecifications.SuccessfulStepExecution)
+        @test isa(scenarioresult.steps[1], Behavior.SuccessfulStepExecution)
+        @test isa(scenarioresult.steps[2], Behavior.SuccessfulStepExecution)
+        @test isa(scenarioresult.steps[3], Behavior.SuccessfulStepExecution)
     end
 
     @testset "Execute a scenario; Scenario is provided; Scenario is returned with the result" begin
         given = Given("Some precondition")
         stepdefmatcher = FakeStepDefinitionMatcher(Dict(given => successful_step_definition))
-        executor = ExecutableSpecifications.Executor(stepdefmatcher)
+        executor = Behavior.Executor(stepdefmatcher)
         scenario = Scenario("This is a scenario", String[], ScenarioStep[given])
 
-        scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
+        scenarioresult = Behavior.executescenario(executor, Background(), scenario)
 
         @test scenarioresult.scenario == scenario
     end
 
     @testset "Execute a scenario; No unique step definition found; Result is NonUniqueMatch" begin
-        stepdefmatcher = ThrowingStepDefinitionMatcher(ExecutableSpecifications.NonUniqueStepDefinition([]))
-        executor = ExecutableSpecifications.Executor(stepdefmatcher)
+        stepdefmatcher = ThrowingStepDefinitionMatcher(Behavior.NonUniqueStepDefinition([]))
+        executor = Behavior.Executor(stepdefmatcher)
         scenario = Scenario("Description", String[], ScenarioStep[Given("some precondition")])
 
-        scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
+        scenarioresult = Behavior.executescenario(executor, Background(), scenario)
 
-        @test isa(scenarioresult.steps[1], ExecutableSpecifications.NonUniqueMatch)
+        @test isa(scenarioresult.steps[1], Behavior.NonUniqueMatch)
     end
 
     @testset "Execute a ScenarioOutline; Outline has two examples; Two scenarios are returned" begin
@@ -156,9 +156,9 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
         step2 = Given("step 2")
         stepdefmatcher = FakeStepDefinitionMatcher(Dict(step1 => successful_step_definition,
                                                         step2 => successful_step_definition))
-        executor = ExecutableSpecifications.Executor(stepdefmatcher)
+        executor = Behavior.Executor(stepdefmatcher)
 
-        outlineresult = ExecutableSpecifications.executescenario(executor, Background(), outline)
+        outlineresult = Behavior.executescenario(executor, Background(), outline)
 
         @test length(outlineresult) == 2
     end
@@ -169,12 +169,12 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
         step2 = Given("step 2")
         stepdefmatcher = FakeStepDefinitionMatcher(Dict(step1 => successful_step_definition,
                                                         step2 => failed_step_definition))
-        executor = ExecutableSpecifications.Executor(stepdefmatcher)
+        executor = Behavior.Executor(stepdefmatcher)
 
-        outlineresult = ExecutableSpecifications.executescenario(executor, Background(), outline)
+        outlineresult = Behavior.executescenario(executor, Background(), outline)
 
-        @test outlineresult[1].steps[1] isa ExecutableSpecifications.SuccessfulStepExecution
-        @test outlineresult[2].steps[1] isa ExecutableSpecifications.StepFailed
+        @test outlineresult[1].steps[1] isa Behavior.SuccessfulStepExecution
+        @test outlineresult[2].steps[1] isa Behavior.StepFailed
     end
 
     @testset "Execute a ScenarioOutline; Outline has three examples; Three scenarios are returned" begin
@@ -185,9 +185,9 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
         stepdefmatcher = FakeStepDefinitionMatcher(Dict(step1 => successful_step_definition,
                                                         step2 => successful_step_definition,
                                                         step3 => successful_step_definition))
-        executor = ExecutableSpecifications.Executor(stepdefmatcher)
+        executor = Behavior.Executor(stepdefmatcher)
 
-        outlineresult = ExecutableSpecifications.executescenario(executor, Background(), outline)
+        outlineresult = Behavior.executescenario(executor, Background(), outline)
 
         @test length(outlineresult) == 3
     end
@@ -197,18 +197,18 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
             given = Given("Some precondition", block_text="Some block text")
             function check_block_text_step_definition(context::StepDefinitionContext, _args)
                 if context[:block_text] == "Some block text"
-                    ExecutableSpecifications.SuccessfulStepExecution()
+                    Behavior.SuccessfulStepExecution()
                 else
-                    ExecutableSpecifications.StepFailed("")
+                    Behavior.StepFailed("")
                 end
             end
             stepdefmatcher = FakeStepDefinitionMatcher(Dict(given => check_block_text_step_definition))
-            executor = ExecutableSpecifications.Executor(stepdefmatcher)
+            executor = Behavior.Executor(stepdefmatcher)
             scenario = Scenario("Description", String[], ScenarioStep[given])
 
-            scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
+            scenarioresult = Behavior.executescenario(executor, Background(), scenario)
 
-            @test isa(scenarioresult.steps[1], ExecutableSpecifications.SuccessfulStepExecution)
+            @test isa(scenarioresult.steps[1], Behavior.SuccessfulStepExecution)
         end
 
         @testset "First step has block text, but second doesn't; The block text is cleared in the second step" begin
@@ -216,20 +216,20 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
             when = When("some action")
             function check_block_text_step_definition(context::StepDefinitionContext, _args)
                 if context[:block_text] == ""
-                    ExecutableSpecifications.SuccessfulStepExecution()
+                    Behavior.SuccessfulStepExecution()
                 else
-                    ExecutableSpecifications.StepFailed("")
+                    Behavior.StepFailed("")
                 end
             end
             stepdefmatcher = FakeStepDefinitionMatcher(Dict(
                 given => successful_step_definition,
                 when => check_block_text_step_definition))
-            executor = ExecutableSpecifications.Executor(stepdefmatcher)
+            executor = Behavior.Executor(stepdefmatcher)
             scenario = Scenario("Description", String[], [given, when])
 
-            scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
+            scenarioresult = Behavior.executescenario(executor, Background(), scenario)
 
-            @test isa(scenarioresult.steps[2], ExecutableSpecifications.SuccessfulStepExecution)
+            @test isa(scenarioresult.steps[2], Behavior.SuccessfulStepExecution)
         end
     end
 
@@ -240,12 +240,12 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
 
             background = Background("A background", ScenarioStep[Given("some background precondition")])
 
-            executor = ExecutableSpecifications.Executor(stepdefmatcher)
+            executor = Behavior.Executor(stepdefmatcher)
             scenario = Scenario("Description", String[], ScenarioStep[Given("some precondition")])
 
-            scenarioresult = ExecutableSpecifications.executescenario(executor, background, scenario)
+            scenarioresult = Behavior.executescenario(executor, background, scenario)
 
-            @test isa(scenarioresult.backgroundresult[1], ExecutableSpecifications.NoStepDefinitionFound)
+            @test isa(scenarioresult.backgroundresult[1], Behavior.NoStepDefinitionFound)
         end
 
         @testset "Execute a one-step Background; A successful match found; Background result is Success" begin
@@ -259,12 +259,12 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
 
             background = Background("A background", ScenarioStep[Given("some background precondition")])
 
-            executor = ExecutableSpecifications.Executor(stepdefmatcher)
+            executor = Behavior.Executor(stepdefmatcher)
             scenario = Scenario("Description", String[], ScenarioStep[Given("some precondition")])
 
-            scenarioresult = ExecutableSpecifications.executescenario(executor, background, scenario)
+            scenarioresult = Behavior.executescenario(executor, background, scenario)
 
-            @test isa(scenarioresult.backgroundresult[1], ExecutableSpecifications.SuccessfulStepExecution)
+            @test isa(scenarioresult.backgroundresult[1], Behavior.SuccessfulStepExecution)
         end
 
         @testset "Execute a one-step background; The matching step fails; Result is Failed" begin
@@ -275,13 +275,13 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
                     given => successful_step_definition,
                     bgiven => failed_step_definition,
                 ))
-            executor = ExecutableSpecifications.Executor(stepdefmatcher)
+            executor = Behavior.Executor(stepdefmatcher)
             scenario = Scenario("Description", String[], ScenarioStep[given])
             background = Background("Background description", ScenarioStep[bgiven])
 
-            scenarioresult = ExecutableSpecifications.executescenario(executor, background, scenario)
+            scenarioresult = Behavior.executescenario(executor, background, scenario)
 
-            @test isa(scenarioresult.backgroundresult[1], ExecutableSpecifications.StepFailed)
+            @test isa(scenarioresult.backgroundresult[1], Behavior.StepFailed)
         end
 
         @testset "Execute a one-step background; The background step fails; The Scenario step is skipped" begin
@@ -292,13 +292,13 @@ ExecutableSpecifications.findstepdefinition(matcher::ThrowingStepDefinitionMatch
                     given => successful_step_definition,
                     bgiven => failed_step_definition,
                 ))
-            executor = ExecutableSpecifications.Executor(stepdefmatcher)
+            executor = Behavior.Executor(stepdefmatcher)
             scenario = Scenario("Description", String[], ScenarioStep[given])
             background = Background("Background description", ScenarioStep[bgiven])
 
-            scenarioresult = ExecutableSpecifications.executescenario(executor, background, scenario)
+            scenarioresult = Behavior.executescenario(executor, background, scenario)
 
-            @test isa(scenarioresult.steps[1], ExecutableSpecifications.SkippedStep)
+            @test isa(scenarioresult.steps[1], Behavior.SkippedStep)
         end
 
         # TODO Additional tests to ensure that Backgrounds work as any Scenario section does

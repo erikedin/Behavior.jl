@@ -3,7 +3,7 @@ using Behavior:
     finish, issuccess, findstepdefinition, NoMatchingStepDefinition, runfeatures!,
     Driver, readstepdefinitions!, OSAbstraction
 using Behavior.Gherkin: Feature, FeatureHeader, Scenario, Given, ParseOptions
-import ExecutableSpecifications: addmatcher!, findfileswithextension, readfile, runfeature!,
+import Behavior: addmatcher!, findfileswithextension, readfile, runfeature!,
                                  issuccess, finish
 
 @testset "Engine               " begin

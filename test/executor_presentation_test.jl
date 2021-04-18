@@ -4,9 +4,9 @@ using Behavior.Gherkin: ScenarioStep, Background
 using Behavior
 using Behavior: StepDefinitionContext, StepDefinition, StepDefinitionLocation
 using Behavior: Executor, StepExecutionResult, QuietRealTimePresenter, executefeature, ScenarioResult
-import ExecutableSpecifications: present
+import Behavior: present
 
-mutable struct FakeRealTimePresenter <: ExecutableSpecifications.RealTimePresenter
+mutable struct FakeRealTimePresenter <: Behavior.RealTimePresenter
     scenarios::Vector{Scenario}
     scenarioresults::Vector{ScenarioResult}
     steps::Vector{ScenarioStep}
@@ -31,7 +31,7 @@ stepresult(p::FakeRealTimePresenter, step::ScenarioStep) = p.results[step]
         executor = Executor(matcher, presenter)
 
         scenario = Scenario("Some scenario", String[], ScenarioStep[])
-        ExecutableSpecifications.executescenario(executor,  Background(),scenario)
+        Behavior.executescenario(executor,  Background(),scenario)
 
         @test presenter.scenarios[1] == scenario
     end
@@ -42,7 +42,7 @@ stepresult(p::FakeRealTimePresenter, step::ScenarioStep) = p.results[step]
         executor = Executor(matcher, presenter)
 
         scenario = Scenario("Some scenario", String[], ScenarioStep[])
-        ExecutableSpecifications.executescenario(executor,  Background(),scenario)
+        Behavior.executescenario(executor,  Background(),scenario)
 
         @test presenter.scenarioresults[1].scenario == scenario
     end
@@ -54,7 +54,7 @@ stepresult(p::FakeRealTimePresenter, step::ScenarioStep) = p.results[step]
         executor = Executor(matcher, presenter)
 
         scenario = Scenario("Some scenario", String[], ScenarioStep[given])
-        ExecutableSpecifications.executescenario(executor,  Background(),scenario)
+        Behavior.executescenario(executor,  Background(),scenario)
 
         @test presenter.steps[1] == given
     end
@@ -66,9 +66,9 @@ stepresult(p::FakeRealTimePresenter, step::ScenarioStep) = p.results[step]
         executor = Executor(matcher, presenter)
 
         scenario = Scenario("Some scenario", String[], ScenarioStep[given])
-        ExecutableSpecifications.executescenario(executor,  Background(),scenario)
+        Behavior.executescenario(executor,  Background(),scenario)
 
-        @test stepresult(presenter, given) == ExecutableSpecifications.SuccessfulStepExecution()
+        @test stepresult(presenter, given) == Behavior.SuccessfulStepExecution()
     end
 
     @testset "Execution presentation; Scenario step fails; Next is also presented" begin
@@ -80,7 +80,7 @@ stepresult(p::FakeRealTimePresenter, step::ScenarioStep) = p.results[step]
         executor = Executor(matcher, presenter)
 
         scenario = Scenario("Some scenario", String[], ScenarioStep[given, when])
-        ExecutableSpecifications.executescenario(executor,  Background(),scenario)
+        Behavior.executescenario(executor,  Background(),scenario)
 
         @test presenter.steps[2] == when
     end
@@ -94,9 +94,9 @@ stepresult(p::FakeRealTimePresenter, step::ScenarioStep) = p.results[step]
         executor = Executor(matcher, presenter)
 
         scenario = Scenario("Some scenario", String[], ScenarioStep[given, when])
-        ExecutableSpecifications.executescenario(executor,  Background(),scenario)
+        Behavior.executescenario(executor,  Background(),scenario)
 
-        @test stepresult(presenter, when) == ExecutableSpecifications.SkippedStep()
+        @test stepresult(presenter, when) == Behavior.SkippedStep()
     end
 
     @testset "Execution presentation; Feature is executed; Feature is presented" begin
@@ -106,7 +106,7 @@ stepresult(p::FakeRealTimePresenter, step::ScenarioStep) = p.results[step]
 
         scenario = Scenario("Some scenario", String[], ScenarioStep[])
         feature = Feature(FeatureHeader("", [], []), [scenario])
-        ExecutableSpecifications.executefeature(executor, feature)
+        Behavior.executefeature(executor, feature)
 
         @test presenter.features[1] == feature
     end

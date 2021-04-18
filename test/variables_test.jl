@@ -63,14 +63,14 @@ using Behavior: FromMacroStepDefinitionMatcher, findstepdefinition
                 @expect v == "bar"
             end
         """)
-        executor = ExecutableSpecifications.Executor(stepdefmatcher)
+        executor = Behavior.Executor(stepdefmatcher)
 
         given = Given("some value bar")
         scenario = Scenario("Description", String[], ScenarioStep[given])
 
-        scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
+        scenarioresult = Behavior.executescenario(executor, Background(), scenario)
 
-        @test isa(scenarioresult.steps[1], ExecutableSpecifications.SuccessfulStepExecution)
+        @test isa(scenarioresult.steps[1], Behavior.SuccessfulStepExecution)
     end
 
     @testset "Scenario step has two String parameters; Arguments are bar, fnord" begin
@@ -82,14 +82,14 @@ using Behavior: FromMacroStepDefinitionMatcher, findstepdefinition
                 @expect v2 == "fnord"
             end
         """)
-        executor = ExecutableSpecifications.Executor(stepdefmatcher)
+        executor = Behavior.Executor(stepdefmatcher)
 
         given = Given("some values bar and fnord")
         scenario = Scenario("Description", String[], ScenarioStep[given])
 
-        scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
+        scenarioresult = Behavior.executescenario(executor, Background(), scenario)
 
-        @test isa(scenarioresult.steps[1], ExecutableSpecifications.SuccessfulStepExecution)
+        @test isa(scenarioresult.steps[1], Behavior.SuccessfulStepExecution)
     end
 
     @testset "Typed parameters" begin

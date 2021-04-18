@@ -5,17 +5,17 @@ using Behavior:
     issuccess, beforescenario, afterscenario, FromSourceExecutionEnvironment
 
 
-mutable struct FakeExecutionEnvironment <: ExecutableSpecifications.ExecutionEnvironment
+mutable struct FakeExecutionEnvironment <: Behavior.ExecutionEnvironment
     afterscenariowasexecuted::Bool
 
     FakeExecutionEnvironment() = new(false)
 end
 
-function ExecutableSpecifications.beforescenario(::FakeExecutionEnvironment, context::StepDefinitionContext, scenario::Gherkin.Scenario)
+function Behavior.beforescenario(::FakeExecutionEnvironment, context::StepDefinitionContext, scenario::Gherkin.Scenario)
     context[:beforescenariowasexecuted] = true
 end
 
-function ExecutableSpecifications.afterscenario(f::FakeExecutionEnvironment, context::StepDefinitionContext, scenario::Gherkin.Scenario)
+function Behavior.afterscenario(f::FakeExecutionEnvironment, context::StepDefinitionContext, scenario::Gherkin.Scenario)
     context[:afterscenariowasexecuted] = true
     f.afterscenariowasexecuted = true
 end
@@ -24,9 +24,9 @@ struct SingleStepDefinitionMatcher <: StepDefinitionMatcher
     stepbody::Function
 end
 
-function ExecutableSpecifications.findstepdefinition(
+function Behavior.findstepdefinition(
         s::SingleStepDefinitionMatcher,
-        step::ExecutableSpecifications.Gherkin.ScenarioStep)
+        step::Behavior.Gherkin.ScenarioStep)
     stepdefinition = (context, args) -> begin
         s.stepbody(context, args)
         SuccessfulStepExecution()

@@ -20,36 +20,36 @@ using .Gherkin: DataTable, DataTableRow
             )
 
             if context.datatable == expectedtable
-                ExecutableSpecifications.SuccessfulStepExecution()
+                Behavior.SuccessfulStepExecution()
             else
-                ExecutableSpecifications.StepFailed("")
+                Behavior.StepFailed("")
             end
         end
         stepdefmatcher = FakeStepDefinitionMatcher(Dict(given => check_datatable_step_definition))
-        executor = ExecutableSpecifications.Executor(stepdefmatcher)
+        executor = Behavior.Executor(stepdefmatcher)
         scenario = Scenario("Description", String[], ScenarioStep[given])
 
-        scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
+        scenarioresult = Behavior.executescenario(executor, Background(), scenario)
 
-        @test isa(scenarioresult.steps[1], ExecutableSpecifications.SuccessfulStepExecution)
+        @test isa(scenarioresult.steps[1], Behavior.SuccessfulStepExecution)
     end
 
     @testset "Scenario step has no data table; Context table is empty" begin
         given = Given("Some precondition")
         function check_datatable_step_definition(context::StepDefinitionContext, _args)
             if context.datatable == []
-                ExecutableSpecifications.SuccessfulStepExecution()
+                Behavior.SuccessfulStepExecution()
             else
-                ExecutableSpecifications.StepFailed("")
+                Behavior.StepFailed("")
             end
         end
         stepdefmatcher = FakeStepDefinitionMatcher(Dict(given => check_datatable_step_definition))
-        executor = ExecutableSpecifications.Executor(stepdefmatcher)
+        executor = Behavior.Executor(stepdefmatcher)
         scenario = Scenario("Description", String[], ScenarioStep[given])
 
-        scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
+        scenarioresult = Behavior.executescenario(executor, Background(), scenario)
 
-        @test isa(scenarioresult.steps[1], ExecutableSpecifications.SuccessfulStepExecution)
+        @test isa(scenarioresult.steps[1], Behavior.SuccessfulStepExecution)
     end
 
     @testset "First step has table but not second; Second context table is empty" begin
@@ -57,21 +57,21 @@ using .Gherkin: DataTable, DataTableRow
         given2 = Given("Some other precondition")
         function check_datatable_step_definition(context::StepDefinitionContext, _args)
             if context.datatable == []
-                ExecutableSpecifications.SuccessfulStepExecution()
+                Behavior.SuccessfulStepExecution()
             else
-                ExecutableSpecifications.StepFailed("")
+                Behavior.StepFailed("")
             end
         end
         stepdefmatcher = FakeStepDefinitionMatcher(Dict(
             given1 => successful_step_definition,
             given2 => check_datatable_step_definition
         ))
-        executor = ExecutableSpecifications.Executor(stepdefmatcher)
+        executor = Behavior.Executor(stepdefmatcher)
         scenario = Scenario("Description", String[], ScenarioStep[given1, given2])
 
-        scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
+        scenarioresult = Behavior.executescenario(executor, Background(), scenario)
 
-        @test isa(scenarioresult.steps[2], ExecutableSpecifications.SuccessfulStepExecution)
+        @test isa(scenarioresult.steps[2], Behavior.SuccessfulStepExecution)
     end
 
     @testset "Scenario Outline step has a data table; Context contains the data tables" begin
@@ -91,9 +91,9 @@ using .Gherkin: DataTable, DataTableRow
             )
 
             if context.datatable == expectedtable
-                ExecutableSpecifications.SuccessfulStepExecution()
+                Behavior.SuccessfulStepExecution()
             else
-                ExecutableSpecifications.StepFailed("")
+                Behavior.StepFailed("")
             end
         end
         stepdefmatcher = FakeStepDefinitionMatcher(Dict(
@@ -103,7 +103,7 @@ using .Gherkin: DataTable, DataTableRow
             when => check_datatable_step_definition,
             then => check_datatable_step_definition,
         ))
-        executor = ExecutableSpecifications.Executor(stepdefmatcher)
+        executor = Behavior.Executor(stepdefmatcher)
         scenario = ScenarioOutline(
             "Description",
             String[],                        # Tags
@@ -112,14 +112,14 @@ using .Gherkin: DataTable, DataTableRow
             [ "1" "2"]                       # Examples
         )
 
-        scenarioresult = ExecutableSpecifications.executescenario(executor, Background(), scenario)
+        scenarioresult = Behavior.executescenario(executor, Background(), scenario)
 
-        @test isa(scenarioresult[1].steps[1], ExecutableSpecifications.SuccessfulStepExecution)
-        @test isa(scenarioresult[1].steps[2], ExecutableSpecifications.SuccessfulStepExecution)
-        @test isa(scenarioresult[1].steps[3], ExecutableSpecifications.SuccessfulStepExecution)
-        @test isa(scenarioresult[2].steps[1], ExecutableSpecifications.SuccessfulStepExecution)
-        @test isa(scenarioresult[2].steps[2], ExecutableSpecifications.SuccessfulStepExecution)
-        @test isa(scenarioresult[2].steps[3], ExecutableSpecifications.SuccessfulStepExecution)
+        @test isa(scenarioresult[1].steps[1], Behavior.SuccessfulStepExecution)
+        @test isa(scenarioresult[1].steps[2], Behavior.SuccessfulStepExecution)
+        @test isa(scenarioresult[1].steps[3], Behavior.SuccessfulStepExecution)
+        @test isa(scenarioresult[2].steps[1], Behavior.SuccessfulStepExecution)
+        @test isa(scenarioresult[2].steps[2], Behavior.SuccessfulStepExecution)
+        @test isa(scenarioresult[2].steps[3], Behavior.SuccessfulStepExecution)
     end
 
 

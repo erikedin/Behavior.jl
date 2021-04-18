@@ -11,7 +11,7 @@ using Behavior.Gherkin
     end
 
     @testset "Assert failure in included file; Assert is 1 == 2; Failure has human readable string 1 == 2" begin
-        matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
+        matcher = Behavior.FromMacroStepDefinitionMatcher("""
             using Behavior
 
             @given("some precondition") do context
@@ -19,9 +19,9 @@ using Behavior.Gherkin
             end
         """)
         given = Gherkin.Given("some precondition")
-        context = ExecutableSpecifications.StepDefinitionContext()
+        context = Behavior.StepDefinitionContext()
 
-        m = ExecutableSpecifications.findstepdefinition(matcher, given)
+        m = Behavior.findstepdefinition(matcher, given)
 
         args = Dict{Symbol, Any}()
         stepfailed = m.stepdefinition.definition(context, args)
@@ -30,7 +30,7 @@ using Behavior.Gherkin
     end
 
     @testset "Assert failure in included file; Assert is isempty([1]); Failure has human readable string isempty([1])" begin
-        matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
+        matcher = Behavior.FromMacroStepDefinitionMatcher("""
             using Behavior
 
             @given("some precondition") do context
@@ -38,9 +38,9 @@ using Behavior.Gherkin
             end
         """)
         given = Gherkin.Given("some precondition")
-        context = ExecutableSpecifications.StepDefinitionContext()
+        context = Behavior.StepDefinitionContext()
 
-        m = ExecutableSpecifications.findstepdefinition(matcher, given)
+        m = Behavior.findstepdefinition(matcher, given)
 
         args = Dict{Symbol, Any}()
         stepfailed = m.stepdefinition.definition(context, args)
@@ -49,7 +49,7 @@ using Behavior.Gherkin
     end
 
     @testset "Fail assertion used in step, Step is StepFailed with assertion 'Some reason'" begin
-        matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
+        matcher = Behavior.FromMacroStepDefinitionMatcher("""
             using Behavior
 
             @given("some precondition") do context
@@ -57,9 +57,9 @@ using Behavior.Gherkin
             end
         """)
         given = Gherkin.Given("some precondition")
-        context = ExecutableSpecifications.StepDefinitionContext()
+        context = Behavior.StepDefinitionContext()
 
-        m = ExecutableSpecifications.findstepdefinition(matcher, given)
+        m = Behavior.findstepdefinition(matcher, given)
 
         args = Dict{Symbol, Any}()
         stepfailed = m.stepdefinition.definition(context, args)

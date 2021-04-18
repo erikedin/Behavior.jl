@@ -4,7 +4,7 @@ using Behavior.Gherkin: ScenarioStep
 using Behavior
 using Behavior: StepDefinitionContext, StepDefinition, StepDefinitionLocation
 using Behavior: Executor, StepExecutionResult, QuietRealTimePresenter, executefeature
-import ExecutableSpecifications: present
+import Behavior: present
 
 @testset "Feature Executor     " begin
     @testset "Execute a feature; Feature has one scenario; Feature result has one scenario result" begin
@@ -65,7 +65,7 @@ import ExecutableSpecifications: present
 
         featureresult = executefeature(executor, feature)
 
-        @test featureresult.scenarioresults[1].steps[1] isa ExecutableSpecifications.StepFailed
+        @test featureresult.scenarioresults[1].steps[1] isa Behavior.StepFailed
     end
 
     @testset "Execute a feature; One Scenario and an Outline with two examples; Three results" begin

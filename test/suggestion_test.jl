@@ -267,9 +267,9 @@ using Behavior: findmissingsteps, ExecutorEngine, suggestmissingsteps
 
             assertexecutor = Executor(compositematcher, QuietRealTimePresenter())
 
-            featureresult = ExecutableSpecifications.executefeature(assertexecutor, feature)
+            featureresult = Behavior.executefeature(assertexecutor, feature)
             scenarioresult = featureresult.scenarioresults[1]
-            @test scenarioresult.steps[1] isa ExecutableSpecifications.StepFailed
+            @test scenarioresult.steps[1] isa Behavior.StepFailed
         end
     end
 
@@ -295,9 +295,9 @@ using Behavior: findmissingsteps, ExecutorEngine, suggestmissingsteps
 
             assertexecutor = Executor(compositematcher, QuietRealTimePresenter())
 
-            featureresult = ExecutableSpecifications.executefeature(assertexecutor, feature)
+            featureresult = Behavior.executefeature(assertexecutor, feature)
             scenarioresult = featureresult.scenarioresults[1]
-            @test scenarioresult.steps[1] isa ExecutableSpecifications.StepFailed
+            @test scenarioresult.steps[1] isa Behavior.StepFailed
         end
 
         # Check that each PCRE metacharacter is escaped properly.

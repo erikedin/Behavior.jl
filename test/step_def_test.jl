@@ -7,8 +7,8 @@ using Behavior.Gherkin: Given, When, Then
 @testset "Step definitions     " begin
     @testset "Find a step definition" begin
         @testset "Find a step definition; A matching given step; A step is found" begin
-            given = ExecutableSpecifications.Gherkin.Given("some definition")
-            stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
+            given = Behavior.Gherkin.Given("some definition")
+            stepdef_matcher = Behavior.FromMacroStepDefinitionMatcher("""
                 using Behavior: @given
 
                 @given("some definition") do context
@@ -16,14 +16,14 @@ using Behavior.Gherkin: Given, When, Then
                 end
             """)
 
-            stepmatch = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
+            stepmatch = Behavior.findstepdefinition(stepdef_matcher, given)
             stepdefinition = stepmatch.stepdefinition
             @test isa(stepdefinition.definition, Function)
         end
 
         @testset "Find a step definition; A non-matching given step; No step definition found" begin
-            given = ExecutableSpecifications.Gherkin.Given("some other definition")
-            stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
+            given = Behavior.Gherkin.Given("some other definition")
+            stepdef_matcher = Behavior.FromMacroStepDefinitionMatcher("""
                 using Behavior: @given
 
                 @given("some definition") do context
@@ -31,12 +31,12 @@ using Behavior.Gherkin: Given, When, Then
                 end
             """)
 
-            @test_throws ExecutableSpecifications.NoMatchingStepDefinition ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
+            @test_throws Behavior.NoMatchingStepDefinition Behavior.findstepdefinition(stepdef_matcher, given)
         end
 
         @testset "Find a step definition; A matching given step with another description; A step is found" begin
-            given = ExecutableSpecifications.Gherkin.Given("some other definition")
-            stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
+            given = Behavior.Gherkin.Given("some other definition")
+            stepdef_matcher = Behavior.FromMacroStepDefinitionMatcher("""
                 using Behavior: @given
 
                 @given("some other definition") do context
@@ -44,7 +44,7 @@ using Behavior.Gherkin: Given, When, Then
                 end
             """)
 
-            stepmatch = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
+            stepmatch = Behavior.findstepdefinition(stepdef_matcher, given)
             stepdefinition = stepmatch.stepdefinition
             @test isa(stepdefinition.definition, Function)
         end
@@ -52,8 +52,8 @@ using Behavior.Gherkin: Given, When, Then
         @testset "Find a step definition in another matcher; The other matcher has no matching step; No step is found" begin
             # This test ensures that step definitions are local to a single matcher, so that they aren't
             # kept globally.
-            given = ExecutableSpecifications.Gherkin.Given("some definition")
-            stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
+            given = Behavior.Gherkin.Given("some definition")
+            stepdef_matcher = Behavior.FromMacroStepDefinitionMatcher("""
                 using Behavior: @given
 
                 @given("some definition") do context
@@ -62,18 +62,18 @@ using Behavior.Gherkin: Given, When, Then
             """)
 
             # There is no step definitions here, so it should not find any matching definitions.
-            empty_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
+            empty_matcher = Behavior.FromMacroStepDefinitionMatcher("""
                 using Behavior: @given
             """)
 
-            @test_throws ExecutableSpecifications.NoMatchingStepDefinition ExecutableSpecifications.findstepdefinition(empty_matcher, given)
+            @test_throws Behavior.NoMatchingStepDefinition Behavior.findstepdefinition(empty_matcher, given)
         end
     end
 
     @testset "Execute a step definition" begin
         @testset "Execute a step definition; Store an int in context; Context stores the value" begin
-            given = ExecutableSpecifications.Gherkin.Given("some definition")
-            stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
+            given = Behavior.Gherkin.Given("some definition")
+            stepdef_matcher = Behavior.FromMacroStepDefinitionMatcher("""
                 using Behavior: @given
 
                 @given("some definition") do context
@@ -81,8 +81,8 @@ using Behavior.Gherkin: Given, When, Then
                 end
             """)
 
-            context = ExecutableSpecifications.StepDefinitionContext()
-            stepmatch = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
+            context = Behavior.StepDefinitionContext()
+            stepmatch = Behavior.findstepdefinition(stepdef_matcher, given)
             stepdefinition = stepmatch.stepdefinition
             args = Dict{Symbol, Any}()
             stepdefinition.definition(context, args)
@@ -91,8 +91,8 @@ using Behavior.Gherkin: Given, When, Then
         end
 
         @testset "Execute a step definition; Store a string in context; Context stores the value" begin
-            given = ExecutableSpecifications.Gherkin.Given("some definition")
-            stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
+            given = Behavior.Gherkin.Given("some definition")
+            stepdef_matcher = Behavior.FromMacroStepDefinitionMatcher("""
                 using Behavior: @given
 
                 @given("some definition") do context
@@ -100,8 +100,8 @@ using Behavior.Gherkin: Given, When, Then
                 end
             """)
 
-            context = ExecutableSpecifications.StepDefinitionContext()
-            stepmatch = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
+            context = Behavior.StepDefinitionContext()
+            stepmatch = Behavior.findstepdefinition(stepdef_matcher, given)
             stepdefinition = stepmatch.stepdefinition
             args = Dict{Symbol, Any}()
             stepdefinition.definition(context, args)
@@ -110,8 +110,8 @@ using Behavior.Gherkin: Given, When, Then
         end
 
         @testset "Execute a step definition; Retrieve a value from the context; Context value is present" begin
-            given = ExecutableSpecifications.Gherkin.Then(":x has value 1")
-            stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
+            given = Behavior.Gherkin.Then(":x has value 1")
+            stepdef_matcher = Behavior.FromMacroStepDefinitionMatcher("""
                 using Behavior: @then, @expect
 
                 @then(":x has value 1") do context
@@ -119,18 +119,18 @@ using Behavior.Gherkin: Given, When, Then
                 end
             """)
 
-            context = ExecutableSpecifications.StepDefinitionContext()
+            context = Behavior.StepDefinitionContext()
             context[:x] = 1
-            stepmatch = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
+            stepmatch = Behavior.findstepdefinition(stepdef_matcher, given)
             stepdefinition = stepmatch.stepdefinition
             args = Dict{Symbol, Any}()
 
-            @test stepdefinition.definition(context, args) == ExecutableSpecifications.SuccessfulStepExecution()
+            @test stepdefinition.definition(context, args) == Behavior.SuccessfulStepExecution()
         end
 
         @testset "Execute a step definition; An empty step definition; Success is returned" begin
-            given = ExecutableSpecifications.Gherkin.Given("some definition")
-            stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
+            given = Behavior.Gherkin.Given("some definition")
+            stepdef_matcher = Behavior.FromMacroStepDefinitionMatcher("""
                 using Behavior: @given
 
                 @given("some definition") do context
@@ -138,16 +138,16 @@ using Behavior.Gherkin: Given, When, Then
                 end
             """)
 
-            context = ExecutableSpecifications.StepDefinitionContext()
-            stepmatch = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
+            context = Behavior.StepDefinitionContext()
+            stepmatch = Behavior.findstepdefinition(stepdef_matcher, given)
             stepdefinition = stepmatch.stepdefinition
             args = Dict{Symbol, Any}()
-            @test stepdefinition.definition(context, args) == ExecutableSpecifications.SuccessfulStepExecution()
+            @test stepdefinition.definition(context, args) == Behavior.SuccessfulStepExecution()
         end
 
         @testset "Execute a step definition; An assert fails; StepFailed is returned" begin
-            given = ExecutableSpecifications.Gherkin.Given("some definition")
-            stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
+            given = Behavior.Gherkin.Given("some definition")
+            stepdef_matcher = Behavior.FromMacroStepDefinitionMatcher("""
                 using Behavior: @given, @expect
 
                 @given("some definition") do context
@@ -155,16 +155,16 @@ using Behavior.Gherkin: Given, When, Then
                 end
             """)
 
-            context = ExecutableSpecifications.StepDefinitionContext()
-            stepmatch = ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
+            context = Behavior.StepDefinitionContext()
+            stepmatch = Behavior.findstepdefinition(stepdef_matcher, given)
             stepdefinition = stepmatch.stepdefinition
             args = Dict{Symbol, Any}()
-            @test stepdefinition.definition(context, args) isa ExecutableSpecifications.StepFailed
+            @test stepdefinition.definition(context, args) isa Behavior.StepFailed
         end
 
         @testset "Execute a step definition; An empty When step; Success is returned" begin
             when = When("some action")
-            stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
+            stepdef_matcher = Behavior.FromMacroStepDefinitionMatcher("""
                 using Behavior: @when
 
                 @when("some action") do context
@@ -172,16 +172,16 @@ using Behavior.Gherkin: Given, When, Then
                 end
             """)
 
-            context = ExecutableSpecifications.StepDefinitionContext()
-            stepmatch = ExecutableSpecifications.findstepdefinition(stepdef_matcher, when)
+            context = Behavior.StepDefinitionContext()
+            stepmatch = Behavior.findstepdefinition(stepdef_matcher, when)
             stepdefinition = stepmatch.stepdefinition
             args = Dict{Symbol, Any}()
-            @test stepdefinition.definition(context, args) == ExecutableSpecifications.SuccessfulStepExecution()
+            @test stepdefinition.definition(context, args) == Behavior.SuccessfulStepExecution()
         end
 
         @testset "Execute a step definition; An empty Then step; Success is returned" begin
             then = Then("some postcondition")
-            stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
+            stepdef_matcher = Behavior.FromMacroStepDefinitionMatcher("""
                 using Behavior: @then
 
                 @then("some postcondition") do context
@@ -189,16 +189,16 @@ using Behavior.Gherkin: Given, When, Then
                 end
             """)
 
-            context = ExecutableSpecifications.StepDefinitionContext()
-            stepmatch = ExecutableSpecifications.findstepdefinition(stepdef_matcher, then)
+            context = Behavior.StepDefinitionContext()
+            stepmatch = Behavior.findstepdefinition(stepdef_matcher, then)
             stepdefinition = stepmatch.stepdefinition
             args = Dict{Symbol, Any}()
-            @test stepdefinition.definition(context, args) == ExecutableSpecifications.SuccessfulStepExecution()
+            @test stepdefinition.definition(context, args) == Behavior.SuccessfulStepExecution()
         end
 
         @testset "Execute a step definition; Step throws an exception; The error is not caught" begin
             given = Given("some precondition")
-            stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
+            stepdef_matcher = Behavior.FromMacroStepDefinitionMatcher("""
                 using Behavior: @given
 
                 @given("some precondition") do context
@@ -206,7 +206,7 @@ using Behavior.Gherkin: Given, When, Then
                 end
             """)
 
-            context = ExecutableSpecifications.StepDefinitionContext()
+            context = Behavior.StepDefinitionContext()
             stepmatch = findstepdefinition(stepdef_matcher, given)
             stepdefinition = stepmatch.stepdefinition
             args = Dict{Symbol, Any}()
@@ -214,8 +214,8 @@ using Behavior.Gherkin: Given, When, Then
         end
 
         @testset "Execute a step definition; Call a method defined in the steps file; Method is in scope" begin
-            when = ExecutableSpecifications.Gherkin.When("calling empty function foo")
-            stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
+            when = Behavior.Gherkin.When("calling empty function foo")
+            stepdef_matcher = Behavior.FromMacroStepDefinitionMatcher("""
                 using Behavior: @when
 
                 foo() = nothing
@@ -225,18 +225,18 @@ using Behavior.Gherkin: Given, When, Then
                 end
             """)
 
-            context = ExecutableSpecifications.StepDefinitionContext()
-            stepmatch = ExecutableSpecifications.findstepdefinition(stepdef_matcher, when)
+            context = Behavior.StepDefinitionContext()
+            stepmatch = Behavior.findstepdefinition(stepdef_matcher, when)
             stepdefinition = stepmatch.stepdefinition
             args = Dict{Symbol, Any}()
-            @test stepdefinition.definition(context, args) == ExecutableSpecifications.SuccessfulStepExecution()
+            @test stepdefinition.definition(context, args) == Behavior.SuccessfulStepExecution()
         end
     end
 
     @testset "Non-unique step definitions" begin
         @testset "Find a step definition; Two step definitions have the same description; NonUniqueStepDefinition is thrown" begin
-            given = ExecutableSpecifications.Gherkin.Given("some definition")
-            stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
+            given = Behavior.Gherkin.Given("some definition")
+            stepdef_matcher = Behavior.FromMacroStepDefinitionMatcher("""
                 using Behavior: @given
 
                 @given("some definition") do context
@@ -246,13 +246,13 @@ using Behavior.Gherkin: Given, When, Then
                 end
             """)
 
-            context = ExecutableSpecifications.StepDefinitionContext()
-            @test_throws NonUniqueStepDefinition ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
+            context = Behavior.StepDefinitionContext()
+            @test_throws NonUniqueStepDefinition Behavior.findstepdefinition(stepdef_matcher, given)
         end
 
         @testset "Find a step definition; Two step definitions have the same description; File is reported for both" begin
-            given = ExecutableSpecifications.Gherkin.Given("some definition")
-            stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
+            given = Behavior.Gherkin.Given("some definition")
+            stepdef_matcher = Behavior.FromMacroStepDefinitionMatcher("""
                 using Behavior: @given
 
                 @given("some definition") do context
@@ -262,10 +262,10 @@ using Behavior.Gherkin: Given, When, Then
                 end
             """; filename="steps.jl")
 
-            context = ExecutableSpecifications.StepDefinitionContext()
+            context = Behavior.StepDefinitionContext()
             exception_thrown = false
             try
-                ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
+                Behavior.findstepdefinition(stepdef_matcher, given)
             catch ex
                 if ex isa NonUniqueStepDefinition
                     exception_thrown = true
@@ -280,8 +280,8 @@ using Behavior.Gherkin: Given, When, Then
         end
 
         @testset "Find a step definition; Two step definitions have the same description; Another file is reported for both" begin
-            given = ExecutableSpecifications.Gherkin.Given("some definition")
-            stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
+            given = Behavior.Gherkin.Given("some definition")
+            stepdef_matcher = Behavior.FromMacroStepDefinitionMatcher("""
                 using Behavior: @given
 
 
@@ -293,10 +293,10 @@ using Behavior.Gherkin: Given, When, Then
                 end
             """; filename="othersteps.jl")
 
-            context = ExecutableSpecifications.StepDefinitionContext()
+            context = Behavior.StepDefinitionContext()
             exception_thrown = false
             try
-                ExecutableSpecifications.findstepdefinition(stepdef_matcher, given)
+                Behavior.findstepdefinition(stepdef_matcher, given)
             catch ex
                 if ex isa NonUniqueStepDefinition
                     exception_thrown = true
