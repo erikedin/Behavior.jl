@@ -11,7 +11,7 @@ ExamplePackage/
 └── test
     └── runtests.jl
 ```
-To use ExecutableSpecifications.jl, add inside the package
+To use Behavior.jl, add inside the package
 - a directory `features`
 
     This directory will contain the Gherkin feature files.
@@ -38,7 +38,7 @@ Above you will see a single Gherkin feature file `features/Example.feature` and 
 step definition file `features/steps/ExampleSteps.jl`.
 
 ### Test organization
-ExecutableSpecifications searches for both feature files and step files recursively. You may
+Behavior searches for both feature files and step files recursively. You may
 place them in any subdirectory structure that you like. For instance,
 ```
 ExamplePackage/
@@ -70,7 +70,7 @@ There are currently two ways of making assertions in a step:
 
   Unconditionally fails a step, with an explanatory string.
 
-Both these macros are exported from the `ExecutableSpecifications` module.
+Both these macros are exported from the `Behavior` module.
 The `@expect` macro should be the primary method used for testing the actual
 vs. expected values of your code. The `@fail` macro can be used when the
 `@expect` macro is not appropriate, or for checking preconditions in the tests.
@@ -180,7 +180,7 @@ end
 
 ## Strictness of Gherkin syntax
 There are some ways to configure how strict we wish the Gherkin parser to be,
-when reading a feature file. For instance, ExecutableSpecifications by default
+when reading a feature file. For instance, Behavior by default
 requires you to only have steps in the order `Given-When-Then`. It fails if it finds,
 for instance, a `Given` step after a `When` step in a Scenario. This reflects the
 intended use of these steps, but may not be to everyones liking. Therefore, we can
@@ -208,7 +208,7 @@ ERROR: ./features/DemonstratingStepOrder.feature:7
     Actual: Given
 ```
 
-To allow this, create a `ExecutableSpecifications.Gherkin.ParseOptions`
+To allow this, create a `Behavior.Gherkin.ParseOptions`
 struct, with the keyword `allow_any_step_order = true`.
 
 ```julia-repl
@@ -224,7 +224,7 @@ Note that at the time of writing, the step order is the only option available fo
 configuration Gherkin parsing.
 
 ## Step implementation suggestions
-ExecutableSpecifications can find scenario steps that do not have a corresponding
+Behavior can find scenario steps that do not have a corresponding
 step implementation, and suggest one. For instance, if you have the feature
 
 ```Gherkin
@@ -267,7 +267,7 @@ where the step implementations are found. It will find that then `When` step abo
 and provide you with a sample step implementation. The sample will always initially fail, using
 the `@fail` macro, so that it is not accidentally left unimplemented.
 
-Note that `suggestmissingsteps` can also take a `ExecutableSpecifications.Gherkin.ParseOptions` as an optional argument,
+Note that `suggestmissingsteps` can also take a `Behavior.Gherkin.ParseOptions` as an optional argument,
 which allows you to configure how strict or lenient the parser should be when reading the feature file.
 
 ```julia-repl
@@ -294,7 +294,7 @@ implementations would not be stable for the user.
 
 ### Caution
 While it's tempting to use this as a means of automatically generating all missing step implementations,
-it's important to note that ExecutableSpecifications cannot know how to organize the step implementations.
+it's important to note that Behavior cannot know how to organize the step implementations.
 Oftentimes, many feature files will share common step implementations, so there will not be a
 one-to-one correspondence between feature files and the step implementation files. Furthermore,
 step implementations with variables will often match many steps for different values of the variables,

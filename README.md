@@ -60,7 +60,7 @@ extension `.jl` and are stored in `features/steps`.
 
 # Example project
 The project [CoffeeMachine.jl](https://github.com/erikedin/CoffeeMachine.jl) is an example of how to
-use ExecutableSpecifications.jl.
+use Behavior.jl.
 
 # Running
 Run the command line tool `runspec.jl` from the directory containing the `features` directory, or
@@ -90,4 +90,4 @@ These are some current limitations and missing features, that will be lifted as 
 
 
 # License
-ExecutableSpecifications.jl is licensed under the Apache License version 2.0.
+Behavior.jl is licensed under the Apache License version 2.0.

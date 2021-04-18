@@ -1,5 +1,5 @@
-# ExecutableSpecifications Tutorial
-This is a tutorial style introduction to how ExecutableSpecifications.jl works.
+# Behavior Tutorial
+This is a tutorial style introduction to how Behavior.jl works.
 It is not intended as a complete introduction to Behavior Driven Development, but
 rather as an introduction to how to start with this package.
 
@@ -11,7 +11,7 @@ Here is an overview of the steps we'll take:
 
 1. Create a new package
 2. Add some code to test
-3. Add ExecutableSpecifications.jl as a dependency
+3. Add Behavior.jl as a dependency
 4. Write a Gherkin feature
 5. Implement the steps in the feature
 6. Test the Gherkin feature
@@ -120,14 +120,14 @@ the user.
 
 In later steps, we'll create a Gherkin feature that exercises this code.
 
-# Step 3: Add ExecutableSpecifications as a dependency
-NOTE: ExecutableSpecifications is not yet registered as a package, therefore
+# Step 3: Add Behavior as a dependency
+NOTE: Behavior is not yet registered as a package, therefore
 this tutorial will manually clone the repository from GitHub and add it as a
 local development dependency.
 
 In a terminal in `~/.julia/dev`, run
 ```bash
-$ git clone https://github.com/erikedin/ExecutableSpecifications.jl ExecutableSpecifications
+$ git clone https://github.com/erikedin/Behavior.jl Behavior
 ```
 Note that we're cloning it into a repo without the `.jl` prefix, for consistency with the newly generated package.
 
@@ -153,16 +153,16 @@ julia> ]
 
 (CoffeeMachine) pkg>
 ```
-To add ExecutableSpecifications as a local development dependency, run
+To add Behavior as a local development dependency, run
 ```julia-repl
-(CoffeeMachine) pkg> dev ExecutableSpecifications
-[ Info: Resolving package identifier `ExecutableSpecifications` as a directory at `~/.julia/dev/ExecutableSpecifications`.
-Path `ExecutableSpecifications` exists and looks like the correct package. Using existing path.
+(CoffeeMachine) pkg> dev Behavior
+[ Info: Resolving package identifier `Behavior` as a directory at `~/.julia/dev/Behavior`.
+Path `Behavior` exists and looks like the correct package. Using existing path.
    Resolving package versions...
     Updating `~/.julia/dev/CoffeeMachine/Project.toml`
-  [7a129280] + ExecutableSpecifications v0.1.0 `../ExecutableSpecifications`
+  [7a129280] + Behavior v0.1.0 `../Behavior`
     Updating `~/.julia/dev/CoffeeMachine/Manifest.toml`
-  [7a129280] + ExecutableSpecifications v0.1.0 `../ExecutableSpecifications`
+  [7a129280] + Behavior v0.1.0 `../Behavior`
   [c27321d9] + Glob v1.3.0
   [2a0f44e3] + Base64
   [b77e0a4c] + InteractiveUtils
@@ -238,7 +238,7 @@ end
 end
 ```
 This file begins by `using` the `CoffeeMachine` module, which is the thing we wish to
-test, and the `ExecutableSpecifications` module, which provides the test functions.
+test, and the `Behavior` module, which provides the test functions.
 
 The first step implementation is
 ```julia
@@ -251,7 +251,7 @@ This is a Julia implementation of the `Scenario` step
 Given a machine filled with coffee beans
 ```
 Note that the string provided to the `@given` macro matches that of the `Given` step.
-This is how ExecutableSpecifications connects the steps in the Gherkin `.feature` file
+This is how Behavior connects the steps in the Gherkin `.feature` file
 with actual code.
 
 The `do context ... end` is the test function that will run for this step.
@@ -296,17 +296,17 @@ end
 ```
 This step retrieves the cup, which was stored in the `context` by the previous step.
 We use the `@expect` macro to check that the cup does indeed contain coffee. The
-`@expect` macro is provided by `ExecutableSpecifications`, and checks that the
+`@expect` macro is provided by `Behavior`, and checks that the
 provided expression is true. It is very similar to the `@test` macro in the standard
 `Test` module.
 
 If the above expression was false, say that the returned `Cup` struct had `0.0` in its
-coffee field, then the `@expect` macro would record a failure, and `ExecutableSpecifications`
+coffee field, then the `@expect` macro would record a failure, and `Behavior`
 would show this step as failed.
 
 # Step 6: Test the Gherkin feature
 The above steps have created a Gherkin feature file, and a step implementation file,
-but we need to tell `ExecutableSpecifications` to run them.
+but we need to tell `Behavior` to run them.
 
 Julias standard location for tests is in the `test/runtests.jl` file. Add a file
 `CoffeeMachine/test/runtests.jl`:
@@ -317,7 +317,7 @@ using Test
 
 @test runspec(pkgdir(CoffeeMachine)
 ```
-This code calls the `ExecutableSpecifications.runspec` function, which finds all the
+This code calls the `Behavior.runspec` function, which finds all the
 feature files and step implementations, and runs all `Scenarios`.
 For this example, if will find the `Scenario` "Making a regular coffee", and for each
 `Given`/`When`/`Then` step, find the matching step implementation in `CoffeeMachine/features/steps/makingcoffee.jl`, and run it.
@@ -328,7 +328,7 @@ The argument `pkgdir(CofeeMachine)` simply passes `runspec` the path to the root
 Finally, the `@test` macro is used here to ensure that `runspec` returns true, which it does
 when all tests pass. If any tests fail, then `runspec` returns false, and the `@test` macro
 records a failure, so that Julia knows it failed. Without the `@test` macro here,
-`ExecutableSpecifications` will still run all tests, and display them, but the standard
+`Behavior` will still run all tests, and display them, but the standard
 Julia testrunner will not know that any tests failed.
 
 To run the tests, enter the package mode for the `CoffeeMachine` package, and run the `test` command.
@@ -352,7 +352,7 @@ Feature: Making Coffee
 SUCCESS
      Testing CoffeeMachine tests passed
 ```
-`ExecutableSpecifications` will by default print each `Feature`, `Scenario`, and step as they
+`Behavior` will by default print each `Feature`, `Scenario`, and step as they
 are being executed, and show a final result of how many scenarios succeeded, and how many
 failed as part of each `Feature`. Finally, it says `SUCCESS` to indicate that no errors were
 found.
