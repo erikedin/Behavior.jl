@@ -1,15 +1,15 @@
-using ExecutableSpecifications
-using ExecutableSpecifications: findstepdefinition, NonUniqueStepDefinition, StepDefinitionLocation, NoMatchingStepDefinition
-using ExecutableSpecifications: FromMacroStepDefinitionMatcher, CompositeStepDefinitionMatcher, addmatcher!
-using ExecutableSpecifications.Gherkin
-using ExecutableSpecifications.Gherkin: Given, When, Then
+using Behavior
+using Behavior: findstepdefinition, NonUniqueStepDefinition, StepDefinitionLocation, NoMatchingStepDefinition
+using Behavior: FromMacroStepDefinitionMatcher, CompositeStepDefinitionMatcher, addmatcher!
+using Behavior.Gherkin
+using Behavior.Gherkin: Given, When, Then
 
 @testset "Step definitions     " begin
     @testset "Find a step definition" begin
         @testset "Find a step definition; A matching given step; A step is found" begin
             given = ExecutableSpecifications.Gherkin.Given("some definition")
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given
+                using Behavior: @given
 
                 @given("some definition") do context
                     x = 1
@@ -24,7 +24,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         @testset "Find a step definition; A non-matching given step; No step definition found" begin
             given = ExecutableSpecifications.Gherkin.Given("some other definition")
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given
+                using Behavior: @given
 
                 @given("some definition") do context
                     x = 1
@@ -37,7 +37,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         @testset "Find a step definition; A matching given step with another description; A step is found" begin
             given = ExecutableSpecifications.Gherkin.Given("some other definition")
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given
+                using Behavior: @given
 
                 @given("some other definition") do context
                     x = 1
@@ -54,7 +54,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             # kept globally.
             given = ExecutableSpecifications.Gherkin.Given("some definition")
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given
+                using Behavior: @given
 
                 @given("some definition") do context
                     x = 1
@@ -63,7 +63,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
 
             # There is no step definitions here, so it should not find any matching definitions.
             empty_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given
+                using Behavior: @given
             """)
 
             @test_throws ExecutableSpecifications.NoMatchingStepDefinition ExecutableSpecifications.findstepdefinition(empty_matcher, given)
@@ -74,7 +74,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         @testset "Execute a step definition; Store an int in context; Context stores the value" begin
             given = ExecutableSpecifications.Gherkin.Given("some definition")
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given
+                using Behavior: @given
 
                 @given("some definition") do context
                     context[:x] = 1
@@ -93,7 +93,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         @testset "Execute a step definition; Store a string in context; Context stores the value" begin
             given = ExecutableSpecifications.Gherkin.Given("some definition")
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given
+                using Behavior: @given
 
                 @given("some definition") do context
                     context[:x] = "Some string"
@@ -112,7 +112,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         @testset "Execute a step definition; Retrieve a value from the context; Context value is present" begin
             given = ExecutableSpecifications.Gherkin.Then(":x has value 1")
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @then, @expect
+                using Behavior: @then, @expect
 
                 @then(":x has value 1") do context
                     @expect context[:x] == 1
@@ -131,7 +131,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         @testset "Execute a step definition; An empty step definition; Success is returned" begin
             given = ExecutableSpecifications.Gherkin.Given("some definition")
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given
+                using Behavior: @given
 
                 @given("some definition") do context
 
@@ -148,7 +148,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         @testset "Execute a step definition; An assert fails; StepFailed is returned" begin
             given = ExecutableSpecifications.Gherkin.Given("some definition")
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given, @expect
+                using Behavior: @given, @expect
 
                 @given("some definition") do context
                     @expect 1 == 2
@@ -165,7 +165,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         @testset "Execute a step definition; An empty When step; Success is returned" begin
             when = When("some action")
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @when
+                using Behavior: @when
 
                 @when("some action") do context
 
@@ -182,7 +182,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         @testset "Execute a step definition; An empty Then step; Success is returned" begin
             then = Then("some postcondition")
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @then
+                using Behavior: @then
 
                 @then("some postcondition") do context
 
@@ -199,7 +199,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         @testset "Execute a step definition; Step throws an exception; The error is not caught" begin
             given = Given("some precondition")
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given
+                using Behavior: @given
 
                 @given("some precondition") do context
                     throw(ErrorException("Some error"))
@@ -216,7 +216,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         @testset "Execute a step definition; Call a method defined in the steps file; Method is in scope" begin
             when = ExecutableSpecifications.Gherkin.When("calling empty function foo")
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @when
+                using Behavior: @when
 
                 foo() = nothing
 
@@ -237,7 +237,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         @testset "Find a step definition; Two step definitions have the same description; NonUniqueStepDefinition is thrown" begin
             given = ExecutableSpecifications.Gherkin.Given("some definition")
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given
+                using Behavior: @given
 
                 @given("some definition") do context
                 end
@@ -253,7 +253,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         @testset "Find a step definition; Two step definitions have the same description; File is reported for both" begin
             given = ExecutableSpecifications.Gherkin.Given("some definition")
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given
+                using Behavior: @given
 
                 @given("some definition") do context
                 end
@@ -282,7 +282,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         @testset "Find a step definition; Two step definitions have the same description; Another file is reported for both" begin
             given = ExecutableSpecifications.Gherkin.Given("some definition")
             stepdef_matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given
+                using Behavior: @given
 
 
                 @given("some definition") do context
@@ -315,7 +315,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         @testset "Find a step definition from a composite; First matcher has the definition; Definition is found" begin
             given = Given("some precondition")
             matcher1 = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given
+                using Behavior: @given
 
                 @given("some precondition") do context
 
@@ -333,10 +333,10 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         @testset "Find a step definition from a composite; Second matcher has the definition; Definition is found" begin
             given = Given("some other precondition")
             matcher1 = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given
+                using Behavior: @given
             """)
             matcher2 = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given
+                using Behavior: @given
 
                 @given("some other precondition") do context
 
@@ -355,19 +355,19 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             given = Given("some other precondition")
             when = When("some action")
             matcher1 = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given
+                using Behavior: @given
 
 
             """)
             matcher2 = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given
+                using Behavior: @given
 
                 @given("some other precondition") do context
 
                 end
             """)
             matcher3 = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @when
+                using Behavior: @when
 
                 @when("some action") do context
 
@@ -389,14 +389,14 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         @testset "Find a step definition from a composite; Matching two definitions; Non unique step exception thrown" begin
             given = Given("some precondition")
             matcher1 = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given
+                using Behavior: @given
 
                 @given("some precondition") do context
 
                 end
             """)
             matcher2 = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given
+                using Behavior: @given
 
                 @given("some precondition") do context
 
@@ -411,7 +411,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         @testset "Find a step definition from a composite; Matching two definitions in one matcher; Non unique step exception thrown" begin
             given = Given("some precondition")
             matcher1 = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given
+                using Behavior: @given
 
                 @given("some precondition") do context
 
@@ -422,7 +422,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
                 end
             """)
             matcher2 = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given
+                using Behavior: @given
             """)
 
             compositematcher = CompositeStepDefinitionMatcher(matcher1, matcher2)
@@ -433,14 +433,14 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         @testset "Find a step definition from a composite; Matches in both matchers; Non unique locations indicates both matchers" begin
             given = Given("some precondition")
             matcher1 = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given
+                using Behavior: @given
 
                 @given("some precondition") do context
 
                 end
             """; filename="matcher1.jl")
             matcher2 = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given
+                using Behavior: @given
 
                 @given("some precondition") do context
 
@@ -469,7 +469,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         @testset "Find a step definition from a composite; Two matchings in one and one matching in second matcher; Non unique locations indicates both matchers" begin
             given = Given("some precondition")
             matcher1 = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given
+                using Behavior: @given
 
                 @given("some precondition") do context
 
@@ -480,7 +480,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
                 end
             """; filename="matcher1.jl")
             matcher2 = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given
+                using Behavior: @given
 
                 @given("some precondition") do context
 
@@ -509,10 +509,10 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         @testset "Find a step definition from a composite; No matches found; NoMatchingStepDefinition thrown" begin
             given = Given("some precondition")
             matcher1 = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given
+                using Behavior: @given
             """)
             matcher2 = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given
+                using Behavior: @given
             """)
 
             compositematcher = CompositeStepDefinitionMatcher(matcher1, matcher2)
@@ -523,7 +523,7 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
         @testset "Add a matcher after construction; Definition is found" begin
             given = Given("some precondition")
             matcher1 = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications
+                using Behavior
 
                 @given("some precondition") do context end
             """)
@@ -541,14 +541,14 @@ using ExecutableSpecifications.Gherkin: Given, When, Then
             given = Given("some other precondition")
             when = When("some action")
             matcher1 = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given
+                using Behavior: @given
 
                 @given("some other precondition") do context
 
                 end
             """)
             matcher2 = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @when
+                using Behavior: @when
 
                 @when("some action") do context
 

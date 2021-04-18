@@ -1,5 +1,5 @@
 using Test
-using ExecutableSpecifications.Gherkin: hastag, parsefeature, issuccessful, istagsline
+using Behavior.Gherkin: hastag, parsefeature, issuccessful, istagsline
 
 @testset "Tags                 " begin
     @testset "Feature tags" begin

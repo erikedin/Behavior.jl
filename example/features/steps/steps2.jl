@@ -1,4 +1,4 @@
-using ExecutableSpecifications: @given, @when, @then, @expect
+using Behavior: @given, @when, @then, @expect
 
 @given("some precondition which does nothing") do context
 

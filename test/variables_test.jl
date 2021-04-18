@@ -1,12 +1,12 @@
 using Test
-using ExecutableSpecifications.Gherkin: Given, When, ScenarioStep, Scenario, Background
-using ExecutableSpecifications: FromMacroStepDefinitionMatcher, findstepdefinition
+using Behavior.Gherkin: Given, When, ScenarioStep, Scenario, Background
+using Behavior: FromMacroStepDefinitionMatcher, findstepdefinition
 
 @testset "Parameters           " begin
     @testset "Matching against parameters; Definition has one String parameter; has value bar" begin
         given = Given("some bar")
         stepdef_matcher = FromMacroStepDefinitionMatcher("""
-            using ExecutableSpecifications: @given
+            using Behavior: @given
 
             @given("some {String}") do context, v end
         """)
@@ -19,7 +19,7 @@ using ExecutableSpecifications: FromMacroStepDefinitionMatcher, findstepdefiniti
     @testset "Matching against parameters; Definition has one empty String parameter; has value bar" begin
         given = Given("some bar")
         stepdef_matcher = FromMacroStepDefinitionMatcher("""
-            using ExecutableSpecifications: @given
+            using Behavior: @given
 
             @given("some {}") do context, v end
         """)
@@ -32,7 +32,7 @@ using ExecutableSpecifications: FromMacroStepDefinitionMatcher, findstepdefiniti
     @testset "Matching against parameters; Definition has one String parameter; has value baz" begin
         given = Given("some baz")
         stepdef_matcher = FromMacroStepDefinitionMatcher("""
-            using ExecutableSpecifications: @given
+            using Behavior: @given
 
             @given("some {String}") do context, v end
         """)
@@ -45,7 +45,7 @@ using ExecutableSpecifications: FromMacroStepDefinitionMatcher, findstepdefiniti
     @testset "Matching against parameters; Definition has two String parameters;  has values bar and fnord" begin
         given = Given("some bar and fnord")
         stepdef_matcher = FromMacroStepDefinitionMatcher("""
-            using ExecutableSpecifications: @given
+            using Behavior: @given
 
             @given("some {String} and {String}") do context, v1, v2 end
         """)
@@ -57,7 +57,7 @@ using ExecutableSpecifications: FromMacroStepDefinitionMatcher, findstepdefiniti
 
     @testset "Scenario step has a variable foo; Args has :foo => bar" begin
         stepdefmatcher = FromMacroStepDefinitionMatcher("""
-            using ExecutableSpecifications: @given
+            using Behavior: @given
 
             @given("some value {String}") do context, v
                 @expect v == "bar"
@@ -75,7 +75,7 @@ using ExecutableSpecifications: FromMacroStepDefinitionMatcher, findstepdefiniti
 
     @testset "Scenario step has two String parameters; Arguments are bar, fnord" begin
         stepdefmatcher = FromMacroStepDefinitionMatcher("""
-            using ExecutableSpecifications: @given
+            using Behavior: @given
 
             @given("some values {} and {}") do context, v1, v2
                 @expect v1 == "bar"
@@ -96,7 +96,7 @@ using ExecutableSpecifications: FromMacroStepDefinitionMatcher, findstepdefiniti
         @testset "Definition has one Int parameter; has value 123" begin
             given = Given("some value 123")
             stepdef_matcher = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given
+                using Behavior: @given
 
                 @given("some value {Int}") do context, v end
             """)
@@ -109,7 +109,7 @@ using ExecutableSpecifications: FromMacroStepDefinitionMatcher, findstepdefiniti
         @testset "Definition has one Float64 parameter; has value 234.0" begin
             given = Given("some value 234.0")
             stepdef_matcher = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given
+                using Behavior: @given
 
                 @given("some value {Float64}") do context, v end
             """)
@@ -122,7 +122,7 @@ using ExecutableSpecifications: FromMacroStepDefinitionMatcher, findstepdefiniti
         @testset "Definition has one Bool parameter; has value true" begin
             given = Given("some value true")
             stepdef_matcher = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given
+                using Behavior: @given
 
                 @given("some value {Bool}") do context, v end
             """)
@@ -135,7 +135,7 @@ using ExecutableSpecifications: FromMacroStepDefinitionMatcher, findstepdefiniti
         @testset "Definition has one Bool parameter; has value false" begin
             given = Given("some value false")
             stepdef_matcher = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given
+                using Behavior: @given
 
                 @given("some value {Bool}") do context, v end
             """)
@@ -148,7 +148,7 @@ using ExecutableSpecifications: FromMacroStepDefinitionMatcher, findstepdefiniti
         @testset "Definition has one Bool parameter; has value false" begin
             given = Given("some value false")
             stepdef_matcher = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications: @given
+                using Behavior: @given
 
                 @given("some value {Bool}") do context, v end
             """)

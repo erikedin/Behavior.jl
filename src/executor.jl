@@ -245,7 +245,7 @@ function suggestmissingsteps(executor::Executor, feature::Feature) :: String
     missingstepcode = join(missingstepimpls, "\n\n")
 
     """
-    using ExecutableSpecifications
+    using Behavior
 
     $(missingstepcode)
     """

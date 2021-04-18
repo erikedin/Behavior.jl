@@ -1,5 +1,5 @@
-using ExecutableSpecifications: parseonly
-using ExecutableSpecifications.Gherkin: ParseOptions
+using Behavior: parseonly
+using Behavior.Gherkin: ParseOptions
 
 if length(ARGS) !== 1
     println("Usage: julia parseonly.jl <root-directory>")

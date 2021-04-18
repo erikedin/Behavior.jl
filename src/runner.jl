@@ -1,11 +1,11 @@
-using ExecutableSpecifications:
+using Behavior:
     ExecutorEngine, ColorConsolePresenter, Driver,
     readstepdefinitions!, runfeatures!, issuccess,
     FromSourceExecutionEnvironment, NoExecutionEnvironment
 import ExecutableSpecifications:
     findfileswithextension, readfile, fileexists
 
-using ExecutableSpecifications.Gherkin: BadParseResult
+using Behavior.Gherkin: BadParseResult
 using Glob
 
 struct OSAL <: ExecutableSpecifications.OSAbstraction end

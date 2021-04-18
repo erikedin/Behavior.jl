@@ -1,7 +1,7 @@
 using Test
-using ExecutableSpecifications
-using ExecutableSpecifications.Gherkin
-using ExecutableSpecifications: transformoutline
+using Behavior
+using Behavior.Gherkin
+using Behavior: transformoutline
 
 @testset "Scenario Outline     " begin
     @testset "Transform; Outline description is \"Some description\"; Result description is same" begin

@@ -9,7 +9,7 @@ Selecting which features and scenarios to run, based on tags.
 """
 module Selection
 
-using ExecutableSpecifications.Gherkin
+using Behavior.Gherkin
 
 export select, parsetagselector, TagSelector
 

@@ -1,4 +1,4 @@
-using ExecutableSpecifications: suggestmissingsteps, ParseOptions
+using Behavior: suggestmissingsteps, ParseOptions
 
 if length(ARGS) !== 2
     println("Usage: julia suggeststeps.jl <feature file> <steps root path>")

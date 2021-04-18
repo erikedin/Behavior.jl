@@ -1,4 +1,4 @@
-using ExecutableSpecifications.Gherkin: parsescenario!, issuccessful, Given, When, Then, ByLineParser, ScenarioStep
+using Behavior.Gherkin: parsescenario!, issuccessful, Given, When, Then, ByLineParser, ScenarioStep
 
 @testset "Scenario descriptions" begin
     @testset "Scenario long description, one line; Long description is available" begin

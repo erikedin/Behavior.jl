@@ -1,5 +1,5 @@
-using ExecutableSpecifications
-using ExecutableSpecifications:
+using Behavior
+using Behavior:
     StepDefinitionMatcher,
     Executor, executescenario, @expect, SuccessfulStepExecution,
     issuccess, beforescenario, afterscenario, FromSourceExecutionEnvironment
@@ -109,7 +109,7 @@ end
         @testset "beginscenario is defined in source; beginscenario is executed" begin
             # Arrange
             env = FromSourceExecutionEnvironment("""
-                using ExecutableSpecifications
+                using Behavior
 
                 @beforescenario begin
                     context[:beforescenariowasexecuted] = true
@@ -143,7 +143,7 @@ end
         @testset "afterscenario is defined in source; afterscenario is executed" begin
             # Arrange
             env = FromSourceExecutionEnvironment("""
-                using ExecutableSpecifications
+                using Behavior
 
                 @afterscenario begin
                     context[:afterscenariowasexecuted] = true

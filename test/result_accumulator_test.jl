@@ -1,5 +1,5 @@
-using ExecutableSpecifications.Gherkin
-using ExecutableSpecifications:
+using Behavior.Gherkin
+using Behavior:
     ResultAccumulator, accumulateresult!, issuccess, featureresults,
     FeatureResult, ScenarioResult, Given, SuccessfulStepExecution, Scenario, StepFailed
 

@@ -218,7 +218,7 @@ $ mkdir -p features/steps
 ```
 Add a file `CoffeeMachine/features/steps/makingcoffee.jl`:
 ```julia
-using ExecutableSpecifications
+using Behavior
 using CoffeeMachine
 
 @given("a machine filled with coffee beans") do context
@@ -311,7 +311,7 @@ but we need to tell `ExecutableSpecifications` to run them.
 Julias standard location for tests is in the `test/runtests.jl` file. Add a file
 `CoffeeMachine/test/runtests.jl`:
 ```julia
-using ExecutableSpecifications
+using Behavior
 using CoffeeMachine
 using Test
 
@@ -569,7 +569,7 @@ column headers.
 This `Scenario Outline` is exactly equivalent to the two `Scenario`s above. To run it,
 create a new step definition file `CoffeeMachine/features/steps/display.jl`:
 ```julia
-using ExecutableSpecifications
+using Behavior
 using CoffeeMachine
 
 @given("a machine without coffee") do context

@@ -1,4 +1,4 @@
-using ExecutableSpecifications: @given, @when, @then, @expect
+using Behavior: @given, @when, @then, @expect
 
 @given("that the context variable :x has value 1") do context
     context[:x] = 1

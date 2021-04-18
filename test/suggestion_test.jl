@@ -1,11 +1,11 @@
-using ExecutableSpecifications: findmissingsteps, ExecutorEngine, suggestmissingsteps
+using Behavior: findmissingsteps, ExecutorEngine, suggestmissingsteps
 
 @testset "Suggestions          " begin
     @testset "Find missing steps" begin
         @testset "One step missing; Step is listed as missing in result" begin
             # Arrange
             matcher = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications
+                using Behavior
             """)
 
             executor = Executor(matcher, QuietRealTimePresenter())
@@ -24,7 +24,7 @@ using ExecutableSpecifications: findmissingsteps, ExecutorEngine, suggestmissing
         @testset "No step missing; Step is not listed as missing in result" begin
             # Arrange
             matcher = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications
+                using Behavior
             
                 @given("some step") do context end
             """)
@@ -45,7 +45,7 @@ using ExecutableSpecifications: findmissingsteps, ExecutorEngine, suggestmissing
         @testset "One step missing, two found; Only missing step is listed" begin
             # Arrange
             matcher = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications
+                using Behavior
 
                 @given("some precondition") do context end
                 @when("some action") do context end
@@ -73,7 +73,7 @@ using ExecutableSpecifications: findmissingsteps, ExecutorEngine, suggestmissing
         @testset "Two scenarios, two missing steps; Missing steps from both scenarios listed" begin
             # Arrange
             matcher = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications
+                using Behavior
 
                 @given("some precondition") do context end
             """)
@@ -95,7 +95,7 @@ using ExecutableSpecifications: findmissingsteps, ExecutorEngine, suggestmissing
         @testset "Two scenarios, one missing step; Step is only listed once" begin
             # Arrange
             matcher = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications
+                using Behavior
 
                 @given("some precondition") do context end
             """)
@@ -116,7 +116,7 @@ using ExecutableSpecifications: findmissingsteps, ExecutorEngine, suggestmissing
         @testset "Background has a missing step; Missing step is listed" begin
             # Arrange
             matcher = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications
+                using Behavior
 
                 @given("some precondition") do context end
             """)
@@ -137,7 +137,7 @@ using ExecutableSpecifications: findmissingsteps, ExecutorEngine, suggestmissing
         @testset "Two missing steps with different block texts; Step is only listed once" begin
             # Arrange
             matcher = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications
+                using Behavior
 
                 @given("some precondition") do context end
             """)
@@ -160,7 +160,7 @@ using ExecutableSpecifications: findmissingsteps, ExecutorEngine, suggestmissing
         @testset "One missing step; Add step according to suggestion; Step is found" begin
             # Arrange
             matcher = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications
+                using Behavior
 
                 @given("successful step") do context end
             """)
@@ -187,7 +187,7 @@ using ExecutableSpecifications: findmissingsteps, ExecutorEngine, suggestmissing
         @testset "Many missing steps; Add steps according to suggestion; Steps are found" begin
             # Arrange
             matcher = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications
+                using Behavior
 
                 @given("successful step") do context end
             """)
@@ -219,7 +219,7 @@ using ExecutableSpecifications: findmissingsteps, ExecutorEngine, suggestmissing
         @testset "Missing step ending with a double-quote; Suggestion works" begin
             # Arrange
             matcher = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications
+                using Behavior
 
                 @given("successful step") do context end
             """)
@@ -249,7 +249,7 @@ using ExecutableSpecifications: findmissingsteps, ExecutorEngine, suggestmissing
         @testset "One missing step; Add step according to suggestion; Step fails when executed" begin
             # Arrange
             matcher = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications
+                using Behavior
             """)
             executor = Executor(matcher, QuietRealTimePresenter())
 
@@ -277,7 +277,7 @@ using ExecutableSpecifications: findmissingsteps, ExecutorEngine, suggestmissing
         function testsuggestionescaping(steps::AbstractVector{ScenarioStep})
             # Arrange
             matcher = FromMacroStepDefinitionMatcher("""
-                using ExecutableSpecifications
+                using Behavior
             """)
             executor = Executor(matcher, QuietRealTimePresenter())
 
@@ -357,7 +357,7 @@ using ExecutableSpecifications: findmissingsteps, ExecutorEngine, suggestmissing
     @testset "Escaping the PCRE metacharacter ." begin
         # Arrange
         matcher = FromMacroStepDefinitionMatcher("""
-            using ExecutableSpecifications
+            using Behavior
         """)
         executor = Executor(matcher, QuietRealTimePresenter())
 

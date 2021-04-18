@@ -1,4 +1,4 @@
-using ExecutableSpecifications.Gherkin
+using Behavior.Gherkin
 
 """
 The location of a step definition (the Julia code of a test) is a filename and a line number.

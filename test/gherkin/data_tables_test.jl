@@ -1,4 +1,4 @@
-using ExecutableSpecifications.Gherkin: issuccessful, parsescenario!, Given, When, Then, ByLineParser, ScenarioStep, ParseOptions
+using Behavior.Gherkin: issuccessful, parsescenario!, Given, When, Then, ByLineParser, ScenarioStep, ParseOptions
 
 @testset "Data tables          " begin
     @testset "A Scenario with a data table; The data table is associated with the step" begin

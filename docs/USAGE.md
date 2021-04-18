@@ -77,7 +77,7 @@ vs. expected values of your code. The `@fail` macro can be used when the
 
 Examples:
 ```julia
-using ExecutableSpecifications
+using Behavior
 
 @then("one plus one equals two") do context
     @expect 1+1 == 2
@@ -85,7 +85,7 @@ end
 ```
 
 ```julia
-using ExecutableSpecifications
+using Behavior
 
 @given("some precondition") do context
     if !someprecondition()
@@ -112,7 +112,7 @@ Feature: Demonstrating parameters
 ```
 we have two steps. Both of these steps will match the step definition
 ```julia
-using ExecutableSpecifications
+using Behavior
 
 @given("value {String}") do context, value
     @expect value in ["42", "17"]
@@ -128,7 +128,7 @@ be `String`.
 
 One can have several parameters in the step definition. For instance, the step definition
 ```julia
-using ExecutableSpecifications
+using Behavior
 
 @given("{} {}") do context, key, value
     @expect key == "value"
@@ -167,7 +167,7 @@ Feature: Demonstrating data tables
 The `Given` step above has a data table associated with it. To access the data table
 in a step definition, use the `datatable` field on the `context` object:
 ```julia
-using ExecutableSpecifications
+using Behavior
 
 @given("some users") do context
     users = context.datatable
@@ -212,8 +212,8 @@ To allow this, create a `ExecutableSpecifications.Gherkin.ParseOptions`
 struct, with the keyword `allow_any_step_order = true`.
 
 ```julia-repl
-julia> using ExecutableSpecifications
-julia> using ExecutableSpecifications.Gherkin
+julia> using Behavior
+julia> using Behavior.Gherkin
 
 julia> p = ParseOptions(allow_any_step_order = true)
 
@@ -240,7 +240,7 @@ and the step implementation
 
 ```julia
 # features/steps/somesteps.jl
-using ExecutableSpecifications
+using Behavior
 
 @given("an existing step") do context
     # Some  test
@@ -252,10 +252,10 @@ step implementation, like the `Given` step does. To get a suggestion for missing
 implementations in a given feature file, you can run
 
 ```julia-repl
-julia> using ExecutableSpecifications
+julia> using Behavior
 
 julia> suggestmissingsteps("features/SomeFeature.feature", "features/steps")
-using ExecutableSpecifications
+using Behavior
 
 @when("a step is missing") do context
     @fail "Implement me"
@@ -271,12 +271,12 @@ Note that `suggestmissingsteps` can also take a `ExecutableSpecifications.Gherki
 which allows you to configure how strict or lenient the parser should be when reading the feature file.
 
 ```julia-repl
-julia> using ExecutableSpecifications
-julia> using ExecutableSpecifications.Gherkin
+julia> using Behavior
+julia> using Behavior.Gherkin
 
 julia> suggestmissingsteps("features/SomeFeature.feature", "features/steps",
                            parseoptions=ParseOptions(allow_any_step_order = true))
-using ExecutableSpecifications
+using Behavior
 
 @when("a step is missing") do context
     @fail "Implement me"
@@ -336,21 +336,21 @@ One scenario has the `@bar` and `@baz` tags, and another has the tag `@ignore`.
 
 You can select to run only the scenarios marked with `@foo` by running
 ```julia-repl
-julia> using ExecutableSpecifications
+julia> using Behavior
 julia> runspec(tags = "@foo")
 ```
 This will run both scenarios above, as they both inherit the `@foo` tag from the feature level.
 
 You can run only the scenario marked with `@bar` by running
 ```julia-repl
-julia> using ExecutableSpecifications
+julia> using Behavior
 julia> runspec(tags = "@bar")
 ```
 This will run only the first scenario `Scenario: Some scenario` above, as the second scenario does not have the `@bar` tag.
 
 You can also choose to run scenarios that _do not_ have a given tag, such as `@ignore`.
 ```julia-repl
-julia> using ExecutableSpecifications
+julia> using Behavior
 julia> runspec(tags = "not @ignore")
 ```
 This will also run only the first scenario, as it does not have the `@ignore` tag, but not the second.

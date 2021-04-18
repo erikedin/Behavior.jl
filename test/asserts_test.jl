@@ -1,5 +1,5 @@
-using ExecutableSpecifications
-using ExecutableSpecifications.Gherkin
+using Behavior
+using Behavior.Gherkin
 
 @testset "Asserts              " begin
     @testset "Assert failure; Assert is 1 == 2; Failure has human readable string 1 == 2" begin
@@ -12,7 +12,7 @@ using ExecutableSpecifications.Gherkin
 
     @testset "Assert failure in included file; Assert is 1 == 2; Failure has human readable string 1 == 2" begin
         matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
-            using ExecutableSpecifications
+            using Behavior
 
             @given("some precondition") do context
                 @expect 1 == 2
@@ -31,7 +31,7 @@ using ExecutableSpecifications.Gherkin
 
     @testset "Assert failure in included file; Assert is isempty([1]); Failure has human readable string isempty([1])" begin
         matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
-            using ExecutableSpecifications
+            using Behavior
 
             @given("some precondition") do context
                 @expect isempty([1])
@@ -50,7 +50,7 @@ using ExecutableSpecifications.Gherkin
 
     @testset "Fail assertion used in step, Step is StepFailed with assertion 'Some reason'" begin
         matcher = ExecutableSpecifications.FromMacroStepDefinitionMatcher("""
-            using ExecutableSpecifications
+            using Behavior
 
             @given("some precondition") do context
                 @fail "Some reason"

@@ -1,4 +1,4 @@
-using ExecutableSpecifications.Gherkin: issuccessful, parsescenario!, Given, When, Then, ByLineParser, ScenarioStep, ParseOptions
+using Behavior.Gherkin: issuccessful, parsescenario!, Given, When, Then, ByLineParser, ScenarioStep, ParseOptions
 
 @testset "Scenario             " begin
     @testset "Scenario has a Given step; the parsed scenario has a Given struct" begin

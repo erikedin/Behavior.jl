@@ -1,8 +1,8 @@
-using ExecutableSpecifications:
+using Behavior:
     Engine, ExecutorEngine, QuietRealTimePresenter, FromMacroStepDefinitionMatcher,
     finish, issuccess, findstepdefinition, NoMatchingStepDefinition, runfeatures!,
     Driver, readstepdefinitions!, OSAbstraction
-using ExecutableSpecifications.Gherkin: Feature, FeatureHeader, Scenario, Given, ParseOptions
+using Behavior.Gherkin: Feature, FeatureHeader, Scenario, Given, ParseOptions
 import ExecutableSpecifications: addmatcher!, findfileswithextension, readfile, runfeature!,
                                  issuccess, finish
 
@@ -13,7 +13,7 @@ import ExecutableSpecifications: addmatcher!, findfileswithextension, readfile, 
         # Arrange
         engine = ExecutorEngine(QuietRealTimePresenter())
         matcher = FromMacroStepDefinitionMatcher("""
-            using ExecutableSpecifications
+            using Behavior
 
             @given("successful step") do context end
         """)
@@ -34,7 +34,7 @@ import ExecutableSpecifications: addmatcher!, findfileswithextension, readfile, 
         # Arrange
         engine = ExecutorEngine(QuietRealTimePresenter())
         matcher = FromMacroStepDefinitionMatcher("""
-            using ExecutableSpecifications
+            using Behavior
 
             @given("failing step") do context
                 @expect 1 == 2
@@ -57,7 +57,7 @@ import ExecutableSpecifications: addmatcher!, findfileswithextension, readfile, 
         # Arrange
         engine = ExecutorEngine(QuietRealTimePresenter())
         matcher = FromMacroStepDefinitionMatcher("""
-            using ExecutableSpecifications
+            using Behavior
 
             @given("failing step") do context
                 @expect 1 == 2
@@ -198,7 +198,7 @@ readfile(os::FakeOSAbstraction, path::String) = os.filecontents[path]
         engine = FakeEngine()
         osal = FakeOSAbstraction(fileswithext=[".jl" => ["features/steps/file.jl"]],
                                  filecontents = Dict("features/steps/file.jl" => """
-                                    using ExecutableSpecifications
+                                    using Behavior
 
                                     @given("successful step") do context end
                                  """))
@@ -219,7 +219,7 @@ readfile(os::FakeOSAbstraction, path::String) = os.filecontents[path]
         engine = FakeEngine()
         osal = FakeOSAbstraction(fileswithext=[".jl" => ["features/steps/file.jl"]],
                                  filecontents = Dict("features/steps/file.jl" => """
-                                    using ExecutableSpecifications
+                                    using Behavior
 
                                  """))
         driver = Driver(osal, engine)

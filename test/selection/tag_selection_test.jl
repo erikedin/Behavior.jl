@@ -1,7 +1,7 @@
 using Test
-using ExecutableSpecifications.Selection
-using ExecutableSpecifications.Gherkin
-using ExecutableSpecifications.Gherkin: AbstractScenario
+using Behavior.Selection
+using Behavior.Gherkin
+using Behavior.Gherkin: AbstractScenario
 
 @testset "Selection            " begin
     # These tests check that the tag selector is parsed and that the expressions are used

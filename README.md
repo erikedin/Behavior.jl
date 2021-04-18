@@ -28,7 +28,7 @@ For each `Given`, `When`, and `Then` line, a corresponding method is written, wh
 that line is reached.
 
 ```julia
-using ExecutableSpecifications
+using Behavior
 using CoffeeMachine
 
 hascoffee(cup::Cup) = cup[:coffee] > 0.0
@@ -67,7 +67,7 @@ Run the command line tool `runspec.jl` from the directory containing the `featur
 from the Julia REPL with
 
 ```julia
-julia> using ExecutableSpecifications
+julia> using Behavior
 julia> runspec()
 ```
 

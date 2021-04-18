@@ -1,4 +1,4 @@
-using ExecutableSpecifications.Gherkin:
+using Behavior.Gherkin:
     parsefeature, issuccessful, ParseOptions,
     Given, When, Then
 

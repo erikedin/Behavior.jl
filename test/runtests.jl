@@ -1,4 +1,4 @@
-using ExecutableSpecifications
+using Behavior
 using Test
 
 include("runsmalltests.jl")

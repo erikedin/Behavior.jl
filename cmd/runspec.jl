@@ -1,5 +1,5 @@
-using ExecutableSpecifications
-using ExecutableSpecifications.Gherkin
+using Behavior
+using Behavior.Gherkin
 
 # In case you want a more lenient parser, you can do something like this.
 # For instance, the below options allows the Given/When/Then steps to be in any order
