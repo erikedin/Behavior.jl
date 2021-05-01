@@ -1,7 +1,7 @@
 using Behavior:
     Engine, ExecutorEngine, QuietRealTimePresenter, FromMacroStepDefinitionMatcher,
     finish, issuccess, findstepdefinition, NoMatchingStepDefinition, runfeatures!,
-    Driver, readstepdefinitions!, OSAbstraction
+    Driver, readstepdefinitions!, OSAbstraction, StepDefinitionMatcher
 using Behavior.Gherkin: Feature, FeatureHeader, Scenario, Given, ParseOptions
 import Behavior: addmatcher!, findfileswithextension, readfile, runfeature!,
                                  issuccess, finish
