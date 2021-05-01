@@ -52,7 +52,13 @@ stepcolor(presenter::Presenter, step::StepExecutionResult) = presenter.colors[ty
 
 A human readable message for a given result.
 """
-stepresultmessage(step::StepFailed) = ["FAILED: " * step.assertion]
+function stepresultmessage(step::StepFailed)
+    if isempty(step.evaluated) || step.assertion == step.evaluated
+        ["FAILED: " * step.assertion]
+    else
+        ["FAILED", "  Expression: " * step.assertion, "   Evaluated: " * step.evaluated]
+    end
+end
 stepresultmessage(nomatch::NoStepDefinitionFound) = ["No match for '$(stepformat(nomatch.step))'"]
 stepresultmessage(nonunique::NonUniqueMatch) = vcat(["Multiple matches found:"], ["  In " * location.filename for location in nonunique.locations])
 stepresultmessage(::SuccessfulStepExecution) = []

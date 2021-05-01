@@ -141,7 +141,7 @@ function step_definition_(definition::Expr, description::String)
                     # StepAssertFailures are turned into a failed result here, but all other exceptions
                     # are propagated.
                     if ex isa StepAssertFailure
-                        StepFailed(ex.assertion)
+                        StepFailed(ex.assertion, ex.evaluated)
                     else
                         rethrow()
                     end

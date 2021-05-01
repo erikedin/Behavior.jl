@@ -30,6 +30,10 @@ struct SuccessfulStepExecution <: StepExecutionResult end
 "An assert failed in the step."
 struct StepFailed <: StepExecutionResult
     assertion::String
+    evaluated::String
+
+    StepFailed(assertion::AbstractString) = new(assertion, "")
+    StepFailed(assertion::AbstractString, evaluated::AbstractString) = new(assertion, evaluated)
 end
 
 "An unexpected error or exception occurred during the step execution."
