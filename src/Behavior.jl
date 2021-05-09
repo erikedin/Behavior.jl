@@ -21,5 +21,6 @@ include("runner.jl")
 
 export @given, @when, @then, @expect, @fail, @beforescenario, @afterscenario, runspec
 export suggestmissingsteps
+export TerseRealTimePresenter, ColorConsolePresenter
 
 end # module
