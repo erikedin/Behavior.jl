@@ -6,8 +6,6 @@ BDD is an acronym for _Behaviour Driven Development_. It is a process for creati
 requirements, written in such a way that they can be executed as code. This package aims to be a
 tool for executing such requirements, and creating reports.
 
-This package is in the early stages of development, and has only minimal functionality.
-
 # Usage
 See [docs/USAGE.md](docs/USAGE.md) for more detailed usage.
 
@@ -74,10 +72,12 @@ julia> runspec()
 See "Current state" for limitations.
 
 # Current state
-The package has minimal functionality, but is under active development.
+The package is not feature complete, but is absolutely in a usable state. It is also under active
+development.
 
 These are some current limitations and missing features, that will be lifted as development progresses:
 
+- [ ] Currently does not function in Julia 1.4 and probably not before
 - [ ] Presenting the results of scenarios is very rudimentary.
 - [ ] Step definition variables do not yet have type information.
 - [ ] Gherkin Rules support
