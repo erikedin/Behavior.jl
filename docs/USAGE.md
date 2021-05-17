@@ -313,9 +313,13 @@ Feature: Demonstrate suggestion limitations
 ```
 
 ## Selecting scenarios by tags
-WARNING: At the time of writing the only supported way of selecting tags is a single tag with an optional "not" expression:
-- `@tag`, or
+WARNING: At the time of writing the only supported way of selecting tags is a single tag or a
+comma-separated list of tags, with an optional "not" expression:
+- `@tag`,
+- `@tag,@othertag,@thirdtag` matches any of the tags
 - `not @tag`
+- `not @tag,@othertag` will not match either `@tag` or `@othertag`
+
 The tag selection is a work in progress.
 
 You can select which scenarios to run using the tags specified in the Gherkin files. For example, a feature file can look like this
@@ -368,6 +372,14 @@ NOTE: The tag selection syntax is a work in progress.
 - `not @tag`
 
     Select scenarios that _do not_ have the tag `@tag`.
+
+- `@tag,@othertag,@thirdtag`
+
+    Select scenarios that have one or several of the tags `@tag`, `@othertag`, `@thirdtag`.
+
+- `not @tag,@othertag,@thirdtag`
+
+    Select scenarios that _do not_ have any of the tags `@tag`, `@othertag`, `@thirdtag`.
 
 ### Future syntax
 In the future, you will be able to write a more complex expression using `and`, `or`, and parentheses, like

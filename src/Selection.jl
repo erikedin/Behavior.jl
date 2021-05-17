@@ -66,6 +66,14 @@ struct All <: TagExpression end
 matches(::All, ::AbstractVector{String}) = true
 
 """
+Any matches any tags in a list.
+"""
+struct Any <: TagExpression
+    exs::Vector{TagExpression}
+end
+matches(anyex::Any, tags::AbstractVector{String}) = any(ex -> matches(ex, tags), anyex.exs)
+
+"""
     parsetagexpression(s::String) :: TagExpression
 
 Parse the string `s` into a `TagExpression`.
@@ -75,9 +83,10 @@ function parsetagexpression(s::String) :: TagExpression
         All()
     elseif startswith(s, "not ")
         tag = replace(s, "not " => "")
-        Not(Tag(tag))
+        Not(parsetagexpression(tag))
     else
-        Tag(s)
+        tags = split(s, ",")
+        Any([Tag(t) for t in tags])
     end
 end
 

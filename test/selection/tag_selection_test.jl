@@ -253,4 +253,66 @@ using Behavior.Gherkin: AbstractScenario
             @test newfeature.scenarios[1] == feature.scenarios[2]
         end
     end
+
+    @testset "Or expressions" begin
+        @testset "Feature has tags @foo and one scenario; selecting @foo,@bar returns the feature unchanged" begin
+            # Arrange
+            header = FeatureHeader("Some feature", String[], ["@foo"])
+            feature = Feature(header, AbstractScenario[
+                Scenario("Some scenario", String[], ScenarioStep[]),
+            ])
+
+            # Act
+            selector = parsetagselector("@foo,@bar")
+            newfeature = select(selector, feature)
+
+            # Assert
+            @test newfeature.scenarios == feature.scenarios
+        end
+
+        @testset "Feature has tags @foo and one scenario; selecting @bar,@foo returns the feature unchanged" begin
+            # Arrange
+            header = FeatureHeader("Some feature", String[], ["@foo"])
+            feature = Feature(header, AbstractScenario[
+                Scenario("Some scenario", String[], ScenarioStep[]),
+            ])
+
+            # Act
+            selector = parsetagselector("@bar,@foo")
+            newfeature = select(selector, feature)
+
+            # Assert
+            @test newfeature.scenarios == feature.scenarios
+        end
+
+        @testset "Feature has tag @foo; Selector is (not @foo,@bar); select returns nothing" begin
+            # Arrange
+            header = FeatureHeader("Some feature", String[], ["@foo"])
+            feature = Feature(header, AbstractScenario[
+                Scenario("Some scenario", String[], ScenarioStep[]),
+            ])
+
+            # Act
+            selector = parsetagselector("not @foo,@bar")
+            newfeature = select(selector, feature)
+
+            # Assert
+            @test isempty(newfeature.scenarios)
+        end
+
+        @testset "Feature has tag @bar; Selector is (not @foo,@bar); select returns nothing" begin
+            # Arrange
+            header = FeatureHeader("Some feature", String[], ["@bar"])
+            feature = Feature(header, AbstractScenario[
+                Scenario("Some scenario", String[], ScenarioStep[]),
+            ])
+
+            # Act
+            selector = parsetagselector("not @foo,@bar")
+            newfeature = select(selector, feature)
+
+            # Assert
+            @test isempty(newfeature.scenarios)
+        end
+    end
 end
