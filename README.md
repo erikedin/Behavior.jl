@@ -8,9 +8,9 @@ requirements, written in such a way that they can be executed as code. This pack
 tool for executing such requirements, and creating reports.
 
 # Usage
-See [docs/USAGE.md](docs/USAGE.md) for more detailed usage.
+See [docs/src/usage.md](docs/src/usage.md) for more detailed usage.
 
-See [docs/TUTORIAL.md](docs/TUTORIAL.md) for a step-by-step introduction to this package.
+See [docs/src/tutorial.md](docs/src/tutorial.md) for a step-by-step introduction to this package.
 
 Specifications are written in the Gherkin format, such as
 
