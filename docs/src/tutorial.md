@@ -1,4 +1,4 @@
-# Behavior Tutorial
+# Tutorial
 This is a tutorial style introduction to how Behavior.jl works.
 It is not intended as a complete introduction to Behavior Driven Development, but
 rather as an introduction to how to start with this package.
@@ -22,7 +22,7 @@ Here is an overview of the steps we'll take:
 If you have an existing package you wish to use, skip to step 3, and mentally
 replace the package name `CoffeeMachine` with your package name.
 
-# Step 1: Create a new package
+## Step 1: Create a new package
 Go to a path where you want to create your new package, commonly
 `~/.julia/dev`, and start Julia there.
 ```
@@ -58,7 +58,7 @@ Create the package by running
 ```
 You now have a brand new package in `~/.julia/dev/CoffeeMachine`.
 
-# Step 2: Add some code
+## Step 2: Add some code
 Open the file `~/.julia/dev/CoffeeMachine/src/CoffeeMachine.jl` and add code so that
 the `CoffeeMachine` module looks like this (you can remove the default `greet` function):
 ```julia
@@ -120,7 +120,7 @@ the user.
 
 In later steps, we'll create a Gherkin feature that exercises this code.
 
-# Step 3: Add Behavior as a dependency
+## Step 3: Add Behavior as a dependency
 NOTE: Behavior is not yet registered as a package, therefore
 this tutorial will manually clone the repository from GitHub and add it as a
 local development dependency.
@@ -180,7 +180,7 @@ We additionally require the standard `Test` module as a dependency, because we'l
 [ .. output not shown for brevity .. ]
 ```
 
-# Step 4: Write a Gherkin feature
+## Step 4: Write a Gherkin feature
 Create a directory `CoffeeMachine/features`.
 ```bash
 $ cd ~/.julia/dev/CoffeeMachine
@@ -210,7 +210,7 @@ under the assumption that there's enough coffee in the machine.
 To actually run these requirements as code, we need to add implementations for each step
 above.
 
-# Step 5: Implement the steps in the feature
+## Step 5: Implement the steps in the feature
 Create a directory `CoffeeMachine/features/steps`.
 ```bash
 $ cd ~/.julia/dev/CoffeeMachine
@@ -304,7 +304,7 @@ If the above expression was false, say that the returned `Cup` struct had `0.0` 
 coffee field, then the `@expect` macro would record a failure, and `Behavior`
 would show this step as failed.
 
-# Step 6: Test the Gherkin feature
+## Step 6: Test the Gherkin feature
 The above steps have created a Gherkin feature file, and a step implementation file,
 but we need to tell `Behavior` to run them.
 
@@ -357,7 +357,7 @@ are being executed, and show a final result of how many scenarios succeeded, and
 failed as part of each `Feature`. Finally, it says `SUCCESS` to indicate that no errors were
 found.
 
-## Optional: Introduce an error to see failures
+### Optional: Introduce an error to see failures
 To see what failures look like, we can intentionally introduce an error into `CoffeeMachine`.
 
 In the file `CoffeeMachine/src/CoffeeMachine.jl`, find the function
@@ -432,7 +432,7 @@ failed in that feature.
 
 To continue, ensure that you undo the intentional error, so that the tests pass again.
 
-# Step 7: Add further scenarios
+## Step 7: Add further scenarios
 Add the following `Scenario` to `CoffeeMachine/features/MakingCoffee.feature`:
 ```Gherkin
 Scenario: Making coffee with milk
@@ -521,7 +521,7 @@ Then the cup contains coffee
 is reused, as is the initial `Given` that constructs the coffee machine. It is
 expected that many, if not most, step definitions will be shared by many scenarios.
 
-# Step 8: Scenario Outlines
+## Step 8: Scenario Outlines
 `Scenario Outline`s in Gherkin is a way to run one scenario for many similar values.
 For instance, say that we want to test the machine's error messages when it is out
 of an ingredient. We could write two different scenarios, one for when the machine is
@@ -592,7 +592,7 @@ end
 ```
 You can run the tests to ensure that they pass.
 
-# Step 9: Parameters
+## Step 9: Parameters
 In the above step, we saw how `Scenario Outline`s can be utilized to reduce otherwise
 repetitive `Scenario`s, and improve readability. In the step definition file above, also
 note that we have two repetitive steps
