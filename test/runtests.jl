@@ -16,4 +16,4 @@ using Behavior
 using Test
 
 include("runsmalltests.jl")
-include("runmediumtests.jl")
+# include("runmediumtests.jl")

@@ -821,4 +821,23 @@ hassometag = hastag(feature, "@sometag")
 hastag(feature::Feature, tag::String) = tag in feature.header.tags
 hastag(scenario::Scenario, tag::String) = tag in scenario.tags
 
+##
+## Experimental new parser
+##
+
+
+struct BlockTextState end
+
+struct StateParser
+    StateParser(; initialstate::BlockTextState) = new()
+end
+
+struct BlockText
+    text::String
+end
+
+function parsegherkin(::StateParser, ::String) :: ParseResult
+    OKParseResult{BlockText}(BlockText(""))
+end
+
 end
