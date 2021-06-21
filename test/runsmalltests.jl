@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+include("gherkin/experimental/runtests.jl")
+
 include("gherkin/feature_test.jl")
 include("gherkin/scenario_test.jl")
 include("gherkin/scenario_outline_test.jl")

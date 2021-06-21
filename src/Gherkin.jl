@@ -14,6 +14,8 @@
 
 module Gherkin
 
+include("GherkinExperimental.jl")
+
 import Base: ==, hash
 
 export Scenario, ScenarioOutline, Feature, FeatureHeader, Given, When, Then, ScenarioStep
