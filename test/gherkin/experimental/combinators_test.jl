@@ -217,4 +217,34 @@
             @test result isa BadParseResult{String}
         end
     end
+
+    @testset "Transformer" begin
+        @testset "Transform to Int; 1; OK" begin
+            # Arrange
+            input = ParserInput("1")
+
+            # Act
+            digit = Line("1")
+            p = Transformer{String, Int}(digit, x -> parse(Int, x))
+            result = p(input)
+
+            # Assert
+            @test result isa OKParseResult{Int}
+            @test result.value == 1
+        end
+
+        @testset "Transform to Int; 2; OK" begin
+            # Arrange
+            input = ParserInput("2")
+
+            # Act
+            digit = Line("1") | Line("2")
+            p = Transformer{String, Int}(digit, x -> parse(Int, x))
+            result = p(input)
+
+            # Assert
+            @test result isa OKParseResult{Int}
+            @test result.value == 2
+        end
+    end
 end

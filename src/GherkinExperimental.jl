@@ -89,6 +89,11 @@ struct BadExpectationParseResult{T} <: BadParseResult{T}
     newinput::ParserInput
 end
 
+struct BadInnerParseResult{S, T} <: BadParseResult{T}
+    inner::BadParseResult{S}
+    newinput::ParserInput
+end
+
 """
     Line(expected::String)
 
@@ -148,10 +153,30 @@ end
 
 (|)(a::Parser{T}, b::Parser{T}) where {T} = Or{T}(a, b)
 
+"""
+    Transformer{S, T}
+
+Transforms a parser of type S to a parser of type T, using a transform function.
+"""
+struct Transformer{S, T} <: Parser{T}
+    inner::Parser{S}
+    transform::Function
+end
+
+function (parser::Transformer{S, T})(input::ParserInput) where {S, T}
+    result = parser.inner(input)
+    if isparseok(result)
+        newvalue = parser.transform(result.value)
+        OKParseResult{T}(newvalue, result.newinput)
+    else
+        BadInnerParseResult{S, T}(result, input)
+    end
+end
+
 # Exports
 export ParserInput, OKParseResult, BadParseResult, isparseok
 
 # Basic combinators
-export Line, Optionally
+export Line, Optionally, Or, Transformer
 
 end
