@@ -94,6 +94,13 @@ struct BadInnerParseResult{S, T} <: BadParseResult{T}
     newinput::ParserInput
 end
 
+struct BadCardinalityParseResult{S, T} <: BadParseResult{T}
+    inner::BadParseResult{S}
+    atleast::Int
+    actual::Int
+    newinput::ParserInput
+end
+
 """
     Line(expected::String)
 
@@ -208,10 +215,42 @@ Joins a sequence of strings together into one string.
 """
 Joined(inner::Parser{Vector{String}}) = Transformer{Vector{String}, String}(inner, x -> join(x, "\n"))
 
+"""
+    Repeating{T}
+
+Repeats the provided parser until it no longer recognizes the input.
+"""
+struct Repeating{T} <: Parser{Vector{T}}
+    inner::Parser{T}
+    atleast::Int
+
+    Repeating{T}(inner::Parser{T}; atleast::Int = 0) where {T} = new(inner, atleast)
+end
+
+function (parser::Repeating{T})(input::ParserInput) :: ParseResult{Vector{T}} where {T}
+    values = Vector{T}()
+    currentinput = input
+
+    while true
+        result = parser.inner(currentinput)
+        if !isparseok(result)
+            cardinality = length(values)
+            if cardinality < parser.atleast
+                return BadCardinalityParseResult{T, Vector{T}}(result, parser.atleast, cardinality, input)
+            end
+            break
+        end
+        push!(values, result.value)
+        currentinput = result.newinput
+    end
+
+    OKParseResult{Vector{T}}(values, currentinput)
+end
+
 # Exports
 export ParserInput, OKParseResult, BadParseResult, isparseok
 
 # Basic combinators
-export Line, Optionally, Or, Transformer, Sequence, Joined
+export Line, Optionally, Or, Transformer, Sequence, Joined, Repeating
 
 end

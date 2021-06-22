@@ -378,4 +378,110 @@
             @test result isa BadParseResult{String}
         end
     end
+
+    @testset "Repeating" begin
+        @testset "Repeating Baz or Quux; Bar; OK and empty" begin
+            # Arrange
+            input = ParserInput("""
+                Bar
+            """)
+
+            # Act
+            s = Line("Baz") | Line("Quux")
+            p = Repeating{String}(s)
+            result = p(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{String}}
+            @test result.value == []
+        end
+
+        @testset "Repeating Baz or Quux; Baz Quux Bar; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Baz
+                Quux
+                Bar
+            """)
+
+            # Act
+            s = Line("Baz") | Line("Quux")
+            p = Repeating{String}(s)
+            result = p(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{String}}
+            @test result.value == ["Baz", "Quux"]
+        end
+
+        @testset "Repeating Baz or Quux followed by Bar; Baz Quux Bar; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Baz
+                Quux
+                Bar
+            """)
+
+            # Act
+            s = Line("Baz") | Line("Quux")
+            p = Sequence{String}(Joined(Repeating{String}(s)), Line("Bar"))
+            result = p(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{String}}
+            @test result.value == ["Baz\nQuux", "Bar"]
+        end
+
+        @testset "Repeating digits; 3 2 1; OK" begin
+            # Arrange
+            input = ParserInput("""
+                3
+                2
+                1
+                Not a digit
+            """)
+
+            # Act
+            digits = Line("1") | Line("2") | Line("3")
+            intparser = Transformer{String, Int}(digits, x -> parse(Int, x))
+            p = Repeating{Int}(intparser)
+            result = p(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{Int}}
+            @test result.value == [3, 2, 1]
+        end
+
+        @testset "Repeating Baz or Quux, at least 1; Bar; Not OK" begin
+            # Arrange
+            input = ParserInput("""
+                Bar
+            """)
+
+            # Act
+            s = Line("Baz") | Line("Quux")
+            p = Repeating{String}(s, atleast=1)
+            result = p(input)
+
+            # Assert
+            @test result isa BadParseResult{Vector{String}}
+        end
+
+        @testset "Repeating Baz or Quux, at least 1; Baz Bar; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Baz
+                Bar
+            """)
+
+            # Act
+            s = Line("Baz") | Line("Quux")
+            p = Repeating{String}(s, atleast=1)
+            result = p(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{String}}
+            @test result.value == ["Baz"]
+        end
+    end
 end
