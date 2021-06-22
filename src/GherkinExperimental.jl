@@ -201,10 +201,17 @@ function (parser::Sequence{T})(input::ParserInput) :: ParseResult{Vector{T}} whe
     OKParseResult{Vector{T}}(values, currentinput)
 end
 
+"""
+    Joined
+
+Joins a sequence of strings together into one string.
+"""
+Joined(inner::Parser{Vector{String}}) = Transformer{Vector{String}, String}(inner, x -> join(x, "\n"))
+
 # Exports
 export ParserInput, OKParseResult, BadParseResult, isparseok
 
 # Basic combinators
-export Line, Optionally, Or, Transformer, Sequence
+export Line, Optionally, Or, Transformer, Sequence, Joined
 
 end
