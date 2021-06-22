@@ -173,10 +173,38 @@ function (parser::Transformer{S, T})(input::ParserInput) where {S, T}
     end
 end
 
+"""
+    Sequence{T}
+
+Combine parsers into a sequence, that matches all of them in order.
+"""
+struct Sequence{T} <: Parser{Vector{T}}
+    inner::Vector{Parser{T}}
+
+    Sequence{T}(parsers...) where {T} = new(collect(parsers))
+end
+
+function (parser::Sequence{T})(input::ParserInput) :: ParseResult{Vector{T}} where {T}
+    values = Vector{T}()
+    currentinput = input
+
+    for p in parser.inner
+        result = p(currentinput)
+        if isparseok(result)
+            push!(values, result.value)
+            currentinput = result.newinput
+        else
+            return BadInnerParseResult{T, Vector{T}}(result, input)
+        end
+    end
+
+    OKParseResult{Vector{T}}(values, currentinput)
+end
+
 # Exports
 export ParserInput, OKParseResult, BadParseResult, isparseok
 
 # Basic combinators
-export Line, Optionally, Or, Transformer
+export Line, Optionally, Or, Transformer, Sequence
 
 end

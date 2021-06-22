@@ -247,4 +247,83 @@
             @test result.value == 2
         end
     end
+
+    @testset "Sequence" begin
+        @testset "Sequence Line Baz; Baz; OK" begin
+            # Arrange
+            input = ParserInput("Baz")
+
+            # Act
+            p = Sequence{String}(Line("Baz"))
+            result = p(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{String}}
+            @test result.value == ["Baz"]
+        end
+
+        @testset "Sequence Line Baz then Quux; Baz Quux; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Baz
+                Quux
+            """)
+
+            # Act
+            p = Sequence{String}(Line("Baz"), Line("Quux"))
+            result = p(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{String}}
+            @test result.value == ["Baz", "Quux"]
+        end
+
+        @testset "Sequence Line Baz then Quux; Baz Bar; Not OK" begin
+            # Arrange
+            input = ParserInput("""
+                Baz
+                Bar
+            """)
+
+            # Act
+            p = Sequence{String}(Line("Baz"), Line("Quux"))
+            result = p(input)
+
+            # Assert
+            @test result isa BadParseResult{Vector{String}}
+        end
+
+        @testset "Sequence Line Baz then Quux; Foo Quux; Not OK" begin
+            # Arrange
+            input = ParserInput("""
+                Foo
+                Quux
+            """)
+
+            # Act
+            p = Sequence{String}(Line("Baz"), Line("Quux"))
+            result = p(input)
+
+            # Assert
+            @test result isa BadParseResult{Vector{String}}
+        end
+
+        @testset "Sequence Ints 1 then 2; 1 then 2; OK" begin
+            # Arrange
+            input = ParserInput("""
+                1
+                2
+            """)
+
+            # Act
+            digits = Line("1") | Line("2")
+            intparser = Transformer{String, Int}(digits, x -> parse(Int, x))
+            p = Sequence{Int}(intparser, intparser)
+            result = p(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{Int}}
+            @test result.value == [1, 2]
+        end
+    end
 end
