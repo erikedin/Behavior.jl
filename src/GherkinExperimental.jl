@@ -72,6 +72,15 @@ BadParseResult{T} is an abstract supertype for all failed parse results.
 """
 abstract type BadParseResult{T} <: ParseResult{T} end
 
+"""
+    isparseok(::ParseResult{T})
+
+isparseok returns true for successful parse results, and false for unsuccessful ones.
+"""
+
+isparseok(::OKParseResult{T}) where {T} = true
+isparseok(::BadParseResult{T}) where {T} = false
+
 struct BadExpectationParseResult{T} <: BadParseResult{T}
     expected::String
     actual::String
@@ -97,10 +106,29 @@ function (parser::Line)(input::ParserInput) :: ParseResult{String}
     end
 end
 
+"""
+    Optionally{T}
+
+Optionally{T} parses a value of type T if the inner parser succeeds, or nothing
+if the inner parser fails. It always succeeds.
+"""
+struct Optionally{T} <: Parser{Union{Nothing, T}}
+    inner::Parser{T}
+end
+
+function (parser::Optionally{T})(input::ParserInput) :: ParseResult{Union{Nothing, T}} where {T}
+    result = parser.inner(input)
+    if isparseok(result)
+        OKParseResult{Union{Nothing, T}}(result.value, result.newinput)
+    else
+        OKParseResult{Union{Nothing, T}}(nothing, input)
+    end
+end
+
 # Exports
-export ParserInput, OKParseResult, BadParseResult
+export ParserInput, OKParseResult, BadParseResult, isparseok
 
 # Basic combinators
-export Line
+export Line, Optionally
 
 end

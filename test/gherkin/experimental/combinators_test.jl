@@ -95,4 +95,86 @@
             @test result.newinput == input
         end
     end
+
+    @testset "Optionally" begin
+        @testset "Optionally Foo; Foo; OK" begin
+            # Arrange
+            input = ParserInput("Foo")
+
+            # Act
+            parser = Optionally{String}(Line("Foo"))
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Union{Nothing, String}}
+            @test result.value == "Foo"
+        end
+
+        @testset "Optionally Foo; Bar; OK with nothing" begin
+            # Arrange
+            input = ParserInput("Bar")
+
+            # Act
+            parser = Optionally{String}(Line("Foo"))
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Union{Nothing, String}}
+            @test result.value === nothing
+        end
+
+        @testset "Optionally Bar; Bar; OK" begin
+            # Arrange
+            input = ParserInput("Bar")
+
+            # Act
+            parser = Optionally{String}(Line("Bar"))
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Union{Nothing, String}}
+            @test result.value == "Bar"
+        end
+
+        @testset "Optionally Foo then Bar; Foo Bar; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Foo
+                Bar
+            """)
+
+            # Act
+            parser1 = Optionally{String}(Line("Foo"))
+            result1 = parser1(input)
+
+            parser2 = Line("Bar")
+            result2 = parser2(result1.newinput)
+
+            # Assert
+            @test result1 isa OKParseResult{Union{Nothing, String}}
+            @test result1.value == "Foo"
+            @test result2 isa OKParseResult{String}
+            @test result2.value == "Bar"
+        end
+
+        @testset "Optionally Foo then Bar; Bar; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Bar
+            """)
+
+            # Act
+            parser1 = Optionally{String}(Line("Foo"))
+            result1 = parser1(input)
+
+            parser2 = Line("Bar")
+            result2 = parser2(result1.newinput)
+
+            # Assert
+            @test result1 isa OKParseResult{Union{Nothing, String}}
+            @test result1.value === nothing
+            @test result2 isa OKParseResult{String}
+            @test result2.value == "Bar"
+        end
+    end
 end
