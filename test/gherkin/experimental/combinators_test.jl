@@ -177,4 +177,44 @@
             @test result2.value == "Bar"
         end
     end
+
+    @testset "Or" begin
+        @testset "Foo or Bar; Foo; OK" begin
+            # Arrange
+            input = ParserInput("Foo")
+
+            # Act
+            p = Line("Foo") | Line("Bar")
+            result = p(input)
+
+            # Assert
+            @test result isa OKParseResult{String}
+            @test result.value == "Foo"
+        end
+
+        @testset "Foo or Bar; Bar; OK" begin
+            # Arrange
+            input = ParserInput("Bar")
+
+            # Act
+            p = Line("Foo") | Line("Bar")
+            result = p(input)
+
+            # Assert
+            @test result isa OKParseResult{String}
+            @test result.value == "Bar"
+        end
+
+        @testset "Foo or Bar; Baz; Not OK" begin
+            # Arrange
+            input = ParserInput("Baz")
+
+            # Act
+            p = Line("Foo") | Line("Bar")
+            result = p(input)
+
+            # Assert
+            @test result isa BadParseResult{String}
+        end
+    end
 end

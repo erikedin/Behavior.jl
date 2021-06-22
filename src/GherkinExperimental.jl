@@ -14,6 +14,8 @@
 
 module Experimental
 
+import Base: (|)
+
 struct GherkinSource
     lines::Vector{String}
 
@@ -124,6 +126,27 @@ function (parser::Optionally{T})(input::ParserInput) :: ParseResult{Union{Nothin
         OKParseResult{Union{Nothing, T}}(nothing, input)
     end
 end
+
+"""
+    Or{T}(::Parser{T}, ::Parser{T})
+
+Or matches either of the provided parsers. It short-circuits.
+"""
+struct Or{T} <: Parser{T}
+    a::Parser{T}
+    b::Parser{T}
+end
+
+function (parser::Or{T})(input::ParserInput) :: ParseResult{T} where {T}
+    result = parser.a(input)
+    if isparseok(result)
+        result
+    else
+        parser.b(input)
+    end
+end
+
+(|)(a::Parser{T}, b::Parser{T}) where {T} = Or{T}(a, b)
 
 # Exports
 export ParserInput, OKParseResult, BadParseResult, isparseok
