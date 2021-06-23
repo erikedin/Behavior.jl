@@ -60,5 +60,42 @@
             @test result isa OKParseResult{String}
             @test result.value == "Foo"
         end
+
+        @testset "Foo Bar Baz; OK" begin
+            # Arrange
+            input = ParserInput("""
+                \"\"\"
+                Foo
+                Bar
+                Baz
+                \"\"\"
+            """)
+            # Act
+            p = BlockText()
+            result = p(input)
+
+            # Assert
+            @test result isa OKParseResult{String}
+            @test result.value == "Foo\nBar\nBaz"
+        end
+
+        @testset "Foo Bar Baz, then Quux; OK" begin
+            # Arrange
+            input = ParserInput("""
+                \"\"\"
+                Foo
+                Bar
+                Baz
+                \"\"\"
+                Quux
+            """)
+            # Act
+            p = Sequence{String}(BlockText(), Line("Quux"))
+            result = p(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{String}}
+            @test result.value == ["Foo\nBar\nBaz", "Quux"]
+        end
     end
 end
