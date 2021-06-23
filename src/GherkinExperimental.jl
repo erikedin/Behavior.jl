@@ -278,13 +278,14 @@ takeelement(i::Int) = xs -> xs[i]
 
 Parses a Gherkin block text.
 """
-# BlockText() = Transformer{Vector{String}, String}(
-#     Sequence{String}(
-#         Line("\"\"\""),
-#         Line("\"\"\""),
-#     ),
-#     takeelement(2)
-# )
+BlockText() = Transformer{Vector{String}, String}(
+    Sequence{String}(
+        Line("\"\"\""),
+        Joined(Repeating{String}(LineIfNot(Line("\"\"\"")))),
+        Line("\"\"\""),
+    ),
+    takeelement(2)
+)
 
 # Exports
 export ParserInput, OKParseResult, BadParseResult, isparseok
