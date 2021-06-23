@@ -484,4 +484,55 @@
             @test result.value == ["Baz"]
         end
     end
+
+    @testset "LineUntil" begin
+        @testset "LineUntil Baz; Baz; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Baz
+            """)
+
+            # Act
+            p = LineUntil(Line("Baz"))
+            result = p(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{String}}
+            @test result.value == []
+        end
+
+        @testset "LineUntil Baz; Foo Bar Baz; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Foo
+                Bar
+                Baz
+            """)
+
+            # Act
+            p = LineUntil(Line("Baz"))
+            result = p(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{String}}
+            @test result.value == ["Foo", "Bar"]
+        end
+
+        @testset "LineUntil Baz then Baz; Foo Bar Baz; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Foo
+                Bar
+                Baz
+            """)
+
+            # Act
+            p = Sequence{String}(Joined(LineUntil(Line("Baz"))), Line("Baz"))
+            result = p(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{String}}
+            @test result.value == ["Foo\nBar", "Baz"]
+        end
+    end
 end

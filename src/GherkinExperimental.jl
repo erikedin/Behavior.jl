@@ -247,10 +247,36 @@ function (parser::Repeating{T})(input::ParserInput) :: ParseResult{Vector{T}} wh
     OKParseResult{Vector{T}}(values, currentinput)
 end
 
+"""
+    LineUntil
+
+Consumes lines until the provided parser recognizes a line.
+"""
+struct LineUntil <: Parser{Vector{String}}
+    inner::Parser{String}
+end
+
+function (parser::LineUntil)(input::ParserInput) :: ParseResult{Vector{String}}
+    values = String[]
+    currentinput = input
+
+    while true
+        result = parser.inner(currentinput)
+        if isparseok(result)
+            break
+        end
+
+        push!(values, line(currentinput))
+        currentinput = consume(currentinput)
+    end
+
+    OKParseResult{Vector{String}}(values, currentinput)
+end
+
 # Exports
 export ParserInput, OKParseResult, BadParseResult, isparseok
 
 # Basic combinators
-export Line, Optionally, Or, Transformer, Sequence, Joined, Repeating
+export Line, Optionally, Or, Transformer, Sequence, Joined, Repeating, LineUntil
 
 end
