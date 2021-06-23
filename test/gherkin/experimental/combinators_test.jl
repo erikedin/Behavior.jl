@@ -485,54 +485,51 @@
         end
     end
 
-    @testset "LineUntil" begin
-        @testset "LineUntil Baz; Baz; OK" begin
+    @testset "LineIfNot" begin
+        @testset "LineIfNot Baz; Baz; Not OK" begin
             # Arrange
             input = ParserInput("""
                 Baz
             """)
 
             # Act
-            p = LineUntil(Line("Baz"))
+            p = LineIfNot(Line("Baz"))
             result = p(input)
 
             # Assert
-            @test result isa OKParseResult{Vector{String}}
-            @test result.value == []
+            @test result isa BadParseResult{String}
+            @test result.unexpected == "Baz"
         end
 
-        @testset "LineUntil Baz; Foo Bar Baz; OK" begin
+        @testset "LineIfNot Baz; Foo Baz; OK" begin
             # Arrange
             input = ParserInput("""
                 Foo
+            """)
+
+            # Act
+            p = LineIfNot(Line("Baz"))
+            result = p(input)
+
+            # Assert
+            @test result isa OKParseResult{String}
+            @test result.value == "Foo"
+        end
+
+        @testset "LineIfNot Baz then Baz; Bar Baz; OK" begin
+            # Arrange
+            input = ParserInput("""
                 Bar
                 Baz
             """)
 
             # Act
-            p = LineUntil(Line("Baz"))
+            p = Sequence{String}(LineIfNot(Line("Baz")), Line("Baz"))
             result = p(input)
 
             # Assert
             @test result isa OKParseResult{Vector{String}}
-            @test result.value == ["Foo", "Bar"]
-        end
-
-        @testset "LineUntil Baz then Baz; Foo Bar Baz; OK" begin
-            # Arrange
-            input = ParserInput("""
-                Foo
-                Bar
-                Baz
-            """)
-
-            # Act
-            p = Sequence{String}(Joined(LineUntil(Line("Baz"))), Line("Baz"))
-            result = p(input)
-
-            # Assert
-            @test result isa OKParseResult{Vector{String}}
-            @test result.value == ["Foo\nBar", "Baz"]
+            @test result.value == ["Bar", "Baz"]
         end
     end
 end

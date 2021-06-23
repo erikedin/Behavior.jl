@@ -89,6 +89,11 @@ struct BadExpectationParseResult{T} <: BadParseResult{T}
     newinput::ParserInput
 end
 
+struct BadUnexpectedParseResult{T} <: BadParseResult{T}
+    unexpected::String
+    newinput::ParserInput
+end
+
 struct BadInnerParseResult{S, T} <: BadParseResult{T}
     inner::BadParseResult{S}
     newinput::ParserInput
@@ -248,35 +253,46 @@ function (parser::Repeating{T})(input::ParserInput) :: ParseResult{Vector{T}} wh
 end
 
 """
-    LineUntil
+    LineIfNot
 
-Consumes lines until the provided parser recognizes a line.
+Consumes a line if it does not match a given parser.
 """
-struct LineUntil <: Parser{Vector{String}}
+struct LineIfNot <: Parser{String}
     inner::Parser{String}
 end
 
-function (parser::LineUntil)(input::ParserInput) :: ParseResult{Vector{String}}
-    values = String[]
-    currentinput = input
-
-    while true
-        result = parser.inner(currentinput)
-        if isparseok(result)
-            break
-        end
-
-        push!(values, line(currentinput))
-        currentinput = consume(currentinput)
+function (parser::LineIfNot)(input::ParserInput) :: ParseResult{String}
+    result = parser.inner(input)
+    if isparseok(result)
+        BadUnexpectedParseResult{String}(result.value, input)
+    else
+        s = line(input)
+        OKParseResult{String}(s, consume(input))
     end
-
-    OKParseResult{Vector{String}}(values, currentinput)
 end
+
+takeelement(i::Int) = xs -> xs[i]
+
+"""
+    BlockText
+
+Parses a Gherkin block text.
+"""
+# BlockText() = Transformer{Vector{String}, String}(
+#     Sequence{String}(
+#         Line("\"\"\""),
+#         Line("\"\"\""),
+#     ),
+#     takeelement(2)
+# )
 
 # Exports
 export ParserInput, OKParseResult, BadParseResult, isparseok
 
 # Basic combinators
-export Line, Optionally, Or, Transformer, Sequence, Joined, Repeating, LineUntil
+export Line, Optionally, Or, Transformer, Sequence, Joined, Repeating, LineIfNot
+
+# Gherkin combinators
+export BlockText
 
 end

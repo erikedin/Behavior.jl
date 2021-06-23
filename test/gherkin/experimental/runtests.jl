@@ -16,3 +16,4 @@ using Behavior.Gherkin.Experimental
 using Test
 
 include("combinators_test.jl")
+include("gherkin_combinators_test.jl")
