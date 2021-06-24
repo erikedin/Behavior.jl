@@ -343,4 +343,93 @@
             @test result.value == []
         end
     end
+
+    @testset "Scenario parser" begin
+        @testset "Empty Scenario, no description; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario:
+            """)
+
+            # Act
+            parser = ScenarioParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Scenario}
+            @test result.value.description == ""
+            @test result.value.steps == []
+        end
+
+        @testset "Empty Scenario, some description; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario: Some description
+            """)
+
+            # Act
+            parser = ScenarioParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Scenario}
+            @test result.value.description == "Some description"
+            @test result.value.steps == []
+        end
+
+        @testset "Scenario Outline:, Not OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario Outline:
+            """)
+
+            # Act
+            parser = ScenarioParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa BadParseResult{Scenario}
+        end
+
+        @testset "Two givens, Some new description; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario: Some new description
+                    Given some precondition
+                    Given some other precondition
+            """)
+
+            # Act
+            parser = ScenarioParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Scenario}
+            @test result.value.description == "Some new description"
+            @test result.value.steps == [Given("some precondition"), Given("some other precondition")]
+        end
+
+        @testset "Two givens with a block text, Some new description; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario: Some new description
+                    Given some precondition
+                        \"\"\"
+                        Block text line.
+                        \"\"\"
+                    Given some other precondition
+            """)
+
+            # Act
+            parser = ScenarioParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Scenario}
+            @test result.value.description == "Some new description"
+            @test result.value.steps == [
+                Given("some precondition"; block_text="Block text line."),
+                Given("some other precondition")]
+        end
+    end
 end

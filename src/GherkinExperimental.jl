@@ -16,7 +16,7 @@ module Experimental
 
 import Base: (|)
 
-using Behavior.Gherkin: Given, When, Then
+using Behavior.Gherkin: Given, When, Then, Scenario, ScenarioStep
 
 struct GherkinSource
     lines::Vector{String}
@@ -355,6 +355,22 @@ Parses zero or more steps.
 """
 StepsParser() = Repeating{Given}(GivenParser())
 
+const ScenarioBits = Union{Keyword, Vector{Given}}
+"""
+    ScenarioParser
+
+Consumes a Scenario.
+"""
+ScenarioParser() = Transformer{Vector{ScenarioBits}, Scenario}(
+    Sequence{ScenarioBits}(
+        KeywordParser("Scenario:"),
+        StepsParser()),
+    sequence -> begin
+        keyword = sequence[1]
+        Scenario(keyword.rest, String[], Vector{ScenarioStep}(sequence[2]))
+    end
+)
+
 ##
 ## Exports
 ##
@@ -367,6 +383,7 @@ export Line, Optionally, Or, Transformer, Sequence, Joined, Repeating, LineIfNot
 # Gherkin combinators
 export BlockText, KeywordParser
 export StepsParser, GivenParser
+export ScenarioParser
 
 # Data carrier types
 export Keyword
