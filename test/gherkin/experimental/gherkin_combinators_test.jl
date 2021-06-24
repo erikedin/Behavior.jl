@@ -328,5 +328,19 @@
             @test result.value[2].text == "some other precondition"
             @test result.value[2].block_text == "Block text line 1.\nBlock text line 2."
         end
+
+        @testset "No givens; OK" begin
+            # Arrange
+            input = ParserInput("""
+            """)
+
+            # Act
+            parser = StepsParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{Given}}
+            @test result.value == []
+        end
     end
 end
