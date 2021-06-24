@@ -13,6 +13,7 @@
 # limitations under the License.
 
 using Behavior.Gherkin.Experimental
+using Behavior.Gherkin: Given, When, Then
 using Test
 
 include("combinators_test.jl")

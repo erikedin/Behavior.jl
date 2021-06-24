@@ -16,6 +16,8 @@ module Experimental
 
 import Base: (|)
 
+using Behavior.Gherkin: Given, When, Then
+
 struct GherkinSource
     lines::Vector{String}
 
@@ -289,6 +291,10 @@ function (parser::StartsWith)(input::ParserInput) :: ParseResult{String}
     end
 end
 
+##
+## Gherkin-specific parser
+##
+
 takeelement(i::Int) = xs -> xs[i]
 
 """
@@ -322,7 +328,20 @@ KeywordParser(word::String) = Transformer{String, Keyword}(
     end
 )
 
-# Exports
+"""
+    GivenParser
+
+Consumes a Given step.
+"""
+GivenParser() :: Parser{Given} = Transformer{Keyword, Given}(
+    KeywordParser("Given"),
+    keyword -> Given(keyword.rest)
+)
+
+##
+## Exports
+##
+
 export ParserInput, OKParseResult, BadParseResult, isparseok
 
 # Basic combinators
@@ -330,6 +349,7 @@ export Line, Optionally, Or, Transformer, Sequence, Joined, Repeating, LineIfNot
 
 # Gherkin combinators
 export BlockText, KeywordParser
+export GivenParser
 
 # Data carrier types
 export Keyword

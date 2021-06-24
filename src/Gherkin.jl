@@ -14,8 +14,6 @@
 
 module Gherkin
 
-include("GherkinExperimental.jl")
-
 import Base: ==, hash
 
 export Scenario, ScenarioOutline, Feature, FeatureHeader, Given, When, Then, ScenarioStep
@@ -233,7 +231,7 @@ struct BadParseResult{T} <: ParseResult{T}
     end
 end
 
-function BadParseResult{T}(inner::BadParseResult{K}) where {T, K} 
+function BadParseResult{T}(inner::BadParseResult{K}) where {T, K}
     BadParseResult{T}(inner.reason, inner.expected, inner.actual, inner.linenumber, inner.line)
 end
 
@@ -254,7 +252,7 @@ Example: Here the tags mark the start of the scenario
     @tag3
     Scenario: Some scenario
 
-    `lookaheadfor(byline, iscurrentlineasection, istagline) -> true` 
+    `lookaheadfor(byline, iscurrentlineasection, istagline) -> true`
 
 Example: Here the tags _do_ not mark the start of the scenario
     @tag1
@@ -265,7 +263,7 @@ Example: Here the tags _do_ not mark the start of the scenario
 
     Scenario: Some scenario
 
-    `lookaheadfor(byline, iscurrentlineasection, istagline) -> false` 
+    `lookaheadfor(byline, iscurrentlineasection, istagline) -> false`
 """
 function lookaheadfor(byline::ByLineParser, istarget::Function, isallowedprefix::Function) :: Bool
     for nextline in byline.rest
@@ -822,5 +820,7 @@ hassometag = hastag(feature, "@sometag")
 """
 hastag(feature::Feature, tag::String) = tag in feature.header.tags
 hastag(scenario::Scenario, tag::String) = tag in scenario.tags
+
+include("GherkinExperimental.jl")
 
 end

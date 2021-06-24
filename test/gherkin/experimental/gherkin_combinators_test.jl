@@ -197,4 +197,36 @@
             @test result.value.rest == "Some description"
         end
     end
+
+    @testset "GivenParser" begin
+        @testset "Given some precondition; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Given some precondition
+            """)
+
+            # Act
+            parser = GivenParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Given}
+            @test result.value == Given("some precondition")
+        end
+
+        @testset "Given some other precondition; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Given some other precondition
+            """)
+
+            # Act
+            parser = GivenParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Given}
+            @test result.value == Given("some other precondition")
+        end
+    end
 end
