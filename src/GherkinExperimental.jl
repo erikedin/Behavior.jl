@@ -97,7 +97,7 @@ struct BadUnexpectedParseResult{T} <: BadParseResult{T}
 end
 
 struct BadInnerParseResult{S, T} <: BadParseResult{T}
-    inner::BadParseResult{S}
+    inner::BadParseResult{<:S}
     newinput::ParserInput
 end
 
@@ -193,7 +193,7 @@ end
 Combine parsers into a sequence, that matches all of them in order.
 """
 struct Sequence{T} <: Parser{Vector{T}}
-    inner::Vector{Parser{T}}
+    inner::Vector{Parser{<:T}}
 
     Sequence{T}(parsers...) where {T} = new(collect(parsers))
 end
@@ -328,14 +328,24 @@ KeywordParser(word::String) = Transformer{String, Keyword}(
     end
 )
 
+const MaybeBlockText = Union{Nothing, String}
+const StepPieces = Union{Keyword, MaybeBlockText}
 """
     GivenParser
 
 Consumes a Given step.
 """
-GivenParser() :: Parser{Given} = Transformer{Keyword, Given}(
-    KeywordParser("Given"),
-    keyword -> Given(keyword.rest)
+GivenParser() :: Parser{Given} = Transformer{Vector{StepPieces}, Given}(
+    Sequence{StepPieces}(KeywordParser("Given"), Optionally(BlockText())),
+    sequence -> begin
+        keyword = sequence[1]
+        blocktext = if sequence[2] !== nothing
+            sequence[2]
+        else
+            ""
+        end
+        Given(keyword.rest, block_text=blocktext)
+    end
 )
 
 ##

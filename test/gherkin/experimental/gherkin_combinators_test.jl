@@ -228,5 +228,40 @@
             @test result isa OKParseResult{Given}
             @test result.value == Given("some other precondition")
         end
+
+        @testset "When some action; Not OK" begin
+            # Arrange
+            input = ParserInput("""
+                When some action
+            """)
+
+            # Act
+            parser = GivenParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa BadParseResult{Given}
+        end
+
+        @testset "Followed by block text; OK and the text is present" begin
+            # Arrange
+            input = ParserInput("""
+                Given some precondition
+                    \"\"\"
+                    Some block text.
+                    On two lines.
+                    \"\"\"
+            """)
+
+            # Act
+            parser = GivenParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Given}
+            @test result.value isa Given
+            @test result.value.text == "some precondition"
+            @test result.value.block_text == "Some block text.\nOn two lines."
+        end
     end
 end
