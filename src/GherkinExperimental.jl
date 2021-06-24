@@ -271,6 +271,24 @@ function (parser::LineIfNot)(input::ParserInput) :: ParseResult{String}
     end
 end
 
+"""
+    StartsWith
+
+Consumes a line if it starts with a given string.
+"""
+struct StartsWith <: Parser{String}
+    prefix::String
+end
+
+function (parser::StartsWith)(input::ParserInput) :: ParseResult{String}
+    s = line(input)
+    if startswith(s, parser.prefix)
+        OKParseResult{String}(s, consume(input))
+    else
+        BadExpectationParseResult{String}(parser.prefix, s, input)
+    end
+end
+
 takeelement(i::Int) = xs -> xs[i]
 
 """
@@ -291,7 +309,7 @@ BlockText() = Transformer{Vector{String}, String}(
 export ParserInput, OKParseResult, BadParseResult, isparseok
 
 # Basic combinators
-export Line, Optionally, Or, Transformer, Sequence, Joined, Repeating, LineIfNot
+export Line, Optionally, Or, Transformer, Sequence, Joined, Repeating, LineIfNot, StartsWith
 
 # Gherkin combinators
 export BlockText

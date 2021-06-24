@@ -532,4 +532,74 @@
             @test result.value == ["Bar", "Baz"]
         end
     end
+
+    @testset "StartsWith" begin
+        @testset "Foo; Foo; OK" begin
+            # Arrange
+            input = ParserInput(
+                """
+                Foo
+                """
+            )
+
+            # Act
+            parser = StartsWith("Foo")
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{String}
+            @test result.value == "Foo"
+        end
+
+        @testset "Foo; Bar; Not OK" begin
+            # Arrange
+            input = ParserInput(
+                """
+                Bar
+                """
+            )
+
+            # Act
+            parser = StartsWith("Foo")
+            result = parser(input)
+
+            # Assert
+            @test result isa BadParseResult{String}
+        end
+
+        @testset "Foo; Foo Bar; OK" begin
+            # Arrange
+            input = ParserInput(
+                """
+                Foo Bar
+                """
+            )
+
+            # Act
+            parser = StartsWith("Foo")
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{String}
+            @test result.value == "Foo Bar"
+        end
+
+        @testset "Foo the Quux; Foo Bar, Quux; OK" begin
+            # Arrange
+            input = ParserInput(
+                """
+                Foo Bar
+                Quux
+                """
+            )
+
+            # Act
+            parser = Sequence{String}(StartsWith("Foo"), Line("Quux"))
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{String}}
+            @test result.value == ["Foo Bar", "Quux"]
+        end
+    end
 end
