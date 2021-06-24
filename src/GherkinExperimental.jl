@@ -348,6 +348,13 @@ GivenParser() :: Parser{Given} = Transformer{Vector{StepPieces}, Given}(
     end
 )
 
+"""
+    StepsParser
+
+Parses zero or more steps.
+"""
+StepsParser() = Repeating{Given}(GivenParser())
+
 ##
 ## Exports
 ##
@@ -359,7 +366,7 @@ export Line, Optionally, Or, Transformer, Sequence, Joined, Repeating, LineIfNot
 
 # Gherkin combinators
 export BlockText, KeywordParser
-export GivenParser
+export StepsParser, GivenParser
 
 # Data carrier types
 export Keyword

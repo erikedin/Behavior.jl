@@ -264,4 +264,69 @@
             @test result.value.block_text == "Some block text.\nOn two lines."
         end
     end
+
+    @testset "Steps parser" begin
+        @testset "Two givens; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Given some precondition
+                Given some other precondition
+            """)
+
+            # Act
+            parser = StepsParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{Given}}
+            @test result.value[1] == Given("some precondition")
+            @test result.value[2] == Given("some other precondition")
+        end
+
+        @testset "Two givens separated by a block text; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Given some precondition
+                    \"\"\"
+                    Block text line 1.
+                    Block text line 2.
+                    \"\"\"
+                Given some other precondition
+            """)
+
+            # Act
+            parser = StepsParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{Given}}
+            @test result.value[1] isa Given
+            @test result.value[1].text == "some precondition"
+            @test result.value[1].block_text == "Block text line 1.\nBlock text line 2."
+            @test result.value[2] == Given("some other precondition")
+        end
+
+        @testset "Two givens follow by a block text; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Given some precondition
+                Given some other precondition
+                    \"\"\"
+                    Block text line 1.
+                    Block text line 2.
+                    \"\"\"
+            """)
+
+            # Act
+            parser = StepsParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{Given}}
+            @test result.value[1] == Given("some precondition")
+            @test result.value[2] isa Given
+            @test result.value[2].text == "some other precondition"
+            @test result.value[2].block_text == "Block text line 1.\nBlock text line 2."
+        end
+    end
 end
