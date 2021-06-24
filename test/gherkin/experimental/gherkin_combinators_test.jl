@@ -98,4 +98,87 @@
             @test result.value == ["Foo\nBar\nBaz", "Quux"]
         end
     end
+
+    @testset "KeywordParser" begin
+        @testset "Scenario:, Scenario:; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario:
+            """)
+
+            # Act
+            parser = KeywordParser("Scenario:")
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Keyword}
+            @test result.value.keyword == "Scenario:"
+            @test result.value.rest == ""
+        end
+
+        @testset "Given, Given; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Given
+            """)
+
+            # Act
+            parser = KeywordParser("Given")
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Keyword}
+            @test result.value.keyword == "Given"
+            @test result.value.rest == ""
+        end
+
+        @testset "Scenario:, Scenario Outline:; Not OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario Outline:
+            """)
+
+            # Act
+            parser = KeywordParser("Scenario:")
+            result = parser(input)
+
+            # Assert
+            @test result isa BadParseResult{Keyword}
+        end
+
+        @testset "Scenario: then Scenario Outline:, Scenario:, Scenario Outline:; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario:
+                Scenario Outline:
+            """)
+
+            # Act
+            parser = Sequence{Keyword}(KeywordParser("Scenario:"), KeywordParser("Scenario Outline:"))
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{Keyword}}
+            @test result.value[1].keyword == "Scenario:"
+            @test result.value[1].rest == ""
+            @test result.value[2].keyword == "Scenario Outline:"
+            @test result.value[2].rest == ""
+        end
+
+        @testset "Scenario:, Scenario: Some description; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario: Some description
+            """)
+
+            # Act
+            parser = KeywordParser("Scenario:")
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Keyword}
+            @test result.value.keyword == "Scenario:"
+            @test result.value.rest == "Some description"
+        end
+    end
 end

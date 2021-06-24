@@ -305,6 +305,23 @@ BlockText() = Transformer{Vector{String}, String}(
     takeelement(2)
 )
 
+struct Keyword
+    keyword::String
+    rest::String
+end
+
+"""
+    KeywordParser
+
+Recognizes a keyword, and any following text on the same line.
+"""
+KeywordParser(word::String) = Transformer{String, Keyword}(
+    StartsWith(word),
+    s -> begin
+        Keyword(word, strip(replace(s, word => "")))
+    end
+)
+
 # Exports
 export ParserInput, OKParseResult, BadParseResult, isparseok
 
@@ -312,6 +329,9 @@ export ParserInput, OKParseResult, BadParseResult, isparseok
 export Line, Optionally, Or, Transformer, Sequence, Joined, Repeating, LineIfNot, StartsWith
 
 # Gherkin combinators
-export BlockText
+export BlockText, KeywordParser
+
+# Data carrier types
+export Keyword
 
 end
