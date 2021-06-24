@@ -180,5 +180,21 @@
             @test result.value.keyword == "Scenario:"
             @test result.value.rest == "Some description"
         end
+
+        @testset "Scenario:, Scenario:Some description, without a space; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario:Some description
+            """)
+
+            # Act
+            parser = KeywordParser("Scenario:")
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Keyword}
+            @test result.value.keyword == "Scenario:"
+            @test result.value.rest == "Some description"
+        end
     end
 end
