@@ -16,7 +16,7 @@ module Experimental
 
 import Base: (|)
 
-using Behavior.Gherkin: Given, When, Then, Scenario, ScenarioStep
+using Behavior.Gherkin: Given, When, Then, Scenario, ScenarioStep, AbstractScenario
 
 struct GherkinSource
     lines::Vector{String}
@@ -371,6 +371,21 @@ ScenarioParser() = Transformer{Vector{ScenarioBits}, Scenario}(
     end
 )
 
+struct Rule
+    description::String
+    scenarios::Vector{AbstractScenario}
+end
+
+"""
+    RuleParser
+
+Consumes a Rule and its child scenarios.
+"""
+RuleParser() = Transformer{Keyword, Rule}(
+    KeywordParser("Rule:"),
+    keyword -> Rule(keyword.rest, AbstractScenario[])
+)
+
 ##
 ## Exports
 ##
@@ -383,9 +398,9 @@ export Line, Optionally, Or, Transformer, Sequence, Joined, Repeating, LineIfNot
 # Gherkin combinators
 export BlockText, KeywordParser
 export StepsParser, GivenParser
-export ScenarioParser
+export ScenarioParser, RuleParser
 
 # Data carrier types
-export Keyword
+export Keyword, Rule
 
 end

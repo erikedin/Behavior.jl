@@ -432,4 +432,38 @@
                 Given("some other precondition")]
         end
     end
+
+    @testset "RuleParser" begin
+        @testset "Empty Rule, no description; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Rule:
+            """)
+
+            # Act
+            parser = RuleParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Rule}
+            @test result.value.description == ""
+            @test result.value.scenarios == []
+        end
+
+        @testset "Empty Rule, Some rule description; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Rule: Some rule description
+            """)
+
+            # Act
+            parser = RuleParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Rule}
+            @test result.value.description == "Some rule description"
+            @test result.value.scenarios == []
+        end
+    end
 end
