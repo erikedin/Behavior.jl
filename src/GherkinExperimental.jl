@@ -43,7 +43,7 @@ end
 consume(input::ParserInput, n::Int) :: ParserInput = ParserInput(input, input.index + n)
 
 function line(input::ParserInput) :: Tuple{String, ParserInput}
-    nextline = findfirst(x -> strip(x) != "", input.source.lines[input.index:end])
+    nextline = findfirst(x -> strip(x) != "" && !startswith(strip(x), "#"), input.source.lines[input.index:end])
     if nextline === nothing
         return "", input
     end

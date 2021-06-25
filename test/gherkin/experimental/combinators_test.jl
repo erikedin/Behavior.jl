@@ -603,7 +603,7 @@
         end
     end
 
-    @testset "Whitespace" begin
+    @testset "Whitespace and comments" begin
         @testset "Match Foo; Blank line, then Foo; OK" begin
             # Arrange
             input = ParserInput("""
@@ -666,6 +666,40 @@
 
 
 
+                Bar
+            """)
+
+            # Act
+            p = Sequence{String}(Line("Foo"), Line("Bar"))
+            result = p(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{String}}
+            @test result.value[1] == "Foo"
+            @test result.value[2] == "Bar"
+        end
+
+        @testset "Match Foo; Comment, then Foo; OK" begin
+            # Arrange
+            input = ParserInput("""
+                # Some comment
+                Foo
+            """)
+
+            # Act
+            p = Line("Foo")
+            result = p(input)
+
+            # Assert
+            @test result isa OKParseResult{String}
+            @test result.value == "Foo"
+        end
+
+        @testset "Match Foo then Bar; Comment between, then Foo, Bar; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Foo
+                # Skip this comment
                 Bar
             """)
 
