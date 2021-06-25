@@ -602,4 +602,81 @@
             @test result.value == ["Foo Bar", "Quux"]
         end
     end
+
+    @testset "Whitespace" begin
+        @testset "Match Foo; Blank line, then Foo; OK" begin
+            # Arrange
+            input = ParserInput("""
+
+                Foo
+            """)
+
+            # Act
+            p = Line("Foo")
+            result = p(input)
+
+            # Assert
+            @test result isa OKParseResult{String}
+            @test result.value == "Foo"
+        end
+
+        @testset "Match Foo then Bar; Blank line, then Foo, Bar; OK" begin
+            # Arrange
+            input = ParserInput("""
+
+                Foo
+                Bar
+            """)
+
+            # Act
+            p = Sequence{String}(Line("Foo"), Line("Bar"))
+            result = p(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{String}}
+            @test result.value[1] == "Foo"
+            @test result.value[2] == "Bar"
+        end
+
+        @testset "Match Foo then Bar; Blank line between, then Foo, Bar; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Foo
+
+                Bar
+            """)
+
+            # Act
+            p = Sequence{String}(Line("Foo"), Line("Bar"))
+            result = p(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{String}}
+            @test result.value[1] == "Foo"
+            @test result.value[2] == "Bar"
+        end
+
+        @testset "Match Foo then Bar; 3 blank line before and between, then Foo, Bar; OK" begin
+            # Arrange
+            input = ParserInput("""
+
+
+
+                Foo
+
+
+
+                Bar
+            """)
+
+            # Act
+            p = Sequence{String}(Line("Foo"), Line("Bar"))
+            result = p(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{String}}
+            @test result.value[1] == "Foo"
+            @test result.value[2] == "Bar"
+        end
+    end
 end

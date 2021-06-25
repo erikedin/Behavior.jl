@@ -40,8 +40,15 @@ struct ParserInput
     ParserInput(input::ParserInput, index::Int) = new(input.source, index)
 end
 
-line(input::ParserInput) :: String = strip(input.source.lines[input.index])
-consume(input::ParserInput) :: ParserInput = ParserInput(input, input.index + 1)
+consume(input::ParserInput, n::Int) :: ParserInput = ParserInput(input, input.index + n)
+
+function line(input::ParserInput) :: Tuple{String, ParserInput}
+    nextline = findfirst(x -> strip(x) != "", input.source.lines[input.index:end])
+    if nextline === nothing
+        return "", input
+    end
+    strip(input.source.lines[input.index + nextline - 1]), consume(input, nextline)
+end
 
 """
     Parser{T}
@@ -119,9 +126,9 @@ struct Line <: Parser{String}
 end
 
 function (parser::Line)(input::ParserInput) :: ParseResult{String}
-    s = line(input)
+    s, newinput = line(input)
     if s == parser.expected
-        OKParseResult{String}(parser.expected, consume(input))
+        OKParseResult{String}(parser.expected, newinput)
     else
         BadExpectationParseResult{String}(parser.expected, s, input)
     end
@@ -268,8 +275,8 @@ function (parser::LineIfNot)(input::ParserInput) :: ParseResult{String}
     if isparseok(result)
         BadUnexpectedParseResult{String}(result.value, input)
     else
-        s = line(input)
-        OKParseResult{String}(s, consume(input))
+        s, newinput = line(input)
+        OKParseResult{String}(s, newinput)
     end
 end
 
@@ -283,9 +290,9 @@ struct StartsWith <: Parser{String}
 end
 
 function (parser::StartsWith)(input::ParserInput) :: ParseResult{String}
-    s = line(input)
+    s, newinput = line(input)
     if startswith(s, parser.prefix)
-        OKParseResult{String}(s, consume(input))
+        OKParseResult{String}(s, newinput)
     else
         BadExpectationParseResult{String}(parser.prefix, s, input)
     end

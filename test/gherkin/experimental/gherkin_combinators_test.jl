@@ -545,5 +545,35 @@
                 Given("some third precondition")
             ]
         end
+
+        @testset "Rule with two scenarios any steps separated by blank lines; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Rule: Some rule description
+
+                    Scenario: Some scenario
+                        Given some precondition
+                        Given some other precondition
+
+                    Scenario: Some other scenario
+                        Given some third precondition
+            """)
+
+            # Act
+            parser = RuleParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Rule}
+            @test result.value.description == "Some rule description"
+            @test result.value.scenarios[1].description == "Some scenario"
+            @test result.value.scenarios[1].steps == [
+                Given("some precondition"), Given("some other precondition")
+            ]
+            @test result.value.scenarios[2].description == "Some other scenario"
+            @test result.value.scenarios[2].steps == [
+                Given("some third precondition")
+            ]
+        end
     end
 end
