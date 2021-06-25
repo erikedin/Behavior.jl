@@ -376,14 +376,21 @@ struct Rule
     scenarios::Vector{AbstractScenario}
 end
 
+const ScenarioList = Vector{Scenario}
+const RuleBits = Union{Keyword, ScenarioList}
+
 """
     RuleParser
 
 Consumes a Rule and its child scenarios.
 """
-RuleParser() = Transformer{Keyword, Rule}(
-    KeywordParser("Rule:"),
-    keyword -> Rule(keyword.rest, AbstractScenario[])
+RuleParser() = Transformer{Vector{RuleBits}, Rule}(
+    Sequence{RuleBits}(KeywordParser("Rule:"), Repeating{Scenario}(ScenarioParser())),
+    sequence -> begin
+        keyword = sequence[1]
+        scenarios = sequence[2]
+        Rule(keyword.rest, scenarios)
+    end
 )
 
 ##
