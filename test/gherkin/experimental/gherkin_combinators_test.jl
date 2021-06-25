@@ -576,4 +576,42 @@
             ]
         end
     end
+
+    @testset "FeatureParser" begin
+        @testset "Empty feature; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Feature: Some feature
+            """)
+
+            # Act
+            parser = FeatureParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Feature}
+            @test result.value.header.description == "Some feature"
+        end
+
+        @testset "Feature with two scenarios any steps; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Feature: Some feature
+
+                    Scenario: Some scenario
+
+                    Scenario: Some other scenario
+            """)
+
+            # Act
+            parser = FeatureParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Feature}
+            @test result.value.header.description == "Some feature"
+            @test result.value.scenarios[1].description == "Some scenario"
+            @test result.value.scenarios[2].description == "Some other scenario"
+        end
+    end
 end

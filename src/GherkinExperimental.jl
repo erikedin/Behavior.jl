@@ -16,7 +16,7 @@ module Experimental
 
 import Base: (|)
 
-using Behavior.Gherkin: Given, When, Then, Scenario, ScenarioStep, AbstractScenario
+using Behavior.Gherkin: Given, When, Then, Scenario, ScenarioStep, AbstractScenario, Feature, FeatureHeader
 
 struct GherkinSource
     lines::Vector{String}
@@ -400,6 +400,20 @@ RuleParser() = Transformer{Vector{RuleBits}, Rule}(
     end
 )
 
+const FeatureBits = Union{Keyword, Vector{Scenario}}
+"""
+    FeatureParser
+
+Consumes a full feature file.
+"""
+FeatureParser() = Transformer{Vector{FeatureBits}, Feature}(
+    Sequence{FeatureBits}(KeywordParser("Feature:"), Repeating{Scenario}(ScenarioParser())),
+    sequence -> begin
+        keyword = sequence[1]
+        Feature(FeatureHeader(keyword.rest, [], []), sequence[2])
+    end
+)
+
 ##
 ## Exports
 ##
@@ -412,7 +426,7 @@ export Line, Optionally, Or, Transformer, Sequence, Joined, Repeating, LineIfNot
 # Gherkin combinators
 export BlockText, KeywordParser
 export StepsParser, GivenParser
-export ScenarioParser, RuleParser
+export ScenarioParser, RuleParser, FeatureParser
 
 # Data carrier types
 export Keyword, Rule
