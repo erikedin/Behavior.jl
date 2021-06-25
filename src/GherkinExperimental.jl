@@ -324,7 +324,7 @@ Recognizes a keyword, and any following text on the same line.
 KeywordParser(word::String) = Transformer{String, Keyword}(
     StartsWith(word),
     s -> begin
-        Keyword(word, strip(replace(s, word => "")))
+        Keyword(word, strip(replace(s, word => "", count=1)))
     end
 )
 

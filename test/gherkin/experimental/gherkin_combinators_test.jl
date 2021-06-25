@@ -196,6 +196,22 @@
             @test result.value.keyword == "Scenario:"
             @test result.value.rest == "Some description"
         end
+
+        @testset "Given; Given on the description as well; Only first given is removed" begin
+            # Arrange
+            input = ParserInput("""
+                Given Given
+            """)
+
+            # Act
+            parser = KeywordParser("Given")
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Keyword}
+            @test result.value.keyword == "Given"
+            @test result.value.rest == "Given"
+        end
     end
 
     @testset "GivenParser" begin
