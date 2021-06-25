@@ -613,5 +613,27 @@
             @test result.value.scenarios[1].description == "Some scenario"
             @test result.value.scenarios[2].description == "Some other scenario"
         end
+
+        @testset "Feature and Rule with one scenario; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Feature: A feature description
+
+                    Rule: Some rule description
+
+                        Scenario: Some scenario
+            """)
+
+            # Act
+            parser = FeatureParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Feature}
+            @test result.value.header.description == "A feature description"
+            @test result.value.scenarios[1].description == "Some rule description"
+            rule = result.value.scenarios[1]
+            @test rule.scenarios[1].description == "Some scenario"
+        end
     end
 end

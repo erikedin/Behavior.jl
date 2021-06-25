@@ -159,11 +159,11 @@ end
 Or matches either of the provided parsers. It short-circuits.
 """
 struct Or{T} <: Parser{T}
-    a::Parser{T}
-    b::Parser{T}
+    a::Parser{<:T}
+    b::Parser{<:T}
 end
 
-function (parser::Or{T})(input::ParserInput) :: ParseResult{T} where {T}
+function (parser::Or{T})(input::ParserInput) :: ParseResult{<:T} where {T}
     result = parser.a(input)
     if isparseok(result)
         result
@@ -378,7 +378,7 @@ ScenarioParser() = Transformer{Vector{ScenarioBits}, Scenario}(
     end
 )
 
-struct Rule
+struct Rule <: AbstractScenario
     description::String
     scenarios::Vector{AbstractScenario}
 end
@@ -400,14 +400,15 @@ RuleParser() = Transformer{Vector{RuleBits}, Rule}(
     end
 )
 
-const FeatureBits = Union{Keyword, Vector{Scenario}}
+const FeatureBits = Union{Keyword, Vector{AbstractScenario}}
 """
     FeatureParser
 
 Consumes a full feature file.
 """
+const ScenarioOrRule = Or{AbstractScenario}(ScenarioParser(), RuleParser())
 FeatureParser() = Transformer{Vector{FeatureBits}, Feature}(
-    Sequence{FeatureBits}(KeywordParser("Feature:"), Repeating{Scenario}(ScenarioParser())),
+    Sequence{FeatureBits}(KeywordParser("Feature:"), Repeating{AbstractScenario}(ScenarioOrRule)),
     sequence -> begin
         keyword = sequence[1]
         Feature(FeatureHeader(keyword.rest, [], []), sequence[2])
