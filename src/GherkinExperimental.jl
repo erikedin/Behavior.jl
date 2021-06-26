@@ -337,23 +337,30 @@ KeywordParser(word::String) = Transformer{String, Keyword}(
 
 const MaybeBlockText = Union{Nothing, String}
 const StepPieces = Union{Keyword, MaybeBlockText}
+
+function StepParser(steptype::Type{T}, keyword::String) :: Parser{T} where {T}
+    Transformer{Vector{StepPieces}, T}(
+        Sequence{StepPieces}(KeywordParser(keyword), Optionally(BlockText())),
+        sequence -> begin
+            keyword = sequence[1]
+            blocktext = if sequence[2] !== nothing
+                sequence[2]
+            else
+                ""
+            end
+            steptype(keyword.rest, block_text=blocktext)
+        end
+    )
+end
+
 """
     GivenParser
 
 Consumes a Given step.
 """
-GivenParser() :: Parser{Given} = Transformer{Vector{StepPieces}, Given}(
-    Sequence{StepPieces}(KeywordParser("Given "), Optionally(BlockText())),
-    sequence -> begin
-        keyword = sequence[1]
-        blocktext = if sequence[2] !== nothing
-            sequence[2]
-        else
-            ""
-        end
-        Given(keyword.rest, block_text=blocktext)
-    end
-)
+GivenParser() = StepParser(Given, "Given ")
+WhenParser() = StepParser(When, "When ")
+ThenParser() = StepParser(Then, "Then ")
 
 """
     StepsParser
@@ -426,7 +433,7 @@ export Line, Optionally, Or, Transformer, Sequence, Joined, Repeating, LineIfNot
 
 # Gherkin combinators
 export BlockText, KeywordParser
-export StepsParser, GivenParser
+export StepsParser, GivenParser, WhenParser, ThenParser
 export ScenarioParser, RuleParser, FeatureParser
 
 # Data carrier types

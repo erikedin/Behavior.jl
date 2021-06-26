@@ -295,6 +295,122 @@
         end
     end
 
+    @testset "WhenParser" begin
+        @testset "When some action; OK" begin
+            # Arrange
+            input = ParserInput("""
+                When some action
+            """)
+
+            # Act
+            parser = WhenParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{When}
+            @test result.value == When("some action")
+        end
+
+        @testset "When some other action; OK" begin
+            # Arrange
+            input = ParserInput("""
+                When some other action
+            """)
+
+            # Act
+            parser = WhenParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{When}
+            @test result.value == When("some other action")
+        end
+
+        @testset "Given some precondition; Not OK" begin
+            # Arrange
+            input = ParserInput("""
+                Given some precondition
+            """)
+
+            # Act
+            parser = WhenParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa BadParseResult{When}
+        end
+
+        @testset "Followed by block text; OK and the text is present" begin
+            # Arrange
+            input = ParserInput("""
+                When some action
+                    \"\"\"
+                    Some block text.
+                    On two lines.
+                    \"\"\"
+            """)
+
+            # Act
+            parser = WhenParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{When}
+            @test result.value isa When
+            @test result.value.text == "some action"
+            @test result.value.block_text == "Some block text.\nOn two lines."
+        end
+
+        @testset "Whennospace; Not OK" begin
+            # Arrange
+            input = ParserInput("""
+                Whennospace some action
+            """)
+
+            # Act
+            parser = WhenParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa BadParseResult{When}
+        end
+    end
+
+    @testset "ThenParser" begin
+        # Tests for Given and When demonstrate correct behavior
+        # and the design of the parser is such that this step will
+        # have the same behavior, so I'm merely demonstrating the existence
+        # of a ThenParser, not fully testing it.
+        @testset "Then some postcondition; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Then some postcondition
+            """)
+
+            # Act
+            parser = ThenParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Then}
+            @test result.value == Then("some postcondition")
+        end
+
+        @testset "Thennospace; Not OK" begin
+            # Arrange
+            input = ParserInput("""
+                Thennospace some postcondition
+            """)
+
+            # Act
+            parser = ThenParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa BadParseResult{Then}
+        end
+    end
+
     @testset "Steps parser" begin
         @testset "Two givens; OK" begin
             # Arrange
