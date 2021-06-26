@@ -424,7 +424,7 @@
             result = parser(input)
 
             # Assert
-            @test result isa OKParseResult{Vector{Given}}
+            @test result isa OKParseResult{Vector{ScenarioStep}}
             @test result.value[1] == Given("some precondition")
             @test result.value[2] == Given("some other precondition")
         end
@@ -445,7 +445,7 @@
             result = parser(input)
 
             # Assert
-            @test result isa OKParseResult{Vector{Given}}
+            @test result isa OKParseResult{Vector{ScenarioStep}}
             @test result.value[1] isa Given
             @test result.value[1].text == "some precondition"
             @test result.value[1].block_text == "Block text line 1.\nBlock text line 2."
@@ -468,7 +468,7 @@
             result = parser(input)
 
             # Assert
-            @test result isa OKParseResult{Vector{Given}}
+            @test result isa OKParseResult{Vector{ScenarioStep}}
             @test result.value[1] == Given("some precondition")
             @test result.value[2] isa Given
             @test result.value[2].text == "some other precondition"
@@ -485,8 +485,61 @@
             result = parser(input)
 
             # Assert
-            @test result isa OKParseResult{Vector{Given}}
+            @test result isa OKParseResult{Vector{ScenarioStep}}
             @test result.value == []
+        end
+
+        @testset "Given then When; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Given some precondition
+                 When some action
+            """)
+
+            # Act
+            parser = StepsParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{ScenarioStep}}
+            @test result.value[1] == Given("some precondition")
+            @test result.value[2] == When("some action")
+        end
+
+        @testset "When, Then; OK" begin
+            # Arrange
+            input = ParserInput("""
+                 When some action
+                 Then some postcondition
+            """)
+
+            # Act
+            parser = StepsParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{ScenarioStep}}
+            @test result.value[1] == When("some action")
+            @test result.value[2] == Then("some postcondition")
+        end
+
+        @testset "Given, When, Then; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Given some precondition
+                 When some action
+                 Then some postcondition
+            """)
+
+            # Act
+            parser = StepsParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{ScenarioStep}}
+            @test result.value[1] == Given("some precondition")
+            @test result.value[2] == When("some action")
+            @test result.value[3] == Then("some postcondition")
         end
     end
 
@@ -553,6 +606,25 @@
             @test result isa OKParseResult{Scenario}
             @test result.value.description == "Some new description"
             @test result.value.steps == [Given("some precondition"), Given("some other precondition")]
+        end
+
+        @testset "Given/When/Then; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario: Some new description
+                    Given some precondition
+                     When some action
+                     Then some precondition
+            """)
+
+            # Act
+            parser = ScenarioParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Scenario}
+            @test result.value.description == "Some new description"
+            @test result.value.steps == [Given("some precondition"), When("some action"), Then("some precondition")]
         end
 
         @testset "Two givens with a block text, Some new description; OK" begin

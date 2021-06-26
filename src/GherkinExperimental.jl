@@ -362,14 +362,20 @@ GivenParser() = StepParser(Given, "Given ")
 WhenParser() = StepParser(When, "When ")
 ThenParser() = StepParser(Then, "Then ")
 
+# TODO Find a way to express this as
+#      GivenParser() | WhenParser() | ThenParser()
+const AnyStepParser = Or{ScenarioStep}(
+    Or{ScenarioStep}(GivenParser(), WhenParser()),
+    ThenParser()
+)
 """
     StepsParser
 
 Parses zero or more steps.
 """
-StepsParser() = Repeating{Given}(GivenParser())
+StepsParser() = Repeating{ScenarioStep}(AnyStepParser)
 
-const ScenarioBits = Union{Keyword, Vector{Given}}
+const ScenarioBits = Union{Keyword, Vector{ScenarioStep}}
 """
     ScenarioParser
 
