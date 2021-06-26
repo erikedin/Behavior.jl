@@ -343,7 +343,7 @@ const StepPieces = Union{Keyword, MaybeBlockText}
 Consumes a Given step.
 """
 GivenParser() :: Parser{Given} = Transformer{Vector{StepPieces}, Given}(
-    Sequence{StepPieces}(KeywordParser("Given"), Optionally(BlockText())),
+    Sequence{StepPieces}(KeywordParser("Given "), Optionally(BlockText())),
     sequence -> begin
         keyword = sequence[1]
         blocktext = if sequence[2] !== nothing

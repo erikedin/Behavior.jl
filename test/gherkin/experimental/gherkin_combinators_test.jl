@@ -279,6 +279,20 @@
             @test result.value.text == "some precondition"
             @test result.value.block_text == "Some block text.\nOn two lines."
         end
+
+        @testset "Givennospace; Not OK" begin
+            # Arrange
+            input = ParserInput("""
+                Givennospace some precondition
+            """)
+
+            # Act
+            parser = GivenParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa BadParseResult{Given}
+        end
     end
 
     @testset "Steps parser" begin
