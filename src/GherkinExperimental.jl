@@ -16,7 +16,8 @@ module Experimental
 
 import Base: (|)
 
-using Behavior.Gherkin: Given, When, Then, Scenario, ScenarioStep, AbstractScenario, Feature, FeatureHeader
+using Behavior.Gherkin: Given, When, Then, Scenario, ScenarioStep, AbstractScenario
+using Behavior.Gherkin: Feature, FeatureHeader, Background
 
 struct GherkinSource
     lines::Vector{String}
@@ -419,6 +420,20 @@ ScenarioParser() = Transformer{Vector{ScenarioBits}, Scenario}(
     end
 )
 
+const BackgroundBits = ScenarioBits
+"""
+    BackgroundParser
+
+Consume a Background.
+"""
+BackgroundParser() = Transformer{Vector{BackgroundBits}, Background}(
+    Sequence{BackgroundBits}(KeywordParser("Background:"), StepsParser()),
+    sequence -> begin
+        keyword = sequence[1]
+        Background(keyword.rest, sequence[2])
+    end
+)
+
 struct Rule <: AbstractScenario
     description::String
     scenarios::Vector{AbstractScenario}
@@ -441,7 +456,7 @@ RuleParser() = Transformer{Vector{RuleBits}, Rule}(
     end
 )
 
-const FeatureBits = Union{Keyword, Vector{AbstractScenario}}
+const FeatureBits = Union{Keyword, Background, Nothing, Vector{AbstractScenario}}
 """
     FeatureParser
 
@@ -449,10 +464,18 @@ Consumes a full feature file.
 """
 const ScenarioOrRule = Or{AbstractScenario}(ScenarioParser(), RuleParser())
 FeatureParser() = Transformer{Vector{FeatureBits}, Feature}(
-    Sequence{FeatureBits}(KeywordParser("Feature:"), Repeating{AbstractScenario}(ScenarioOrRule)),
+    Sequence{FeatureBits}(
+        KeywordParser("Feature:"),
+        Optionally(BackgroundParser()),
+        Repeating{AbstractScenario}(ScenarioOrRule)),
     sequence -> begin
         keyword = sequence[1]
-        Feature(FeatureHeader(keyword.rest, [], []), sequence[2])
+        background = if sequence[2] === nothing
+            Background()
+        else
+            sequence[2]
+        end
+        Feature(FeatureHeader(keyword.rest, [], []), background, sequence[3])
     end
 )
 
@@ -475,7 +498,7 @@ export Joined, Repeating, LineIfNot, StartsWith, EOFParser
 # Gherkin combinators
 export BlockText, KeywordParser
 export StepsParser, GivenParser, WhenParser, ThenParser
-export ScenarioParser, RuleParser, FeatureParser, FeatureFileParser
+export ScenarioParser, RuleParser, FeatureParser, FeatureFileParser, BackgroundParser
 
 # Data carrier types
 export Keyword, Rule

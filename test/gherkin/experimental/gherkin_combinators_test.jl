@@ -779,6 +779,73 @@
         end
     end
 
+    @testset "BackgroundParser" begin
+        @testset "Empty Background, no description; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Background:
+            """)
+
+            # Act
+            parser = BackgroundParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Background}
+            @test result.value.description == ""
+            @test result.value.steps == []
+        end
+
+        @testset "Empty Background, Some description; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Background: Some description
+            """)
+
+            # Act
+            parser = BackgroundParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Background}
+            @test result.value.description == "Some description"
+            @test result.value.steps == []
+        end
+
+        @testset "Scenario:; Not OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario:
+            """)
+
+            # Act
+            parser = BackgroundParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa BadParseResult{Background}
+        end
+
+        @testset "Given/When/Then; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Background: Some new description
+                    Given some precondition
+                     When some action
+                     Then some precondition
+            """)
+
+            # Act
+            parser = BackgroundParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Background}
+            @test result.value.description == "Some new description"
+            @test result.value.steps == [Given("some precondition"), When("some action"), Then("some precondition")]
+        end
+    end
+
     @testset "FeatureParser" begin
         @testset "Empty feature; OK" begin
             # Arrange
@@ -816,6 +883,25 @@
             @test result.value.scenarios[2].description == "Some other scenario"
         end
 
+        @testset "Feature with a scenario; Default background" begin
+            # Arrange
+            input = ParserInput("""
+                Feature: Some feature
+
+                    Scenario: Some scenario
+            """)
+
+            # Act
+            parser = FeatureParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Feature}
+            @test result.value.header.description == "Some feature"
+            @test result.value.background.description == ""
+            @test result.value.background.steps == []
+        end
+
         @testset "Feature and Rule with one scenario; OK" begin
             # Arrange
             input = ParserInput("""
@@ -836,6 +922,52 @@
             @test result.value.scenarios[1].description == "Some rule description"
             rule = result.value.scenarios[1]
             @test rule.scenarios[1].description == "Some scenario"
+        end
+
+        @testset "Feature with a background; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Feature: Some feature
+
+                    Background: Some background
+                        Given some precondition
+            """)
+
+            # Act
+            parser = FeatureParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Feature}
+            @test result.value.header.description == "Some feature"
+            @test result.value.background.description == "Some background"
+            @test result.value.background.steps == [Given("some precondition")]
+            @test result.value.scenarios == []
+        end
+
+        @testset "Feature with a background, then a Scenario; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Feature: Some feature
+
+                    Background: Some background
+                        Given some precondition
+
+                    Scenario: Some scenario
+                        When some action
+            """)
+
+            # Act
+            parser = FeatureParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Feature}
+            @test result.value.header.description == "Some feature"
+            @test result.value.background.description == "Some background"
+            @test result.value.background.steps == [Given("some precondition")]
+            @test result.value.scenarios[1].description == "Some scenario"
+            @test result.value.scenarios[1].steps == [When("some action")]
         end
     end
 
