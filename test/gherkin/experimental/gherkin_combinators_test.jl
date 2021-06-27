@@ -838,4 +838,47 @@
             @test rule.scenarios[1].description == "Some scenario"
         end
     end
+
+    @testset "FeatureFileParser" begin
+        @testset "Feature with two scenarios any steps; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Feature: Some feature
+
+                    Scenario: Some scenario
+
+                    Scenario: Some other scenario
+            """)
+
+            # Act
+            parser = FeatureFileParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Feature}
+            @test result.value.header.description == "Some feature"
+            @test result.value.scenarios[1].description == "Some scenario"
+            @test result.value.scenarios[2].description == "Some other scenario"
+        end
+
+        @testset "Feature, then unallowed new Feature; Not OK" begin
+            # Arrange
+            input = ParserInput("""
+                Feature: Some feature
+
+                    Scenario: Some scenario
+
+                    Scenario: Some other scenario
+
+                    Feature: Not allowed here
+            """)
+
+            # Act
+            parser = FeatureFileParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa BadParseResult{Feature}
+        end
+    end
 end

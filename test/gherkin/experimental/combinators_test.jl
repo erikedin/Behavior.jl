@@ -777,9 +777,7 @@ using Behavior.Gherkin.Experimental: BadExpectationParseResult
             result = parser(input)
 
             # Assert
-            @test result isa BadExpectationParseResult{Nothing}
-            @test result.expected == "<EOF>"
-            @test result.actual == "Foo"
+            @test result isa BadExpectedEOFParseResult{Nothing}
         end
 
         @testset "Foo, then EOF; OK" begin

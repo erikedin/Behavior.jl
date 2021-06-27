@@ -119,6 +119,10 @@ struct BadUnexpectedEOFParseResult{T} <: BadParseResult{T}
     newinput::ParserInput
 end
 
+struct BadExpectedEOFParseResult{T} <: BadParseResult{T}
+    newinput::ParserInput
+end
+
 """
     Line(expected::String)
 
@@ -318,7 +322,7 @@ function (parser::EOFParser)(input::ParserInput) :: ParseResult{Nothing}
     if s === nothing
         OKParseResult{Nothing}(nothing, newinput)
     else
-        BadExpectationParseResult{Nothing}("<EOF>", s, input)
+        BadExpectedEOFParseResult{Nothing}(input)
     end
 end
 
@@ -452,6 +456,12 @@ FeatureParser() = Transformer{Vector{FeatureBits}, Feature}(
     end
 )
 
+const FeatureFileBits = Union{Feature, Nothing}
+FeatureFileParser() = Transformer{Vector{FeatureFileBits}, Feature}(
+    Sequence{FeatureFileBits}(FeatureParser(), EOFParser()),
+    takeelement(1)
+)
+
 ##
 ## Exports
 ##
@@ -465,7 +475,7 @@ export Joined, Repeating, LineIfNot, StartsWith, EOFParser
 # Gherkin combinators
 export BlockText, KeywordParser
 export StepsParser, GivenParser, WhenParser, ThenParser
-export ScenarioParser, RuleParser, FeatureParser
+export ScenarioParser, RuleParser, FeatureParser, FeatureFileParser
 
 # Data carrier types
 export Keyword, Rule
