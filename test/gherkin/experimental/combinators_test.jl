@@ -781,5 +781,74 @@ using Behavior.Gherkin.Experimental: BadExpectationParseResult
             @test result.expected == "<EOF>"
             @test result.actual == "Foo"
         end
+
+        @testset "Foo, then EOF; OK" begin
+            # Arrange
+            input = ParserInput("Foo")
+
+            # Act
+            parser = Sequence{Union{Nothing, String}}(Line("Foo"), EOFParser())
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{Union{Nothing, String}}}
+            @test result.value[1] == "Foo"
+            @test result.value[2] === nothing
+        end
+
+        @testset "Foo, then Bar; Not OK" begin
+            # Arrange
+            input = ParserInput("""
+                Foo
+                Bar
+            """)
+
+            # Act
+            parser = Sequence{Union{Nothing, String}}(Line("Foo"), EOFParser())
+            result = parser(input)
+
+            # Assert
+            @test result isa BadParseResult{Vector{Union{Nothing, String}}}
+        end
+
+        @testset "Feature, then EOF; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Feature: Some feature
+
+                    Scenario: Some scenario
+
+                    Scenario: Other scenario
+            """)
+
+            # Act
+            parser = Sequence{Union{Nothing, Feature}}(FeatureParser(), EOFParser())
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{Union{Nothing, Feature}}}
+            @test result.value[1] isa Feature
+            @test result.value[2] === nothing
+        end
+
+        @testset "Feature, then unallowed new feature; Not OK" begin
+            # Arrange
+            input = ParserInput("""
+                Feature: Some feature
+
+                    Scenario: Some scenario
+
+                    Scenario: Other scenario
+
+                    Feature: Not allowed here
+            """)
+
+            # Act
+            parser = Sequence{Union{Nothing, Feature}}(FeatureParser(), EOFParser())
+            result = parser(input)
+
+            # Assert
+            @test result isa BadParseResult{Vector{Union{Nothing, Feature}}}
+        end
     end
 end
