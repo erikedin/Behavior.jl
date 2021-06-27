@@ -13,6 +13,7 @@
 # limitations under the License.
 
 using Behavior.Gherkin.Experimental
+using Behavior.Gherkin.Experimental: BadUnexpectedEOFParseResult
 using Behavior.Gherkin: Given, When, Then, Scenario, Feature, ScenarioStep
 using Test
 

@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+using Behavior.Gherkin.Experimental: BadExpectationParseResult
+
 @testset "Combinators          " begin
     @testset "Line" begin
         @testset "Match Foo; Foo; OK" begin
@@ -92,6 +94,19 @@
 
             # Assert
             @test result isa BadParseResult{String}
+            @test result.newinput == input
+        end
+
+        @testset "Match Foo; No more input; Unexpected EOF" begin
+            # Arrange
+            input = ParserInput("")
+
+            # Act
+            p = Line("Foo")
+            result = p(input)
+
+            # Assert
+            @test result isa BadUnexpectedEOFParseResult{String}
             @test result.newinput == input
         end
     end
@@ -531,6 +546,19 @@
             @test result isa OKParseResult{Vector{String}}
             @test result.value == ["Bar", "Baz"]
         end
+
+        @testset "LineIfNot Baz; EOF; Not OK" begin
+            # Arrange
+            input = ParserInput("")
+
+            # Act
+            p = LineIfNot(Line("Baz"))
+            result = p(input)
+
+            # Assert
+            @test result isa BadUnexpectedEOFParseResult{String}
+            @test result.newinput == input
+        end
     end
 
     @testset "StartsWith" begin
@@ -600,6 +628,19 @@
             # Assert
             @test result isa OKParseResult{Vector{String}}
             @test result.value == ["Foo Bar", "Quux"]
+        end
+
+        @testset "Foo; EOF; Not OK" begin
+            # Arrange
+            input = ParserInput("")
+
+            # Act
+            parser = StartsWith("Foo")
+            result = parser(input)
+
+            # Assert
+            @test result isa BadUnexpectedEOFParseResult{String}
+            @test result.newinput == input
         end
     end
 
@@ -711,6 +752,34 @@
             @test result isa OKParseResult{Vector{String}}
             @test result.value[1] == "Foo"
             @test result.value[2] == "Bar"
+        end
+    end
+
+    @testset "EOF" begin
+        @testset "No non-blank lines left; OK" begin
+            # Arrange
+            input = ParserInput("")
+
+            # Act
+            parser = EOFParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Nothing}
+        end
+
+        @testset "Line Foo; Not OK" begin
+            # Arrange
+            input = ParserInput("Foo")
+
+            # Act
+            parser = EOFParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa BadExpectationParseResult{Nothing}
+            @test result.expected == "<EOF>"
+            @test result.actual == "Foo"
         end
     end
 end

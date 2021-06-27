@@ -42,10 +42,10 @@ end
 
 consume(input::ParserInput, n::Int) :: ParserInput = ParserInput(input, input.index + n)
 
-function line(input::ParserInput) :: Tuple{String, ParserInput}
+function line(input::ParserInput) :: Tuple{Union{Nothing, String}, ParserInput}
     nextline = findfirst(x -> strip(x) != "" && !startswith(strip(x), "#"), input.source.lines[input.index:end])
     if nextline === nothing
-        return "", input
+        return nothing, input
     end
     strip(input.source.lines[input.index + nextline - 1]), consume(input, nextline)
 end
@@ -115,6 +115,10 @@ struct BadCardinalityParseResult{S, T} <: BadParseResult{T}
     newinput::ParserInput
 end
 
+struct BadUnexpectedEOFParseResult{T} <: BadParseResult{T}
+    newinput::ParserInput
+end
+
 """
     Line(expected::String)
 
@@ -127,7 +131,10 @@ end
 
 function (parser::Line)(input::ParserInput) :: ParseResult{String}
     s, newinput = line(input)
-    if s == parser.expected
+
+    if s === nothing
+        BadUnexpectedEOFParseResult{String}(input)
+    elseif s == parser.expected
         OKParseResult{String}(parser.expected, newinput)
     else
         BadExpectationParseResult{String}(parser.expected, s, input)
@@ -276,7 +283,11 @@ function (parser::LineIfNot)(input::ParserInput) :: ParseResult{String}
         BadUnexpectedParseResult{String}(result.value, input)
     else
         s, newinput = line(input)
-        OKParseResult{String}(s, newinput)
+        if s === nothing
+            BadUnexpectedEOFParseResult{String}(input)
+        else
+            OKParseResult{String}(s, newinput)
+        end
     end
 end
 
@@ -291,10 +302,23 @@ end
 
 function (parser::StartsWith)(input::ParserInput) :: ParseResult{String}
     s, newinput = line(input)
-    if startswith(s, parser.prefix)
+    if s === nothing
+        BadUnexpectedEOFParseResult{String}(input)
+    elseif startswith(s, parser.prefix)
         OKParseResult{String}(s, newinput)
     else
         BadExpectationParseResult{String}(parser.prefix, s, input)
+    end
+end
+
+struct EOFParser <: Parser{Nothing} end
+
+function (parser::EOFParser)(input::ParserInput) :: ParseResult{Nothing}
+    s, newinput = line(input)
+    if s === nothing
+        OKParseResult{Nothing}(nothing, newinput)
+    else
+        BadExpectationParseResult{Nothing}("<EOF>", s, input)
     end
 end
 
@@ -435,7 +459,8 @@ FeatureParser() = Transformer{Vector{FeatureBits}, Feature}(
 export ParserInput, OKParseResult, BadParseResult, isparseok
 
 # Basic combinators
-export Line, Optionally, Or, Transformer, Sequence, Joined, Repeating, LineIfNot, StartsWith
+export Line, Optionally, Or, Transformer, Sequence
+export Joined, Repeating, LineIfNot, StartsWith, EOFParser
 
 # Gherkin combinators
 export BlockText, KeywordParser
