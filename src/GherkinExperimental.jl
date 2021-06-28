@@ -17,7 +17,7 @@ module Experimental
 import Base: (|)
 
 using Behavior.Gherkin: Given, When, Then, Scenario, ScenarioStep, AbstractScenario
-using Behavior.Gherkin: Feature, FeatureHeader, Background
+using Behavior.Gherkin: Feature, FeatureHeader, Background, DataTableRow, DataTable
 
 struct GherkinSource
     lines::Vector{String}
@@ -406,7 +406,7 @@ StepsParser() = Repeating{ScenarioStep}(AnyStepParser)
 
 const ScenarioBits = Union{Keyword, Vector{ScenarioStep}}
 """
-    ScenarioParser
+    ScenarioParser()
 
 Consumes a Scenario.
 """
@@ -422,7 +422,7 @@ ScenarioParser() = Transformer{Vector{ScenarioBits}, Scenario}(
 
 const BackgroundBits = ScenarioBits
 """
-    BackgroundParser
+    BackgroundParser()
 
 Consume a Background.
 """
@@ -432,6 +432,36 @@ BackgroundParser() = Transformer{Vector{BackgroundBits}, Background}(
         keyword = sequence[1]
         Background(keyword.rest, sequence[2])
     end
+)
+
+"""
+    DataTableParser()
+
+Consumes a data table in a scenario step.
+
+## Example
+
+    | Header 1 | Header 2 |
+    | Foo      | Bar      |
+    | Baz      | Quux     |
+"""
+struct DataTableRowParser <: Parser{DataTableRow} end
+
+function (parser::DataTableRowParser)(input::ParserInput) :: ParseResult{DataTableRow}
+    s, newinput = line(input)
+    parts = split(s, "|")
+
+    if length(parts) >= 3
+        columns = collect([strip(p) for p in parts if strip(p) != ""])
+        OKParseResult{DataTableRow}(columns, newinput)
+    else
+        BadExpectationParseResult{DataTableRow}("| column 1 | column 2 | ... | column n |", s, input)
+    end
+end
+
+DataTableParser() = Transformer{DataTableRow, DataTable}(
+    DataTableRowParser(),
+    row -> DataTableRow[row]
 )
 
 struct Rule <: AbstractScenario
@@ -499,6 +529,7 @@ export Joined, Repeating, LineIfNot, StartsWith, EOFParser
 export BlockText, KeywordParser
 export StepsParser, GivenParser, WhenParser, ThenParser
 export ScenarioParser, RuleParser, FeatureParser, FeatureFileParser, BackgroundParser
+export DataTableParser
 
 # Data carrier types
 export Keyword, Rule
