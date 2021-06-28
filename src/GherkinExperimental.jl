@@ -449,6 +449,9 @@ struct DataTableRowParser <: Parser{DataTableRow} end
 
 function (parser::DataTableRowParser)(input::ParserInput) :: ParseResult{DataTableRow}
     s, newinput = line(input)
+    if s === nothing
+        return BadUnexpectedEOFParseResult{DataTableRow}(input)
+    end
     parts = split(s, "|")
 
     if length(parts) >= 3
@@ -459,9 +462,9 @@ function (parser::DataTableRowParser)(input::ParserInput) :: ParseResult{DataTab
     end
 end
 
-DataTableParser() = Transformer{DataTableRow, DataTable}(
-    DataTableRowParser(),
-    row -> DataTableRow[row]
+DataTableParser() = Transformer{Vector{DataTableRow}, DataTable}(
+    Repeating{DataTableRow}(DataTableRowParser(), atleast=1),
+    rows -> rows
 )
 
 struct Rule <: AbstractScenario

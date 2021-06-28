@@ -1105,5 +1105,50 @@
             @test result isa OKParseResult{DataTable}
             @test result.value == [["Foo", "Bar", "Baz"]]
         end
+
+        @testset "Two rows; OK" begin
+            # Arrange
+            input = ParserInput("""
+                | Foo |
+                | Bar |
+            """)
+
+            # Act
+            parser = DataTableParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{DataTable}
+            @test result.value == [["Foo"], ["Bar"]]
+        end
+
+        @testset "EOF; Not OK" begin
+            # Arrange
+            input = ParserInput("""
+            """)
+
+            # Act
+            parser = DataTableParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa BadParseResult{DataTable}
+        end
+
+        @testset "Many columns and rows; OK" begin
+            # Arrange
+            input = ParserInput("""
+                | Foo | Bar |
+                | Baz | Quux |
+            """)
+
+            # Act
+            parser = DataTableParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{DataTable}
+            @test result.value == [["Foo", "Bar"], ["Baz", "Quux"]]
+        end
     end
 end
