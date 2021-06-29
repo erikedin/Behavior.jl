@@ -649,6 +649,86 @@
                 Given("some precondition"; block_text="Block text line."),
                 Given("some other precondition")]
         end
+
+        @testset "A step has a data table; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario: Some new description
+                    Given some precondition
+                        | Foo | Bar  |
+                        | Baz | Quux |
+            """)
+
+            # Act
+            parser = ScenarioParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Scenario}
+            @test result.value.description == "Some new description"
+            given = result.value.steps[1]
+            @test given.text == "some precondition"
+            @test given.datatable == [
+                ["Foo", "Bar"],
+                ["Baz", "Quux"]
+            ]
+        end
+
+        @testset "A step has a data table and a block text; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario: Some new description
+                    Given some precondition
+                        | Foo | Bar  |
+                        | Baz | Quux |
+                        \"\"\"
+                        Some block text
+                        \"\"\"
+            """)
+
+            # Act
+            parser = ScenarioParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Scenario}
+            @test result.value.description == "Some new description"
+            given = result.value.steps[1]
+            @test given.text == "some precondition"
+            @test given.datatable == [
+                ["Foo", "Bar"],
+                ["Baz", "Quux"]
+            ]
+            @test given.block_text == "Some block text"
+        end
+
+        @testset "A step has block text and data table; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario: Some new description
+                    Given some precondition
+                        \"\"\"
+                        Some block text
+                        \"\"\"
+                        | Foo | Bar  |
+                        | Baz | Quux |
+            """)
+
+            # Act
+            parser = ScenarioParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Scenario}
+            @test result.value.description == "Some new description"
+            given = result.value.steps[1]
+            @test given.text == "some precondition"
+            @test given.datatable == [
+                ["Foo", "Bar"],
+                ["Baz", "Quux"]
+            ]
+            @test given.block_text == "Some block text"
+        end
     end
 
     @testset "RuleParser" begin

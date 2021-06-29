@@ -353,6 +353,40 @@ struct Keyword
 end
 
 """
+    DataTableParser()
+
+Consumes a data table in a scenario step.
+
+## Example
+
+    | Header 1 | Header 2 |
+    | Foo      | Bar      |
+    | Baz      | Quux     |
+"""
+struct DataTableRowParser <: Parser{DataTableRow} end
+
+function (parser::DataTableRowParser)(input::ParserInput) :: ParseResult{DataTableRow}
+    s, newinput = line(input)
+    if s === nothing
+        return BadUnexpectedEOFParseResult{DataTableRow}(input)
+    end
+    parts = split(s, "|")
+
+    if length(parts) >= 3
+        columns = collect([strip(p) for p in parts if strip(p) != ""])
+        OKParseResult{DataTableRow}(columns, newinput)
+    else
+        BadExpectationParseResult{DataTableRow}("| column 1 | column 2 | ... | column n |", s, input)
+    end
+end
+
+DataTableParser() = Transformer{Vector{DataTableRow}, DataTable}(
+    Repeating{DataTableRow}(DataTableRowParser(), atleast=1),
+    rows -> rows
+)
+
+
+"""
     KeywordParser
 
 Recognizes a keyword, and any following text on the same line.
@@ -364,20 +398,41 @@ KeywordParser(word::String) = Transformer{String, Keyword}(
     end
 )
 
-const MaybeBlockText = Union{Nothing, String}
-const StepPieces = Union{Keyword, MaybeBlockText}
+const TableOrBlockTextTypes = Union{String, DataTable}
+const DataTableOrBlockText = (
+    Sequence{TableOrBlockTextTypes}(DataTableParser(), BlockText()) |
+    Sequence{TableOrBlockTextTypes}(BlockText(), DataTableParser()) |
+    Sequence{TableOrBlockTextTypes}(BlockText()) |
+    Sequence{TableOrBlockTextTypes}(DataTableParser())
+)
+const StepPieces = Union{Keyword, Union{Nothing, Vector{TableOrBlockTextTypes}}}
+
+mutable struct StepBuilder{T}
+    steptype::Type{T}
+    keyword::Keyword
+    blocktext::String
+    datatable::DataTable
+
+    StepBuilder{T}(steptype::Type{T}, keyword::Keyword) where {T} = new(steptype, keyword, "", DataTable())
+end
+
+accumulate!(sb::StepBuilder{T}, table::DataTable) where {T} = sb.datatable = table
+accumulate!(sb::StepBuilder{T}, blocktext::String) where {T} = sb.blocktext = blocktext
+accumulate!(sb::StepBuilder{T}, vs::Vector{TableOrBlockTextTypes}) where {T} = foreach(v -> accumulate!(sb, v), vs)
+accumulate!(::StepBuilder{T}, ::Nothing) where {T} = nothing
+
+buildstep(sb::StepBuilder{T}) where {T} = sb.steptype(sb.keyword.rest, block_text=sb.blocktext, datatable=sb.datatable)
 
 function StepParser(steptype::Type{T}, keyword::String) :: Parser{T} where {T}
     Transformer{Vector{StepPieces}, T}(
-        Sequence{StepPieces}(KeywordParser(keyword), Optionally(BlockText())),
+        Sequence{StepPieces}(KeywordParser(keyword), Optionally(DataTableOrBlockText)),
         sequence -> begin
             keyword = sequence[1]
-            blocktext = if sequence[2] !== nothing
-                sequence[2]
-            else
-                ""
-            end
-            steptype(keyword.rest, block_text=blocktext)
+            stepbuilder = StepBuilder{T}(steptype, keyword)
+
+            accumulate!(stepbuilder, sequence[2])
+
+            buildstep(stepbuilder)
         end
     )
 end
@@ -432,39 +487,6 @@ BackgroundParser() = Transformer{Vector{BackgroundBits}, Background}(
         keyword = sequence[1]
         Background(keyword.rest, sequence[2])
     end
-)
-
-"""
-    DataTableParser()
-
-Consumes a data table in a scenario step.
-
-## Example
-
-    | Header 1 | Header 2 |
-    | Foo      | Bar      |
-    | Baz      | Quux     |
-"""
-struct DataTableRowParser <: Parser{DataTableRow} end
-
-function (parser::DataTableRowParser)(input::ParserInput) :: ParseResult{DataTableRow}
-    s, newinput = line(input)
-    if s === nothing
-        return BadUnexpectedEOFParseResult{DataTableRow}(input)
-    end
-    parts = split(s, "|")
-
-    if length(parts) >= 3
-        columns = collect([strip(p) for p in parts if strip(p) != ""])
-        OKParseResult{DataTableRow}(columns, newinput)
-    else
-        BadExpectationParseResult{DataTableRow}("| column 1 | column 2 | ... | column n |", s, input)
-    end
-end
-
-DataTableParser() = Transformer{Vector{DataTableRow}, DataTable}(
-    Repeating{DataTableRow}(DataTableRowParser(), atleast=1),
-    rows -> rows
 )
 
 struct Rule <: AbstractScenario
