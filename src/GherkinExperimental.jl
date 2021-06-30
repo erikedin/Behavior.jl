@@ -105,7 +105,7 @@ struct BadUnexpectedParseResult{T} <: BadParseResult{T}
 end
 
 struct BadInnerParseResult{S, T} <: BadParseResult{T}
-    inner::BadParseResult{<:S}
+    inner::ParseResult{<:S}
     newinput::ParserInput
 end
 
@@ -385,6 +385,42 @@ DataTableParser() = Transformer{Vector{DataTableRow}, DataTable}(
     rows -> rows
 )
 
+struct AnyLine <: Parser{String} end
+
+function (parser::AnyLine)(input::ParserInput) :: ParseResult{String}
+    s, newinput = line(input)
+    if s === nothing
+        BadUnexpectedEOFParseResult{String}(input)
+    else
+        OKParseResult{String}(s, newinput)
+    end
+end
+
+Splitter(inner::Parser{String}, delimiter) :: Parser{Vector{String}} = Transformer{String, Vector{String}}(
+    inner,
+    s -> split(s, delimiter, keepempty=false)
+)
+
+struct Validator{T} <: Parser{Vector{T}}
+    inner::Parser{Vector{T}}
+    f::Function
+end
+
+function (parser::Validator{T})(input::ParserInput) :: ParseResult{Vector{T}} where {T}
+    result = parser.inner(input)
+    if isparseok(result) && all(parser.f, result.value)
+        OKParseResult{Vector{T}}(result.value, result.newinput)
+    else
+        BadInnerParseResult{Vector{T}, Vector{T}}(result, input)
+    end
+end
+
+"""
+    TagParser()
+
+Consumes a single tag in the form `@tagname`.
+"""
+TagParser() :: Parser{Vector{String}} = Validator{String}(Splitter(AnyLine(), isspace), x -> startswith(x, "@"))
 
 """
     KeywordParser
@@ -554,7 +590,7 @@ export Joined, Repeating, LineIfNot, StartsWith, EOFParser
 export BlockText, KeywordParser
 export StepsParser, GivenParser, WhenParser, ThenParser
 export ScenarioParser, RuleParser, FeatureParser, FeatureFileParser, BackgroundParser
-export DataTableParser
+export DataTableParser, TagParser
 
 # Data carrier types
 export Keyword, Rule

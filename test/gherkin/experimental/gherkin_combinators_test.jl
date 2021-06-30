@@ -1231,4 +1231,150 @@
             @test result.value == [["Foo", "Bar"], ["Baz", "Quux"]]
         end
     end
+
+    @testset "Tags" begin
+        @testset "AnyLine; @tag; OK" begin
+            # Arrange
+            input = ParserInput("@tag")
+
+            # Act
+            parser = Experimental.AnyLine()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{String}
+            @test result.value == "@tag"
+        end
+
+        @testset "Splitter; @tag1 and @tag2; OK" begin
+            # Arrange
+            input = ParserInput("@tag1 @tag2")
+
+            # Act
+            parser = Experimental.Splitter(Experimental.AnyLine(), isspace)
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{String}}
+            @test result.value == ["@tag1", "@tag2"]
+        end
+
+        @testset "Validator; All strings begin with an @; OK" begin
+            # Arrange
+            input = ParserInput("@tag1 @tag2")
+
+            # Act
+            inner = Experimental.Splitter(Experimental.AnyLine(), isspace)
+            parser = Experimental.Validator{String}(inner, x -> startswith(x, "@"))
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{String}}
+            @test result.value == ["@tag1", "@tag2"]
+        end
+
+        @testset "Validator; Not all strings begin with an @; Not OK" begin
+            # Arrange
+            input = ParserInput("@tag1 tag2")
+
+            # Act
+            inner = Experimental.Splitter(Experimental.AnyLine(), isspace)
+            parser = Experimental.Validator{String}(inner, x -> startswith(x, "@"))
+            result = parser(input)
+
+            # Assert
+            @test result isa BadParseResult{Vector{String}}
+        end
+
+        @testset "@tag; OK" begin
+            # Arrange
+            input = ParserInput("""
+                @tag
+            """)
+
+            # Act
+            parser = TagParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{String}}
+            @test result.value == ["@tag"]
+        end
+
+        @testset "tag; Not OK" begin
+            # Arrange
+            input = ParserInput("""
+                tag
+            """)
+
+            # Act
+            parser = TagParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa BadParseResult{Vector{String}}
+        end
+
+        @testset "EOF; Not OK" begin
+            # Arrange
+            input = ParserInput("")
+
+            # Act
+            parser = TagParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa BadParseResult{Vector{String}}
+        end
+
+        @testset "@tag followed by Scenario:; OK" begin
+            # Arrange
+            input = ParserInput("""
+                @tag1
+                Scenario: Some scenario
+            """)
+
+            # Act
+            parser = Sequence{Union{Vector{String}, Keyword}}(
+                        TagParser(),
+                        KeywordParser("Scenario:")
+            )
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{Union{Vector{String}, Keyword}}}
+            @test result.value[1] == ["@tag1"]
+            @test result.value[2] == Keyword("Scenario:", "Some scenario")
+        end
+
+        @testset "@tag1 @tag2; OK" begin
+            # Arrange
+            input = ParserInput("""
+                @tag1 @tag2
+            """)
+
+            # Act
+            parser = TagParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{String}}
+            @test result.value == ["@tag1", "@tag2"]
+        end
+
+        @testset "@tag1 @tag2 with multiple spaces; OK" begin
+            # Arrange
+            input = ParserInput("""
+                @tag1     @tag2
+            """)
+
+            # Act
+            parser = TagParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{String}}
+            @test result.value == ["@tag1", "@tag2"]
+        end
+    end
 end
