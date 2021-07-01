@@ -166,6 +166,19 @@ function (parser::Optionally{T})(input::ParserInput) :: ParseResult{Union{Nothin
 end
 
 """
+    optionalordefault(value, default)
+
+Return `value` if it is not nothing, default otherwise.
+"""
+function optionalordefault(value, default)
+    if value === nothing
+        default
+    else
+        value
+    end
+end
+
+"""
     Or{T}(::Parser{T}, ::Parser{T})
 
 Or matches either of the provided parsers. It short-circuits.
@@ -520,11 +533,7 @@ ScenarioParser() = Transformer{Vector{ScenarioBits}, Scenario}(
         KeywordParser("Scenario:"),
         StepsParser()),
     sequence -> begin
-        tags = if sequence[1] === nothing
-            []
-        else
-            sequence[1]
-        end
+        tags = optionalordefault(sequence[1], [])
         keyword = sequence[2]
         Scenario(keyword.rest, tags, Vector{ScenarioStep}(sequence[3]))
     end
@@ -581,16 +590,8 @@ FeatureParser() = Transformer{Vector{FeatureBits}, Feature}(
         Repeating{AbstractScenario}(ScenarioOrRule)),
     sequence -> begin
         keyword = sequence[2]
-        tags = if sequence[1] === nothing
-            String[]
-        else
-            sequence[1]
-        end
-        background = if sequence[3] === nothing
-            Background()
-        else
-            sequence[3]
-        end
+        tags = optionalordefault(sequence[1], String[])
+        background = optionalordefault(sequence[3], Background())
         Feature(FeatureHeader(keyword.rest, [], tags), background, sequence[4])
     end
 )
