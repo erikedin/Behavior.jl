@@ -415,12 +415,24 @@ function (parser::Validator{T})(input::ParserInput) :: ParseResult{Vector{T}} wh
     end
 end
 
+const TagList = Vector{String}
+
 """
     TagParser()
 
 Consumes a single tag in the form `@tagname`.
 """
-TagParser() :: Parser{Vector{String}} = Validator{String}(Splitter(AnyLine(), isspace), x -> startswith(x, "@"))
+TagParser() :: Parser{TagList} = Validator{String}(Splitter(AnyLine(), isspace), x -> startswith(x, "@"))
+
+"""
+    TagLinesParser()
+
+Read tags until they stop.
+"""
+TagLinesParser() :: Parser{TagList} = Transformer{Vector{TagList}, TagList}(
+    Repeating{TagList}(TagParser()),
+    taglines -> vcat(taglines...)
+)
 
 """
     KeywordParser
@@ -590,7 +602,7 @@ export Joined, Repeating, LineIfNot, StartsWith, EOFParser
 export BlockText, KeywordParser
 export StepsParser, GivenParser, WhenParser, ThenParser
 export ScenarioParser, RuleParser, FeatureParser, FeatureFileParser, BackgroundParser
-export DataTableParser, TagParser
+export DataTableParser, TagParser, TagLinesParser
 
 # Data carrier types
 export Keyword, Rule

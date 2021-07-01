@@ -1376,5 +1376,37 @@
             @test result isa OKParseResult{Vector{String}}
             @test result.value == ["@tag1", "@tag2"]
         end
+
+        @testset "@tag1 then @tag2; OK" begin
+            # Arrange
+            input = ParserInput("""
+                @tag1
+                @tag2
+            """)
+
+            # Act
+            parser = TagLinesParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{String}}
+            @test result.value == ["@tag1", "@tag2"]
+        end
+
+        @testset "@tag1 @tag2, then @tag3; OK" begin
+            # Arrange
+            input = ParserInput("""
+                @tag1 @tag2
+                @tag3
+            """)
+
+            # Act
+            parser = TagLinesParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{String}}
+            @test result.value == ["@tag1", "@tag2", "@tag3"]
+        end
     end
 end
