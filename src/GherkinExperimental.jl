@@ -507,7 +507,8 @@ Parses zero or more steps.
 """
 StepsParser() = Repeating{ScenarioStep}(AnyStepParser)
 
-const ScenarioBits = Union{Keyword, Vector{ScenarioStep}}
+const MaybeTags = Union{Nothing, Vector{String}}
+const ScenarioBits = Union{Keyword, Vector{ScenarioStep}, MaybeTags}
 """
     ScenarioParser()
 
@@ -515,11 +516,17 @@ Consumes a Scenario.
 """
 ScenarioParser() = Transformer{Vector{ScenarioBits}, Scenario}(
     Sequence{ScenarioBits}(
+        Optionally(TagLinesParser()),
         KeywordParser("Scenario:"),
         StepsParser()),
     sequence -> begin
-        keyword = sequence[1]
-        Scenario(keyword.rest, String[], Vector{ScenarioStep}(sequence[2]))
+        tags = if sequence[1] === nothing
+            []
+        else
+            sequence[1]
+        end
+        keyword = sequence[2]
+        Scenario(keyword.rest, tags, Vector{ScenarioStep}(sequence[3]))
     end
 )
 
@@ -559,7 +566,7 @@ RuleParser() = Transformer{Vector{RuleBits}, Rule}(
     end
 )
 
-const FeatureBits = Union{Keyword, Background, Nothing, Vector{AbstractScenario}}
+const FeatureBits = Union{Keyword, Background, Nothing, Vector{AbstractScenario}, MaybeTags}
 """
     FeatureParser
 
@@ -568,17 +575,23 @@ Consumes a full feature file.
 const ScenarioOrRule = Or{AbstractScenario}(ScenarioParser(), RuleParser())
 FeatureParser() = Transformer{Vector{FeatureBits}, Feature}(
     Sequence{FeatureBits}(
+        Optionally(TagLinesParser()),
         KeywordParser("Feature:"),
         Optionally(BackgroundParser()),
         Repeating{AbstractScenario}(ScenarioOrRule)),
     sequence -> begin
-        keyword = sequence[1]
-        background = if sequence[2] === nothing
+        keyword = sequence[2]
+        tags = if sequence[1] === nothing
+            String[]
+        else
+            sequence[1]
+        end
+        background = if sequence[3] === nothing
             Background()
         else
-            sequence[2]
+            sequence[3]
         end
-        Feature(FeatureHeader(keyword.rest, [], []), background, sequence[3])
+        Feature(FeatureHeader(keyword.rest, [], tags), background, sequence[4])
     end
 )
 
