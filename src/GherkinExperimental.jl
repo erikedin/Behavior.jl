@@ -298,7 +298,8 @@ end
 function (parser::LineIfNot)(input::ParserInput) :: ParseResult{String}
     result = parser.inner(input)
     if isparseok(result)
-        BadUnexpectedParseResult{String}(result.value, input)
+        badline, _badinput = line(input)
+        BadUnexpectedParseResult{String}(badline, input)
     else
         s, newinput = line(input)
         if s === nothing
@@ -520,9 +521,17 @@ Parses zero or more steps.
 """
 StepsParser() = Repeating{ScenarioStep}(AnyStepParser)
 
-const AnyKeyword = KeywordParser("Given ") | KeywordParser("Feature:")
+const AnyKeyword = (
+    KeywordParser("Given ") |
+    KeywordParser("When ") |
+    KeywordParser("Then ") |
+    KeywordParser("Feature:") |
+    KeywordParser("Scenario:")
+)
 const MaybeTags = Union{Nothing, Vector{String}}
 const ScenarioBits = Union{Keyword, String, Vector{ScenarioStep}, MaybeTags}
+
+const LongDescription = Joined(Repeating{String}(LineIfNot(AnyKeyword)))
 """
     ScenarioParser()
 
@@ -532,7 +541,7 @@ ScenarioParser() = Transformer{Vector{ScenarioBits}, Scenario}(
     Sequence{ScenarioBits}(
         Optionally(TagLinesParser()),
         KeywordParser("Scenario:"),
-        Optionally(Line("Foo")),
+        Optionally(LongDescription),
         StepsParser()),
     sequence -> begin
         tags = optionalordefault(sequence[1], [])

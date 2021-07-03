@@ -627,6 +627,41 @@
             @test result.value.steps == [Given("some precondition"), When("some action"), Then("some precondition")]
         end
 
+        @testset "When/Then; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario: Some new description
+                     When some action
+                     Then some precondition
+            """)
+
+            # Act
+            parser = ScenarioParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Scenario}
+            @test result.value.description == "Some new description"
+            @test result.value.steps == [When("some action"), Then("some precondition")]
+        end
+
+        @testset "Then; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario: Some new description
+                     Then some precondition
+            """)
+
+            # Act
+            parser = ScenarioParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Scenario}
+            @test result.value.description == "Some new description"
+            @test result.value.steps == [Then("some precondition")]
+        end
+
         @testset "Two givens with a block text, Some new description; OK" begin
             # Arrange
             input = ParserInput("""
@@ -1452,7 +1487,6 @@
                 Scenario: Some new description
                     Foo
                     Given some precondition
-                    Given some other precondition
             """)
 
             # Act
@@ -1465,25 +1499,79 @@
             @test result.value.long_description == "Foo"
         end
 
-        # @testset "Description on multiple lines; OK" begin
-        #     # Arrange
-        #     input = ParserInput("""
-        #         Scenario: Some new description
-        #             Foo
-        #             Bar
-        #             Baz
-        #             Given some precondition
-        #             Given some other precondition
-        #     """)
+        @testset "Description Bar; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario: Some new description
+                    Bar
+                    Given some precondition
+            """)
 
-        #     # Act
-        #     parser = ScenarioParser()
-        #     result = parser(input)
+            # Act
+            parser = ScenarioParser()
+            result = parser(input)
 
-        #     # Assert
-        #     @test result isa OKParseResult{Scenario}
-        #     @test result.value.description == "Some new description"
-        #     @test result.value.long_description == "Foo\nBar\nBaz"
-        # end
+            # Assert
+            @test result isa OKParseResult{Scenario}
+            @test result.value.description == "Some new description"
+            @test result.value.long_description == "Bar"
+        end
+
+        @testset "Description Bar then When; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario: Some new description
+                    Bar
+                    When some action
+            """)
+
+            # Act
+            parser = ScenarioParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Scenario}
+            @test result.value.description == "Some new description"
+            @test result.value.long_description == "Bar"
+        end
+
+        @testset "Description Bar then Then; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario: Some new description
+                    Bar
+                    Then some postcondition
+            """)
+
+            # Act
+            parser = ScenarioParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Scenario}
+            @test result.value.description == "Some new description"
+            @test result.value.long_description == "Bar"
+        end
+
+        @testset "Description on multiple lines; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario: Some new description
+                    Foo
+                    Bar
+                    Baz
+                    Given some precondition
+                    Given some other precondition
+            """)
+
+            # Act
+            parser = ScenarioParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Scenario}
+            @test result.value.description == "Some new description"
+            @test result.value.long_description == "Foo\nBar\nBaz"
+        end
     end
 end
