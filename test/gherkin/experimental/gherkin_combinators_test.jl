@@ -1444,4 +1444,46 @@
             @test result.value == ["@tag1", "@tag2", "@tag3"]
         end
     end
+
+    @testset "Long descriptions" begin
+        @testset "Description Foo; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario: Some new description
+                    Foo
+                    Given some precondition
+                    Given some other precondition
+            """)
+
+            # Act
+            parser = ScenarioParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Scenario}
+            @test result.value.description == "Some new description"
+            @test result.value.long_description == "Foo"
+        end
+
+        # @testset "Description on multiple lines; OK" begin
+        #     # Arrange
+        #     input = ParserInput("""
+        #         Scenario: Some new description
+        #             Foo
+        #             Bar
+        #             Baz
+        #             Given some precondition
+        #             Given some other precondition
+        #     """)
+
+        #     # Act
+        #     parser = ScenarioParser()
+        #     result = parser(input)
+
+        #     # Assert
+        #     @test result isa OKParseResult{Scenario}
+        #     @test result.value.description == "Some new description"
+        #     @test result.value.long_description == "Foo\nBar\nBaz"
+        # end
+    end
 end

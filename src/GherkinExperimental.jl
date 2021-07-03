@@ -292,7 +292,7 @@ end
 Consumes a line if it does not match a given parser.
 """
 struct LineIfNot <: Parser{String}
-    inner::Parser{String}
+    inner::Parser{<:Any}
 end
 
 function (parser::LineIfNot)(input::ParserInput) :: ParseResult{String}
@@ -520,8 +520,9 @@ Parses zero or more steps.
 """
 StepsParser() = Repeating{ScenarioStep}(AnyStepParser)
 
+const AnyKeyword = KeywordParser("Given ") | KeywordParser("Feature:")
 const MaybeTags = Union{Nothing, Vector{String}}
-const ScenarioBits = Union{Keyword, Vector{ScenarioStep}, MaybeTags}
+const ScenarioBits = Union{Keyword, String, Vector{ScenarioStep}, MaybeTags}
 """
     ScenarioParser()
 
@@ -531,11 +532,13 @@ ScenarioParser() = Transformer{Vector{ScenarioBits}, Scenario}(
     Sequence{ScenarioBits}(
         Optionally(TagLinesParser()),
         KeywordParser("Scenario:"),
+        Optionally(Line("Foo")),
         StepsParser()),
     sequence -> begin
         tags = optionalordefault(sequence[1], [])
         keyword = sequence[2]
-        Scenario(keyword.rest, tags, Vector{ScenarioStep}(sequence[3]))
+        longdescription = optionalordefault(sequence[3], "")
+        Scenario(keyword.rest, tags, Vector{ScenarioStep}(sequence[4]), long_description=longdescription)
     end
 )
 
