@@ -526,7 +526,9 @@ const AnyKeyword = (
     KeywordParser("When ") |
     KeywordParser("Then ") |
     KeywordParser("Feature:") |
-    KeywordParser("Scenario:")
+    KeywordParser("Scenario:") |
+    KeywordParser("Background:") |
+    KeywordParser("Rule:")
 )
 const MaybeTags = Union{Nothing, Vector{String}}
 const ScenarioBits = Union{Keyword, String, Vector{ScenarioStep}, MaybeTags}
@@ -587,7 +589,7 @@ RuleParser() = Transformer{Vector{RuleBits}, Rule}(
     end
 )
 
-const FeatureBits = Union{Keyword, Background, Nothing, Vector{AbstractScenario}, MaybeTags}
+const FeatureBits = Union{Keyword, String, Background, Nothing, Vector{AbstractScenario}, MaybeTags}
 """
     FeatureParser
 
@@ -598,13 +600,15 @@ FeatureParser() = Transformer{Vector{FeatureBits}, Feature}(
     Sequence{FeatureBits}(
         Optionally(TagLinesParser()),
         KeywordParser("Feature:"),
+        Optionally(LongDescription),
         Optionally(BackgroundParser()),
         Repeating{AbstractScenario}(ScenarioOrRule)),
     sequence -> begin
         keyword = sequence[2]
         tags = optionalordefault(sequence[1], String[])
-        background = optionalordefault(sequence[3], Background())
-        Feature(FeatureHeader(keyword.rest, [], tags), background, sequence[4])
+        longdescription = optionalordefault(sequence[3], "")
+        background = optionalordefault(sequence[4], Background())
+        Feature(FeatureHeader(keyword.rest, [longdescription], tags), background, sequence[5])
     end
 )
 

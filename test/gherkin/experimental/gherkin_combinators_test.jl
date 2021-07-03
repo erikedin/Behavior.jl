@@ -1573,5 +1573,58 @@
             @test result.value.description == "Some new description"
             @test result.value.long_description == "Foo\nBar\nBaz"
         end
+
+        @testset "Description on a feature, no Background; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Feature: Some feature
+
+                    This is a description.
+                    On two lines.
+
+                    Scenario: Some scenario
+                        When some action
+            """)
+
+            # Act
+            parser = FeatureParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Feature}
+            @test result.value.header.description == "Some feature"
+            @test result.value.header.long_description == ["This is a description.\nOn two lines."]
+            @test result.value.scenarios[1].description == "Some scenario"
+            @test result.value.scenarios[1].steps == [When("some action")]
+        end
+
+        @testset "Description on a feature, with Background; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Feature: Some feature
+
+                    This is a description.
+                    On two lines.
+
+                    Background: Some background
+                        Given some precondition
+
+                    Scenario: Some scenario
+                        When some action
+            """)
+
+            # Act
+            parser = FeatureParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Feature}
+            @test result.value.header.description == "Some feature"
+            @test result.value.header.long_description == ["This is a description.\nOn two lines."]
+            @test result.value.background.description == "Some background"
+            @test result.value.background.steps == [Given("some precondition")]
+            @test result.value.scenarios[1].description == "Some scenario"
+            @test result.value.scenarios[1].steps == [When("some action")]
+        end
     end
 end
