@@ -125,6 +125,8 @@ end
 struct Background
     description::String
     steps::Vector{ScenarioStep}
+    long_description::String
+    Background(description::AbstractString, steps::Vector{ScenarioStep}; long_description::String = "") = new(description, steps, long_description)
 end
 Background() = Background("", ScenarioStep[])
 
@@ -803,6 +805,7 @@ function parsefeature(text::String; options :: ParseOptions = ParseOptions()) ::
         OKParseResult{Feature}(
             Feature(feature_header_result.value, background, scenarios))
     catch ex
+        println(ex)
         BadParseResult{Feature}(:exception, :nothing, Symbol(ex), byline)
     end
 end

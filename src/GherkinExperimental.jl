@@ -560,10 +560,15 @@ const BackgroundBits = ScenarioBits
 Consume a Background.
 """
 BackgroundParser() = Transformer{Vector{BackgroundBits}, Background}(
-    Sequence{BackgroundBits}(KeywordParser("Background:"), StepsParser()),
+    Sequence{BackgroundBits}(
+        KeywordParser("Background:"),
+        Optionally(LongDescription),
+        StepsParser()
+    ),
     sequence -> begin
         keyword = sequence[1]
-        Background(keyword.rest, sequence[2])
+        longdescription = optionalordefault(sequence[2], "")
+        Background(keyword.rest, sequence[3], long_description=longdescription)
     end
 )
 

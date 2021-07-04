@@ -1482,7 +1482,7 @@
         end
     end
 
-    @testset "Long descriptions" begin
+    @testset "Long descriptions parser" begin
         @testset "Description Foo; OK" begin
             # Arrange
             input = ParserInput("""
@@ -1554,28 +1554,9 @@
             @test result.value.description == "Some new description"
             @test result.value.long_description == "Bar"
         end
+    end
 
-        @testset "Description on multiple lines; OK" begin
-            # Arrange
-            input = ParserInput("""
-                Scenario: Some new description
-                    Foo
-                    Bar
-                    Baz
-                    Given some precondition
-                    Given some other precondition
-            """)
-
-            # Act
-            parser = ScenarioParser()
-            result = parser(input)
-
-            # Assert
-            @test result isa OKParseResult{Scenario}
-            @test result.value.description == "Some new description"
-            @test result.value.long_description == "Foo\nBar\nBaz"
-        end
-
+    @testset "Long descriptions" begin
         @testset "Description on a feature, no Background; OK" begin
             # Arrange
             input = ParserInput("""
@@ -1627,6 +1608,49 @@
             @test result.value.background.steps == [Given("some precondition")]
             @test result.value.scenarios[1].description == "Some scenario"
             @test result.value.scenarios[1].steps == [When("some action")]
+        end
+
+        @testset "Scenario with a description; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario: Some new description
+                    Foo
+                    Bar
+                    Baz
+                    Given some precondition
+                    Given some other precondition
+            """)
+
+            # Act
+            parser = ScenarioParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Scenario}
+            @test result.value.description == "Some new description"
+            @test result.value.long_description == "Foo\nBar\nBaz"
+        end
+
+        @testset "Background with a description; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Background: Some background description
+
+                    This is a description.
+                    On two lines.
+
+                    Given some precondition
+                    Given some other precondition
+            """)
+
+            # Act
+            parser = BackgroundParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Background}
+            @test result.value.description == "Some background description"
+            @test result.value.long_description == "This is a description.\nOn two lines."
         end
     end
 end
