@@ -764,24 +764,6 @@
             ]
             @test given.block_text == "Some block text"
         end
-
-        @testset "Empty Scenario, with tags; OK" begin
-            # Arrange
-            input = ParserInput("""
-                @tag1
-                @tag2
-                Scenario: Some description
-            """)
-
-            # Act
-            parser = ScenarioParser()
-            result = parser(input)
-
-            # Assert
-            @test result isa OKParseResult{Scenario}
-            @test result.value.description == "Some description"
-            @test result.value.tags == ["@tag1", "@tag2"]
-        end
     end
 
     @testset "RuleParser" begin
@@ -1102,23 +1084,6 @@
             @test result.value.scenarios[1].description == "Some scenario"
             @test result.value.scenarios[1].steps == [When("some action")]
         end
-
-        @testset "Empty feature with tags; OK" begin
-            # Arrange
-            input = ParserInput("""
-                @sometag
-                @othertag
-                Feature: Some feature
-            """)
-
-            # Act
-            parser = FeatureParser()
-            result = parser(input)
-
-            # Assert
-            @test result isa OKParseResult{Feature}
-            @test result.value.header.tags == ["@sometag", "@othertag"]
-        end
     end
 
     @testset "FeatureFileParser" begin
@@ -1302,7 +1267,7 @@
         end
     end
 
-    @testset "Tags" begin
+    @testset "TagsParser" begin
         @testset "AnyLine; @tag; OK" begin
             # Arrange
             input = ParserInput("@tag")
@@ -1477,6 +1442,43 @@
             # Assert
             @test result isa OKParseResult{Vector{String}}
             @test result.value == ["@tag1", "@tag2", "@tag3"]
+        end
+    end
+
+    @testset "Tags" begin
+        @testset "Empty Scenario, with tags; OK" begin
+            # Arrange
+            input = ParserInput("""
+                @tag1
+                @tag2
+                Scenario: Some description
+            """)
+
+            # Act
+            parser = ScenarioParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Scenario}
+            @test result.value.description == "Some description"
+            @test result.value.tags == ["@tag1", "@tag2"]
+        end
+
+        @testset "Empty feature with tags; OK" begin
+            # Arrange
+            input = ParserInput("""
+                @sometag
+                @othertag
+                Feature: Some feature
+            """)
+
+            # Act
+            parser = FeatureParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Feature}
+            @test result.value.header.tags == ["@sometag", "@othertag"]
         end
     end
 
