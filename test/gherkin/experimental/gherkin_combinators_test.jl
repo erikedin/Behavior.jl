@@ -1652,5 +1652,29 @@
             @test result.value.description == "Some background description"
             @test result.value.long_description == "This is a description.\nOn two lines."
         end
+
+        @testset "Description on a Rule; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Rule: Some rule
+
+                    This is a description.
+                    On two lines.
+
+                    Scenario: Some scenario
+                        When some action
+            """)
+
+            # Act
+            parser = RuleParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Rule}
+            @test result.value.description == "Some rule"
+            @test result.value.longdescription == "This is a description.\nOn two lines."
+            @test result.value.scenarios[1].description == "Some scenario"
+            @test result.value.scenarios[1].steps == [When("some action")]
+        end
     end
 end

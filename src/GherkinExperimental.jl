@@ -574,11 +574,12 @@ BackgroundParser() = Transformer{Vector{BackgroundBits}, Background}(
 
 struct Rule <: AbstractScenario
     description::String
+    longdescription::String
     scenarios::Vector{AbstractScenario}
 end
 
 const ScenarioList = Vector{Scenario}
-const RuleBits = Union{Keyword, ScenarioList}
+const RuleBits = Union{Keyword, Nothing, String, ScenarioList}
 
 """
     RuleParser
@@ -586,11 +587,15 @@ const RuleBits = Union{Keyword, ScenarioList}
 Consumes a Rule and its child scenarios.
 """
 RuleParser() = Transformer{Vector{RuleBits}, Rule}(
-    Sequence{RuleBits}(KeywordParser("Rule:"), Repeating{Scenario}(ScenarioParser())),
+    Sequence{RuleBits}(
+        KeywordParser("Rule:"),
+        Optionally(LongDescription),
+        Repeating{Scenario}(ScenarioParser())),
     sequence -> begin
         keyword = sequence[1]
-        scenarios = sequence[2]
-        Rule(keyword.rest, scenarios)
+        longdescription = optionalordefault(sequence[2], "")
+        scenarios = sequence[3]
+        Rule(keyword.rest, longdescription, scenarios)
     end
 )
 
