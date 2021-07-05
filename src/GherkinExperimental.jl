@@ -576,10 +576,11 @@ struct Rule <: AbstractScenario
     description::String
     longdescription::String
     scenarios::Vector{AbstractScenario}
+    tags::Vector{String}
 end
 
 const ScenarioList = Vector{Scenario}
-const RuleBits = Union{Keyword, Nothing, String, ScenarioList}
+const RuleBits = Union{Keyword, MaybeTags, Nothing, String, ScenarioList}
 
 """
     RuleParser
@@ -588,14 +589,16 @@ Consumes a Rule and its child scenarios.
 """
 RuleParser() = Transformer{Vector{RuleBits}, Rule}(
     Sequence{RuleBits}(
+        Optionally(TagLinesParser()),
         KeywordParser("Rule:"),
         Optionally(LongDescription),
         Repeating{Scenario}(ScenarioParser())),
     sequence -> begin
-        keyword = sequence[1]
-        longdescription = optionalordefault(sequence[2], "")
-        scenarios = sequence[3]
-        Rule(keyword.rest, longdescription, scenarios)
+        tags = optionalordefault(sequence[1], String[])
+        keyword = sequence[2]
+        longdescription = optionalordefault(sequence[3], "")
+        scenarios = sequence[4]
+        Rule(keyword.rest, longdescription, scenarios, tags)
     end
 )
 

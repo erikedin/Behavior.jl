@@ -1480,6 +1480,23 @@
             @test result isa OKParseResult{Feature}
             @test result.value.header.tags == ["@sometag", "@othertag"]
         end
+
+        @testset "Empty Rule with tags; OK" begin
+            # Arrange
+            input = ParserInput("""
+                @sometag
+                @othertag
+                Rule: Some rule
+            """)
+
+            # Act
+            parser = RuleParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Rule}
+            @test result.value.tags == ["@sometag", "@othertag"]
+        end
     end
 
     @testset "Long descriptions parser" begin
