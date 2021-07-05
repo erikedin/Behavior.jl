@@ -1342,5 +1342,7 @@
             @test result.value.scenarios[1].description == "Some scenario"
             @test result.value.scenarios[1].steps == [When("some action")]
         end
+
+        # TODO Scenario Outline
     end
 end

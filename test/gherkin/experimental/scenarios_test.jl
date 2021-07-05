@@ -349,4 +349,29 @@
             ]
         end
     end
+
+    @testset "Scenario Outlines" begin
+        @testset "Scenario Outline one step, no description; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario:
+                    Given some value <Foo>
+                
+                    Examples:
+                        | Foo |
+                        | bar |
+            """)
+
+            # Act
+            parser = ScenarioOutlineParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{ScenarioOutline}
+            @test result.value.description == ""
+            @test result.value.steps == [Given("some value <Foo>")]
+            @test result.value.placeholders == ["Foo"]
+            @test result.value.examples == [["bar"]]
+        end
+    end
 end

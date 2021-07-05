@@ -18,6 +18,7 @@ import Base: (|)
 
 using Behavior.Gherkin: Given, When, Then, Scenario, ScenarioStep, AbstractScenario
 using Behavior.Gherkin: Feature, FeatureHeader, Background, DataTableRow, DataTable
+using Behavior.Gherkin: ScenarioOutline
 
 struct GherkinSource
     lines::Vector{String}
@@ -553,6 +554,28 @@ ScenarioParser() = Transformer{Vector{ScenarioBits}, Scenario}(
     end
 )
 
+const ScenarioOutlineBits = Union{Keyword, String, Vector{ScenarioStep}, MaybeTags}
+"""
+    ScenarioOutlineParser()
+
+Consumes a Scenario Outline.
+"""
+ScenarioOutlineParser() = Transformer{Vector{ScenarioOutlineBits}, ScenarioOutline}(
+    Sequence{ScenarioOutlineBits}(
+
+    ),
+    sequence -> begin
+        ScenarioOutline(
+            "",
+            String[],
+            ScenarioStep[Given("some value <Foo>")],
+            String["Foo"],
+            [["bar"]],
+            long_description=""
+        )
+    end
+)
+
 const BackgroundBits = ScenarioBits
 """
     BackgroundParser()
@@ -645,7 +668,7 @@ export Joined, Repeating, LineIfNot, StartsWith, EOFParser
 export BlockText, KeywordParser
 export StepsParser, GivenParser, WhenParser, ThenParser
 export ScenarioParser, RuleParser, FeatureParser, FeatureFileParser, BackgroundParser
-export DataTableParser, TagParser, TagLinesParser
+export DataTableParser, TagParser, TagLinesParser, ScenarioOutlineParser
 
 # Data carrier types
 export Keyword, Rule
