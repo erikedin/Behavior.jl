@@ -496,14 +496,11 @@
             @test result.value.long_description == "This is a long description.\nOn two lines."
         end
 
-        @testset "Scenario Outline with two variables; OK" begin
+        @testset "Scenario Outline with two placeholders; OK" begin
             # Arrange
             input = ParserInput("""
                 @tag1 @tag2
                 Scenario Outline: Some scenario outline
-
-                    This is a long description.
-                    On two lines.
 
                     Given some value <Foo>
                      When some action
@@ -521,6 +518,56 @@
             # Assert
             @test result isa OKParseResult{ScenarioOutline}
             @test result.value.placeholders == ["Foo", "Bar"]
+        end
+
+        @testset "Scenario Outline with two columns of examples; OK" begin
+            # Arrange
+            input = ParserInput("""
+                @tag1 @tag2
+                Scenario Outline: Some scenario outline
+
+                    Given some value <Foo>
+                     When some action
+                     Then some postcondition
+                
+                    Examples:
+                        | Foo | Bar  |
+                        | baz | quux |
+            """)
+
+            # Act
+            parser = ScenarioOutlineParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{ScenarioOutline}
+            @test result.value.examples[1] == ["baz", "quux"]
+        end
+
+        @testset "Scenario Outline with two rows of examples; OK" begin
+            # Arrange
+            input = ParserInput("""
+                @tag1 @tag2
+                Scenario Outline: Some scenario outline
+
+                    Given some value <Foo>
+                     When some action
+                     Then some postcondition
+                
+                    Examples:
+                        | Foo   | Bar     |
+                        | baz   | quux    |
+                        | fnord | quuxbaz |
+            """)
+
+            # Act
+            parser = ScenarioOutlineParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{ScenarioOutline}
+            @test result.value.examples[1] == ["baz", "quux"]
+            @test result.value.examples[2] == ["fnord", "quuxbaz"]
         end
     end
 end

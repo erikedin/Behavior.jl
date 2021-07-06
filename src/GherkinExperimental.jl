@@ -582,7 +582,7 @@ ScenarioOutlineParser() = Transformer{Vector{ScenarioOutlineBits}, ScenarioOutli
             tags,
             steps,
             placeholders,
-            [["bar"]],
+            examples[2:end],
             long_description=longdescription
         )
     end
