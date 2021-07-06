@@ -554,7 +554,7 @@ ScenarioParser() = Transformer{Vector{ScenarioBits}, Scenario}(
     end
 )
 
-const ScenarioOutlineBits = Union{Keyword, String, Vector{ScenarioStep}, MaybeTags}
+const ScenarioOutlineBits = Union{Keyword, String, Vector{ScenarioStep}, MaybeTags, DataTable}
 """
     ScenarioOutlineParser()
 
@@ -562,16 +562,28 @@ Consumes a Scenario Outline.
 """
 ScenarioOutlineParser() = Transformer{Vector{ScenarioOutlineBits}, ScenarioOutline}(
     Sequence{ScenarioOutlineBits}(
-
+        Optionally(TagLinesParser()),
+        KeywordParser("Scenario Outline:"),
+        Optionally(LongDescription),
+        StepsParser(),
+        Line("Examples:"),
+        DataTableParser()
     ),
     sequence -> begin
+        tags = optionalordefault(sequence[1], [])
+        keyword = sequence[2]
+        longdescription = optionalordefault(sequence[3], "")
+        steps = sequence[4]
+        examples = sequence[6]
+        # The DataTableParser guarantess at least 1 row.
+        placeholders = examples[1]
         ScenarioOutline(
-            "",
-            String[],
-            ScenarioStep[Given("some value <Foo>")],
-            String["Foo"],
+            keyword.rest,
+            tags,
+            steps,
+            placeholders,
             [["bar"]],
-            long_description=""
+            long_description=longdescription
         )
     end
 )

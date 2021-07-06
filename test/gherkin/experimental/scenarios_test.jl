@@ -354,7 +354,7 @@
         @testset "Scenario Outline one step, no description; OK" begin
             # Arrange
             input = ParserInput("""
-                Scenario:
+                Scenario Outline:
                     Given some value <Foo>
                 
                     Examples:
@@ -369,9 +369,158 @@
             # Assert
             @test result isa OKParseResult{ScenarioOutline}
             @test result.value.description == ""
+            @test result.value.tags == []
             @test result.value.steps == [Given("some value <Foo>")]
             @test result.value.placeholders == ["Foo"]
             @test result.value.examples == [["bar"]]
+        end
+
+        @testset "Scenario Outline, then EOF; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario Outline:
+                    Given some value <Foo>
+                
+                    Examples:
+                        | Foo |
+                        | bar |
+            """)
+
+            # Act
+            parser = Sequence{Union{ScenarioOutline, Nothing}}(
+                        ScenarioOutlineParser(),
+                        EOFParser())
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Vector{Union{ScenarioOutline, Nothing}}}
+            @test result.value[1].description == ""
+            @test result.value[1].steps == [Given("some value <Foo>")]
+            @test result.value[1].placeholders == ["Foo"]
+            @test result.value[1].examples == [["bar"]]
+            @test result.value[2] === nothing
+        end
+
+        @testset "Scenario Outline one step, and a description; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario Outline: Some scenario outline
+                    Given some value <Foo>
+                
+                    Examples:
+                        | Foo |
+                        | bar |
+            """)
+
+            # Act
+            parser = ScenarioOutlineParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{ScenarioOutline}
+            @test result.value.description == "Some scenario outline"
+        end
+
+        @testset "Scenario Outline with tags; OK" begin
+            # Arrange
+            input = ParserInput("""
+                @tag1 @tag2
+                Scenario Outline: Some scenario outline
+                    Given some value <Foo>
+                
+                    Examples:
+                        | Foo |
+                        | bar |
+            """)
+
+            # Act
+            parser = ScenarioOutlineParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{ScenarioOutline}
+            @test result.value.tags == ["@tag1", "@tag2"]
+        end
+
+        @testset "Scenario Outline with Given/When/Then; OK" begin
+            # Arrange
+            input = ParserInput("""
+                @tag1 @tag2
+                Scenario Outline: Some scenario outline
+                    Given some value <Foo>
+                     When some action
+                     Then some postcondition
+                
+                    Examples:
+                        | Foo |
+                        | bar |
+            """)
+
+            # Act
+            parser = ScenarioOutlineParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{ScenarioOutline}
+            @test result.value.steps == [
+                Given("some value <Foo>"),
+                 When("some action"),
+                 Then("some postcondition")
+            ]
+        end
+
+        @testset "Scenario Outline a longer description; OK" begin
+            # Arrange
+            input = ParserInput("""
+                @tag1 @tag2
+                Scenario Outline: Some scenario outline
+
+                    This is a long description.
+                    On two lines.
+
+                    Given some value <Foo>
+                     When some action
+                     Then some postcondition
+                
+                    Examples:
+                        | Foo |
+                        | bar |
+            """)
+
+            # Act
+            parser = ScenarioOutlineParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{ScenarioOutline}
+            @test result.value.long_description == "This is a long description.\nOn two lines."
+        end
+
+        @testset "Scenario Outline with two variables; OK" begin
+            # Arrange
+            input = ParserInput("""
+                @tag1 @tag2
+                Scenario Outline: Some scenario outline
+
+                    This is a long description.
+                    On two lines.
+
+                    Given some value <Foo>
+                     When some action
+                     Then some postcondition
+                
+                    Examples:
+                        | Foo | Bar  |
+                        | baz | quux |
+            """)
+
+            # Act
+            parser = ScenarioOutlineParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{ScenarioOutline}
+            @test result.value.placeholders == ["Foo", "Bar"]
         end
     end
 end
