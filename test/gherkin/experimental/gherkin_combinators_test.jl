@@ -733,6 +733,32 @@
             @test result.value.scenarios[1].description == "Some scenario"
             @test result.value.scenarios[1].steps == [When("some action")]
         end
+
+        @testset "Feature with a scenario outline; Scenario outline is the only step" begin
+            # Arrange
+            input = ParserInput("""
+                Feature: Some feature
+
+                    Scenario Outline: Some scenario
+                        Given some precondition <Foo>
+
+                        Examples:
+                            | Foo |
+                            | bar |
+            """)
+
+            # Act
+            parser = FeatureParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Feature}
+            @test result.value.header.description == "Some feature"
+            outline = result.value.scenarios[1]
+            @test outline.description == "Some scenario"
+            @test outline.placeholders == ["Foo"]
+            @test outline.examples == [["bar"]]
+        end
     end
 
     @testset "FeatureFileParser" begin

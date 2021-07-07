@@ -528,6 +528,7 @@ const AnyKeyword = (
     KeywordParser("Then ") |
     KeywordParser("Feature:") |
     KeywordParser("Scenario:") |
+    KeywordParser("Scenario Outline:") |
     KeywordParser("Background:") |
     KeywordParser("Rule:")
 )
@@ -575,7 +576,7 @@ ScenarioOutlineParser() = Transformer{Vector{ScenarioOutlineBits}, ScenarioOutli
         longdescription = optionalordefault(sequence[3], "")
         steps = sequence[4]
         examples = sequence[6]
-        # The DataTableParser guarantess at least 1 row.
+        # The DataTableParser guarantees at least 1 row.
         placeholders = examples[1]
         ScenarioOutline(
             keyword.rest,
@@ -643,7 +644,10 @@ const FeatureBits = Union{Keyword, String, Background, Nothing, Vector{AbstractS
 
 Consumes a full feature file.
 """
-const ScenarioOrRule = Or{AbstractScenario}(ScenarioParser(), RuleParser())
+const ScenarioOrRule = Or{AbstractScenario}(
+    Or{AbstractScenario}(ScenarioParser(), ScenarioOutlineParser()),
+    RuleParser()
+)
 FeatureParser() = Transformer{Vector{FeatureBits}, Feature}(
     Sequence{FeatureBits}(
         Optionally(TagLinesParser()),
