@@ -515,6 +515,20 @@ function StepParser(steptype::Type{T}, keyword::String) :: Parser{T} where {T}
 end
 
 """
+    And
+
+An `And` type scenario step
+"""
+struct And <: ScenarioStep
+    text::String
+    block_text::String
+    datatable::DataTable
+
+    And(text::AbstractString; block_text = "", datatable=DataTable()) = new(text, block_text, datatable)
+end
+
+
+"""
     GivenParser
 
 Consumes a Given step.
@@ -522,12 +536,13 @@ Consumes a Given step.
 GivenParser() = StepParser(Given, "Given ")
 WhenParser() = StepParser(When, "When ")
 ThenParser() = StepParser(Then, "Then ")
+AndParser() = StepParser(And, "And ")
 
 # TODO Find a way to express this as
 #      GivenParser() | WhenParser() | ThenParser()
 const AnyStepParser = Or{ScenarioStep}(
     Or{ScenarioStep}(GivenParser(), WhenParser()),
-    ThenParser()
+    Or{ScenarioStep}(ThenParser(), AndParser())
 )
 """
     StepsParser

@@ -584,4 +584,24 @@
             @test result.value.examples[2] == ["fnord", "quuxbaz"]
         end
     end
+
+    @testset "And/But*" begin
+        @testset "Scenario has an And; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario: Some new description
+                    Given some precondition
+                      And some other precondition
+            """)
+
+            # Act
+            parser = ScenarioParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Scenario}
+            @test result.value.description == "Some new description"
+            @test result.value.steps == [Given("some precondition"), And("some other precondition")]
+        end
+    end
 end
