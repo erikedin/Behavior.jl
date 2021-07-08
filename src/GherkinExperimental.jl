@@ -14,7 +14,7 @@
 
 module Experimental
 
-import Base: (|)
+import Base: (|), show
 
 using Behavior.Gherkin: Given, When, Then, Scenario, ScenarioStep, AbstractScenario
 using Behavior.Gherkin: Feature, FeatureHeader, Background, DataTableRow, DataTable
@@ -110,6 +110,13 @@ struct BadInnerParseResult{S, T} <: BadParseResult{T}
     newinput::ParserInput
 end
 
+function Base.show(io::IO, result::BadInnerParseResult{S, T}) where {S, T}
+    show(io, result.inner)
+end
+function Base.show(io::IO, mime::MIME"text/plain", result::BadInnerParseResult{S, T}) where {S, T}
+    show(io, mime, result.inner)
+end
+
 struct BadCardinalityParseResult{S, T} <: BadParseResult{T}
     inner::BadParseResult{S}
     atleast::Int
@@ -123,6 +130,13 @@ end
 
 struct BadExpectedEOFParseResult{T} <: BadParseResult{T}
     newinput::ParserInput
+end
+
+function Base.show(io::IO, result::BadExpectedEOFParseResult{T}) where {T}
+    s, _newinput = line(result.newinput)
+    println(io, "Expected EOF but found at line $(result.newinput.index):")
+    println(io)
+    println(io, "  $s")
 end
 
 """
