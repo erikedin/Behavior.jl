@@ -26,6 +26,11 @@ struct GherkinSource
     GherkinSource(source::String) = new(split(source, "\n"))
 end
 
+notempty(s) = !isempty(strip(s))
+notcomment(s) = !startswith(strip(s), "#")
+defaultlinecondition(s) = notempty(s) && notcomment(s)
+anyline(s) = true
+
 """
     ParserInput
 
@@ -37,15 +42,17 @@ ParserInput encapsulates
 struct ParserInput
     source::GherkinSource
     index::Int
+    condition::Function
 
-    ParserInput(source::String) = new(GherkinSource(source), 1)
-    ParserInput(input::ParserInput, index::Int) = new(input.source, index)
+    ParserInput(source::String) = new(GherkinSource(source), 1, defaultlinecondition)
+    ParserInput(input::ParserInput, index::Int) = new(input.source, index, defaultlinecondition)
+    ParserInput(input::ParserInput, index::Int, condition::Function) = new(input.source, index, condition)
 end
 
 consume(input::ParserInput, n::Int) :: ParserInput = ParserInput(input, input.index + n)
 
 function line(input::ParserInput) :: Tuple{Union{Nothing, String}, ParserInput}
-    nextline = findfirst(x -> strip(x) != "" && !startswith(strip(x), "#"), input.source.lines[input.index:end])
+    nextline = findfirst(input.condition, input.source.lines[input.index:end])
     if nextline === nothing
         return nothing, input
     end
@@ -308,9 +315,16 @@ Consumes a line if it does not match a given parser.
 """
 struct LineIfNot <: Parser{String}
     inner::Parser{<:Any}
+    linecondition::Function
+
+    LineIfNot(inner::Parser{<:Any}) = new(inner, defaultlinecondition)
+    LineIfNot(inner::Parser{<:Any}, condition::Function) = new(inner, condition)
 end
 
-function (parser::LineIfNot)(input::ParserInput) :: ParseResult{String}
+function (parser::LineIfNot)(realinput::ParserInput) :: ParseResult{String}
+    # This parser has support for providing the inner parser with a
+    # non-default line condition.
+    input = ParserInput(realinput, realinput.index, parser.linecondition)
     result = parser.inner(input)
     if isparseok(result)
         badline, _badinput = line(input)
@@ -370,7 +384,7 @@ Parses a Gherkin block text.
 BlockText() = Transformer{Vector{String}, String}(
     Sequence{String}(
         Line("\"\"\""),
-        Joined(Repeating{String}(LineIfNot(Line("\"\"\"")))),
+        Joined(Repeating{String}(LineIfNot(Line("\"\"\""), anyline))),
         Line("\"\"\""),
     ),
     takeelement(2)

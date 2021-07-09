@@ -89,6 +89,7 @@
                 \"\"\"
                 Quux
             """)
+
             # Act
             p = Sequence{String}(BlockText(), Line("Quux"))
             result = p(input)
@@ -96,6 +97,64 @@
             # Assert
             @test result isa OKParseResult{Vector{String}}
             @test result.value == ["Foo\nBar\nBaz", "Quux"]
+        end
+
+        @testset "Foo, empty line, then Baz; Empty line is included" begin
+            # Arrange
+            input = ParserInput("""
+                \"\"\"
+                Foo
+
+                Baz
+                \"\"\"
+            """)
+
+            # Act
+            p = BlockText()
+            result = p(input)
+
+            # Assert
+            @test result isa OKParseResult{String}
+            @test result.value == "Foo\n\nBaz"
+        end
+
+        @testset "Foo, comment, then Baz; Comment line is included" begin
+            # Arrange
+            input = ParserInput("""
+                \"\"\"
+                Foo
+                # Comment line
+                Baz
+                \"\"\"
+            """)
+
+            # Act
+            p = BlockText()
+            result = p(input)
+
+            # Assert
+            @test result isa OKParseResult{String}
+            @test result.value == "Foo\n# Comment line\nBaz"
+        end
+
+        @testset "Foo, comment and empty, then Baz; Comment line and empty are included" begin
+            # Arrange
+            input = ParserInput("""
+                \"\"\"
+                Foo
+                # Comment line
+
+                Baz
+                \"\"\"
+            """)
+
+            # Act
+            p = BlockText()
+            result = p(input)
+
+            # Assert
+            @test result isa OKParseResult{String}
+            @test result.value == "Foo\n# Comment line\n\nBaz"
         end
     end
 
