@@ -165,11 +165,13 @@ ParseOptions lets the user control certain behavior of the parser, making it mor
 """
 struct ParseOptions
     allow_any_step_order::Bool
+    use_experimental::Bool
 
     function ParseOptions(;
-        allow_any_step_order::Bool = false)
+        allow_any_step_order::Bool = false,
+        use_experimental::Bool = false)
 
-        new(allow_any_step_order)
+        new(allow_any_step_order, use_experimental)
     end
 end
 

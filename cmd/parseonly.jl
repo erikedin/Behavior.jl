@@ -15,12 +15,14 @@
 using Behavior: parseonly
 using Behavior.Gherkin: ParseOptions
 
-if length(ARGS) !== 1
-    println("Usage: julia parseonly.jl <root-directory>")
+argslength = length(ARGS)
+if argslength !== 1 && argslength !== 2
+    println("Usage: julia parseonly.jl <root-directory> [--experimental]")
     exit(1)
 end
 
-parseoptions = ParseOptions(allow_any_step_order=true)
+use_experimental = argslength == 2 && ARGS[2] == "--experimental"
+parseoptions = ParseOptions(allow_any_step_order=true, use_experimental=use_experimental)
 
 results = parseonly(ARGS[1], parseoptions=parseoptions)
 num_files = length(results)
@@ -36,11 +38,16 @@ else
         if rs.success
             println(": OK")
         else
-            println()
-            println(" reason: ", rs.result.reason)
-            println(" expected: ", rs.result.expected)
-            println(" actual: ", rs.result.actual)
-            println(" line $(rs.result.linenumber): $(rs.result.line)")
+            if use_experimental
+                println(": NOT OK")
+                println(rs.result)
+            else
+                println()
+                println(" reason: ", rs.result.reason)
+                println(" expected: ", rs.result.expected)
+                println(" actual: ", rs.result.actual)
+                println(" line $(rs.result.linenumber): $(rs.result.line)")
+            end
         end
     end
     println("Parsing failed: ", num_failed)

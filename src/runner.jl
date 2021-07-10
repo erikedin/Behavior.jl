@@ -19,7 +19,8 @@ using Behavior:
 import Behavior:
     findfileswithextension, readfile, fileexists
 
-using Behavior.Gherkin: BadParseResult
+using Behavior.Gherkin
+using Behavior.Gherkin.Experimental
 using Glob
 
 struct OSAL <: Behavior.OSAbstraction end
@@ -33,7 +34,7 @@ fileexists(::OSAL, path::String) = isfile(path)
 """
     rglob(pattern, path)
 
-Find files recursively. 
+Find files recursively.
 """
 rglob(pattern, path) = Base.Iterators.flatten(map(d -> glob(pattern, d[1]), walkdir(path)))
 
@@ -51,12 +52,27 @@ function parseonly(featurepath::String; parseoptions::ParseOptions=ParseOptions(
     # Parse all feature files and collect results to an array of named tuples
     results = []
     for featurefile in featurefiles
-        try
-            parseddata = parsefeature(readfile(driver.os, featurefile), options=parseoptions)
-            isbad = parseddata isa BadParseResult
-            push!(results, (filename = featurefile, success = !isbad, result = parseddata))
-        catch ex
-            push!(results, (filename = featurefile, success = false, result = BadParseResult{Feature}(:exception, :nothing, Symbol("$ex"), 0, "")))
+        if parseoptions.use_experimental
+            try
+                input = Experimental.ParserInput(read(featurefile, String))
+                featureparser = Experimental.FeatureFileParser()
+                result = featureparser(input)
+                if Experimental.isparseok(result)
+                    push!(results, (filename = featurefile, success = true, result = result.value))
+                else
+                    push!(results, (filename = featurefile, success = false, result = result))
+                end
+            catch ex
+                push!(results, (filename = featurefile, success = false, result = Experimental.BadExceptionParseResult{Feature}(ex)))
+            end
+        else
+            try
+                parseddata = parsefeature(readfile(driver.os, featurefile), options=parseoptions)
+                isbad = parseddata isa BadParseResult
+                push!(results, (filename = featurefile, success = !isbad, result = parseddata))
+            catch ex
+                push!(results, (filename = featurefile, success = false, result = Gherkin.BadParseResult{Feature}(:exception, :nothing, Symbol("$ex"), 0, "")))
+            end
         end
     end
     return results
@@ -81,9 +97,9 @@ end
 Execute all features found from the `rootpath`.
 
 By default, it looks for feature files in `<rootpath>/features` and step files
-`<rootpath>/features/steps`. An `environment.jl` file may be added to 
+`<rootpath>/features/steps`. An `environment.jl` file may be added to
 `<rootpath>/features` directory for running certain before/after code.
-You may override the default locations by specifying `featurepath`, 
+You may override the default locations by specifying `featurepath`,
 `stepspath`, or `execenvpath`.
 
 The `tagselector` option is an expression you can use to select which scenarios to run

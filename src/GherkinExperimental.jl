@@ -146,6 +146,15 @@ function Base.show(io::IO, result::BadExpectedEOFParseResult{T}) where {T}
     println(io, "  $s")
 end
 
+struct BadExceptionParseResult{T} <: BadParseResult{T}
+    ex
+end
+
+function Base.show(io::IO, result::BadExceptionParseResult{T}) where {T}
+    show(io, "Exception: $(result.ex)")
+end
+
+
 """
     Line(expected::String)
 
