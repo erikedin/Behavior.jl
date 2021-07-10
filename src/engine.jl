@@ -51,7 +51,8 @@ end
 
 Wrapper method for the above runfeature!.
 """
-function runfeature!(engine::ExecutorEngine, parseresult::Gherkin.OKParseResult{Feature}, _featurefile::String)
+const GoodParseResultType = Union{Gherkin.OKParseResult{Feature}, Gherkin.Experimental.OKParseResult{Feature}}
+function runfeature!(engine::ExecutorEngine, parseresult::GoodParseResultType, _featurefile::String)
     # Filter all features to run only the scenarios chosen by the tag selector, if any.
     # Any features or scenarios that do not match the tag selector will be removed here.
     filteredfeature = Selection.select(engine.selector, parseresult.value)
@@ -72,6 +73,9 @@ A feature could not be parsed. Record the result.
 function runfeature!(engine::ExecutorEngine, parsefailure::Gherkin.BadParseResult{Feature}, featurefile::String)
     accumulateresult!(engine.accumulator, parsefailure, featurefile)
 end
+function runfeature!(engine::ExecutorEngine, parsefailure::Gherkin.Experimental.BadParseResult{Feature}, featurefile::String)
+    accumulateresult!(engine.accumulator, parsefailure, featurefile)
+end
 
 finish(engine::ExecutorEngine) = engine.accumulator
 
@@ -90,10 +94,20 @@ function readstepdefinitions!(driver::Driver, path::String)
     end
 end
 
+function readfeature(driver::Driver, featurefile::String, parseoptions::ParseOptions)
+    if parseoptions.use_experimental
+        input = Gherkin.Experimental.ParserInput(read(featurefile, String))
+        parser = Gherkin.Experimental.FeatureFileParser()
+        parser(input)
+    else
+        parsefeature(readfile(driver.os, featurefile), options=parseoptions)
+    end
+end
+
 function runfeatures!(driver::Driver, path::String; parseoptions::ParseOptions = ParseOptions())
     featurefiles = findfileswithextension(driver.os, path, ".feature")
     for featurefile in featurefiles
-        featureparseresult = parsefeature(readfile(driver.os, featurefile), options=parseoptions)
+        featureparseresult = readfeature(driver, featurefile, parseoptions)
         runfeature!(driver.engine, featureparseresult, featurefile)
     end
     finish(driver.engine)

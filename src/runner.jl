@@ -126,6 +126,11 @@ function runspec(
         NoExecutionEnvironment()
     end
 
+    if parseoptions.use_experimental
+        println("WARNING: Experimental parser used for feature files!")
+        println()
+    end
+
     # TODO: Handle tag selector errors once the syntax is more complex.
     selector = Selection.parsetagselector(tags)
 

@@ -53,6 +53,7 @@ Format a step according to Gherkin syntax.
 stepformat(step::Given) = "Given $(step.text)"
 stepformat(step::When) = " When $(step.text)"
 stepformat(step::Then) = " Then $(step.text)"
+stepformat(step::Gherkin.Experimental.And) = "  And $(step.text)"
 
 """
     stepcolor(::Presenter, ::StepExecutionResult)

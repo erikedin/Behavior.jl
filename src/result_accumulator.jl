@@ -64,7 +64,8 @@ end
 
 A feature file could not be parsed properly. Record the error.
 """
-function accumulateresult!(acc::ResultAccumulator, parsefailure::Gherkin.BadParseResult{Feature}, featurefile::String)
+const BadParseType = Union{Gherkin.BadParseResult{Feature}, Gherkin.Experimental.BadParseResult{Feature}}
+function accumulateresult!(acc::ResultAccumulator, parsefailure::BadParseType, featurefile::String)
     push!(acc.errors, (featurefile, parsefailure))
     acc.isaccumsuccess = false
 end
