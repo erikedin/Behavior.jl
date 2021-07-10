@@ -19,5 +19,8 @@ using Behavior.Gherkin
 # For instance, the below options allows the Given/When/Then steps to be in any order
 # exitcode = runspec(; parseoptions=ParseOptions(allow_any_step_order=true)) ? 0 : - 1
 
-exitcode = runspec() ? 0 : - 1
+const use_experimental = length(ARGS) == 1 && ARGS[1] == "--experimental"
+const options = Gherkin.ParseOptions(use_experimental=use_experimental)
+
+exitcode = runspec(parseoptions=options) ? 0 : - 1
 exit(exitcode)
