@@ -7,4 +7,5 @@ makedocs(
         "Usage" => "usage.md",
         "Tutorial" => "tutorial.md",
         "Functions" => "functions.md",
+        "Gherkin Experimental" => "gherkin_experimental.md"
     ])
