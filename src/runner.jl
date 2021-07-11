@@ -213,6 +213,7 @@ function suggestmissingsteps(
     BadParseResultTypes = Union{Gherkin.BadParseResult{Feature}, Experimental.BadParseResult{Feature}}
 
     parseresult = if parseoptions.use_experimental
+        println("WARNING: suggestmissingsteps is using the experimental Gherkin parser")
         input = ParserInput(read(featurepath, String))
         parser = Experimental.FeatureFileParser()
         parser(input)

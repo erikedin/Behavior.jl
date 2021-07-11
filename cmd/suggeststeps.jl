@@ -14,14 +14,16 @@
 
 using Behavior: suggestmissingsteps, ParseOptions
 
-if length(ARGS) !== 2
-    println("Usage: julia suggeststeps.jl <feature file> <steps root path>")
+if length(ARGS) !== 2 && length(ARGS) !== 3
+    println("Usage: julia suggeststeps.jl <feature file> <steps root path> [--experimental]")
     exit(1)
 end
 
 featurefile = ARGS[1]
 stepsrootpath = ARGS[2]
 
-parseoptions = ParseOptions(allow_any_step_order=true)
+const use_experimental = length(ARGS) == 3 && ARGS[3] == "--experimental"
+
+parseoptions = ParseOptions(allow_any_step_order=true, use_experimental=use_experimental)
 
 suggestmissingsteps(featurefile, stepsrootpath, parseoptions=parseoptions)
