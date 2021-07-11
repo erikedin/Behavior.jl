@@ -210,8 +210,16 @@ function suggestmissingsteps(
 
     readstepdefinitions!(driver, stepspath)
     # Parse the feature file and suggest missing steps.
-    parseresult = parsefeature(read(featurepath, String), options=parseoptions)
-    if parseresult isa BadParseResult
+    BadParseResultTypes = Union{Gherkin.BadParseResult{Feature}, Experimental.BadParseResult{Feature}}
+
+    parseresult = if parseoptions.use_experimental
+        input = ParserInput(read(featurepath, String))
+        parser = Experimental.FeatureFileParser()
+        parser(input)
+    else
+        parsefeature(read(featurepath, String), options=parseoptions)
+    end
+    if parseresult isa BadParseResultTypes
         println("Failed to parse feature file $featurepath")
         println(parseresult)
         return
