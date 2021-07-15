@@ -400,6 +400,7 @@ These are the available hooks:
 - `@beforefeature` and `@afterfeature`
 - `@beforeall` and `@afterall`
 
+### Scenario
 The `@beforescenario` and `@afterscenario` definitions run before and after each scenario.
 
 ```julia
@@ -418,6 +419,7 @@ visible in the scenario steps.
 The `scenario` parameter allows one to see which scenario is being executed, so test resources can
 customized for each scenario.
 
+### Feature
 The `@beforefeature` and `@afterfeature` definitions run before and after each feature, respectively.
 
 ```julia
@@ -439,6 +441,7 @@ Note that today there are no publicly defined methods on the `Behavior.Gherkin.F
 determine what can be done with it, you have to consult the source code. This can obviously
 be improved.
 
+### All
 The `@beforeall` and `@afterall` runs before the first feature, and after the last feature, respectively.
 
 ```julia
@@ -453,3 +456,30 @@ end
 
 The hooks take no arguments. As of today, these hooks can only create global resources, as no context
 or feature object is available.
+
+### Module scope
+The above hooks are evaluated in the `Main` module scope. If you define some function `myfunction`
+in the `environment.jl` file, then you can access it by explicitly using `Main.myfunction`.
+
+Here is an `environment.jl` file that stores some data used by the all-hooks.
+
+```julia
+using Behavior
+
+myfeatures = []
+
+@beforefeature() do feature
+    push!(myfeatures, feature)
+end
+```
+
+In a step definition, you can access the `myfeatures` list by using the `Main` module
+
+```julia
+using Behavior
+
+@then("some description") do
+    latestfeature = Main.myfeatures[end]
+    @expect latestfeature.header.description == "Some feature description"
+end
+```
