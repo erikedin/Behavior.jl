@@ -16,7 +16,9 @@ using Behavior
 using Behavior:
     StepDefinitionMatcher,
     Executor, executescenario, @expect, SuccessfulStepExecution,
-    issuccess, beforescenario, afterscenario, FromSourceExecutionEnvironment
+    issuccess, beforescenario, afterscenario, FromSourceExecutionEnvironment,
+    FromMacroStepDefinitionMatcher, QuietRealTimePresenter
+using Behavior.Gherkin.Experimental
 
 
 mutable struct FakeExecutionEnvironment <: Behavior.ExecutionEnvironment
@@ -187,5 +189,53 @@ end
             # Assert
             @test !haskey(context, :afterscenariowasexecuted)
         end
+    end
+
+    @testset "Before and After feature hooks" begin
+        @testset "beforefeature sets flag; Feature runs; Flag is set" begin
+            # Arrange
+            # Define @beforefeature
+            env = FromSourceExecutionEnvironment("""
+                using Behavior
+                using Behavior.Gherkin
+
+                features = Gherkin.Feature[]
+
+                @beforefeature() do feature
+                    push!(features, feature)
+                end
+            """)
+
+            # Step definitions
+            matcher = FromMacroStepDefinitionMatcher("""
+                using Behavior
+
+                @then("the current feature has description \\"{String}\\"") do context, description
+                    currentfeature = Main.features[end]
+                    @expect currentfeature.header.description == description
+                end
+            """)
+
+            # Feature
+            input = Experimental.ParserInput("""
+                Feature: This is a feature description
+
+                    Scenario: Check the feature description
+                        Then the current feature has description "This is a feature description"
+            """)
+            parser = Experimental.FeatureFileParser()
+            parserresult = parser(input)
+            feature = parserresult.value
+
+            executor = Executor(matcher, QuietRealTimePresenter(), executionenv=env)
+
+            # Act
+            featureresult = executefeature(executor, feature)
+
+            # Assert
+            steps = featureresult.scenarioresults[1].steps
+            @test issuccess(steps[1])
+        end
+
     end
 end

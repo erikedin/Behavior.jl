@@ -188,6 +188,9 @@ end
 Execute all scenarios and scenario outlines in a feature.
 """
 function executefeature(executor::Executor, feature::Gherkin.Feature)
+    # A hook that runs before each feature.
+    beforefeature(executor.executionenv, feature)
+
     # Present that a new feature is about to be executed.
     present(executor.presenter, feature)
 
@@ -230,7 +233,7 @@ function findmissingsteps(executor::Executor, feature::Feature) :: Vector{Scenar
     ])
 
     # We call unique to remove duplicate steps.
-    # We check uniqueness using only the step text, ignoring block text 
+    # We check uniqueness using only the step text, ignoring block text
     # and data tables.
     unique(step -> step.text, vcat(collect(missingsteps), backgroundmissingsteps))
 end

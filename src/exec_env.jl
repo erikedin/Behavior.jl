@@ -18,6 +18,7 @@ abstract type ExecutionEnvironment end
 struct NoExecutionEnvironment <: ExecutionEnvironment end
 beforescenario(::NoExecutionEnvironment, ::StepDefinitionContext, ::Gherkin.Scenario) = nothing
 afterscenario(::NoExecutionEnvironment, ::StepDefinitionContext, ::Gherkin.Scenario) = nothing
+beforefeature(::NoExecutionEnvironment, ::Gherkin.Feature) = nothing
 
 module GlobalExecEnv
     envs = Dict{Symbol, Function}()
@@ -42,6 +43,13 @@ macro afterscenario(ex::Expr)
     end
 end
 
+macro beforefeature(ex::Expr)
+    envdefinition = :( $ex )
+    quote
+        GlobalExecEnv.envs[:beforefeature] = $(esc(envdefinition))
+    end
+end
+
 struct FromSourceExecutionEnvironment <: ExecutionEnvironment
     envdefinitions::Dict{Symbol, Function}
 
@@ -56,20 +64,22 @@ end
 
 function invokeenvironmentmethod(
         executionenv::FromSourceExecutionEnvironment,
-        context::StepDefinitionContext,
-        scenario::Gherkin.Scenario,
-        methodsym::Symbol)
+        methodsym::Symbol,
+        args...)
 
     if haskey(executionenv.envdefinitions, methodsym)
         method = executionenv.envdefinitions[methodsym]
-        Base.invokelatest(method, context, scenario)
+        Base.invokelatest(method, args...)
     end
 end
 
 beforescenario(executionenv::FromSourceExecutionEnvironment,
                context::StepDefinitionContext,
-               scenario::Gherkin.Scenario) = invokeenvironmentmethod(executionenv, context, scenario, :beforescenario)
+               scenario::Gherkin.Scenario) = invokeenvironmentmethod(executionenv, :beforescenario, context, scenario)
 
 afterscenario(executionenv::FromSourceExecutionEnvironment,
               context::StepDefinitionContext,
-              scenario::Gherkin.Scenario) = invokeenvironmentmethod(executionenv, context, scenario, :afterscenario)
+              scenario::Gherkin.Scenario) = invokeenvironmentmethod(executionenv, :afterscenario, context, scenario)
+
+beforefeature(executionenv::FromSourceExecutionEnvironment,
+             feature::Gherkin.Feature) = invokeenvironmentmethod(executionenv, :beforefeature, feature)
