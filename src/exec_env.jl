@@ -20,6 +20,8 @@ beforescenario(::NoExecutionEnvironment, ::StepDefinitionContext, ::Gherkin.Scen
 afterscenario(::NoExecutionEnvironment, ::StepDefinitionContext, ::Gherkin.Scenario) = nothing
 beforefeature(::NoExecutionEnvironment, ::Gherkin.Feature) = nothing
 afterfeature(::NoExecutionEnvironment, ::Gherkin.Feature) = nothing
+beforeall(::NoExecutionEnvironment) = nothing
+afterall(::NoExecutionEnvironment) = nothing
 
 module GlobalExecEnv
     envs = Dict{Symbol, Function}()
@@ -55,6 +57,20 @@ macro afterfeature(ex::Expr)
     envdefinition = :( $ex )
     quote
         GlobalExecEnv.envs[:afterfeature] = $(esc(envdefinition))
+    end
+end
+
+macro beforeall(ex::Expr)
+    envdefinition = :( $ex )
+    quote
+        GlobalExecEnv.envs[:beforeall] = $(esc(envdefinition))
+    end
+end
+
+macro afterall(ex::Expr)
+    envdefinition = :( $ex )
+    quote
+        GlobalExecEnv.envs[:afterall] = $(esc(envdefinition))
     end
 end
 
@@ -94,3 +110,7 @@ beforefeature(executionenv::FromSourceExecutionEnvironment,
 
 afterfeature(executionenv::FromSourceExecutionEnvironment,
              feature::Gherkin.Feature) = invokeenvironmentmethod(executionenv, :afterfeature, feature)
+
+beforeall(executionenv::FromSourceExecutionEnvironment) = invokeenvironmentmethod(executionenv, :beforeall)
+
+afterall(executionenv::FromSourceExecutionEnvironment) = invokeenvironmentmethod(executionenv, :afterall)

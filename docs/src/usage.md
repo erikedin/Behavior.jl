@@ -388,11 +388,17 @@ In the future, you will be able to write a more complex expression using `and`, 
 ```
 which will run all scenarios with the `@foo` tag that do not also have the `@ignore` tag.
 
-## Before/after steps
-You can create steps that execute before and after each scenario, for set up and tear down of test resources.
+## Before/after hooks
+You can create hooks that execute before and after each scenario, for set up and tear down of test resources.
 These must be placed in a file `features/environment.jl` (or some custom features directory you specify).
 Note that this is _not_ the `features/steps` directory, where all step definitions are found, but in the
 `features` directory.
+
+These are the available hooks:
+
+- `@beforescenario` and `@afterscenario`
+- `@beforefeature` and `@afterfeature`
+- `@beforeall` and `@afterall`
 
 The `@beforescenario` and `@afterscenario` definitions run before and after each scenario.
 
@@ -406,7 +412,7 @@ end
 end
 ```
 
-The intention is that one place test resources in the `context` object. This is the same object that
+The intention is that one can place test resources in the `context` object. This is the same object that
 the scenario steps will receive as their `context` parameter, so any modifications to it will be
 visible in the scenario steps.
 The `scenario` parameter allows one to see which scenario is being executed, so test resources can
@@ -432,3 +438,18 @@ at which tags are available on it, for instance.
 Note that today there are no publicly defined methods on the `Behavior.Gherkin.Feature` type. To
 determine what can be done with it, you have to consult the source code. This can obviously
 be improved.
+
+The `@beforeall` and `@afterall` runs before the first feature, and after the last feature, respectively.
+
+```julia
+@beforeall() do
+    # Some code here
+end
+
+@afterall() do
+    # Some code here
+end
+```
+
+The hooks take no arguments. As of today, these hooks can only create global resources, as no context
+or feature object is available.

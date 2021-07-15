@@ -106,9 +106,17 @@ end
 
 function runfeatures!(driver::Driver, path::String; parseoptions::ParseOptions = ParseOptions())
     featurefiles = findfileswithextension(driver.os, path, ".feature")
+
+    # Call the hook that runs before any feature
+    beforeall(driver.engine.executor.executionenv)
+
     for featurefile in featurefiles
         featureparseresult = readfeature(driver, featurefile, parseoptions)
         runfeature!(driver.engine, featureparseresult, featurefile)
     end
+
+    # Call the hook that runs after all features
+    afterall(driver.engine.executor.executionenv)
+
     finish(driver.engine)
 end
