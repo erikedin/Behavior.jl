@@ -411,3 +411,24 @@ the scenario steps will receive as their `context` parameter, so any modificatio
 visible in the scenario steps.
 The `scenario` parameter allows one to see which scenario is being executed, so test resources can
 customized for each scenario.
+
+The `@beforefeature` and `@afterfeature` definitions run before and after each feature, respectively.
+
+```julia
+@beforefeature() do feature
+    # Some code here
+end
+
+@afterfeature() do feature
+    # Some code here
+end
+```
+
+Note that these definitions to not take a `context` parameter. This is because the context is
+specific to each scenario. Outside of a scenario, there is no context object defined.
+The `feature` parameter contains the feature that is about to/was just executed. One can look
+at which tags are available on it, for instance.
+
+Note that today there are no publicly defined methods on the `Behavior.Gherkin.Feature` type. To
+determine what can be done with it, you have to consult the source code. This can obviously
+be improved.
