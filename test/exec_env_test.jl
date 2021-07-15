@@ -192,7 +192,7 @@ end
     end
 
     @testset "Before and After feature hooks" begin
-        @testset "beforefeature sets flag; Feature runs; Flag is set" begin
+        @testset "beforefeature saves the feature; Feature runs; Feature is found in list" begin
             # Arrange
             # Define @beforefeature
             env = FromSourceExecutionEnvironment("""
@@ -237,5 +237,91 @@ end
             @test issuccess(steps[1])
         end
 
+        @testset "afterfeature saves the feature; Feature runs; Feature is not found while running the steps" begin
+            # Arrange
+            # Define @afterfeature
+            env = FromSourceExecutionEnvironment("""
+                using Behavior
+                using Behavior.Gherkin
+
+                features = Gherkin.Feature[]
+
+                @afterfeature() do feature
+                    push!(features, feature)
+                end
+            """)
+
+            # Step definitions
+            matcher = FromMacroStepDefinitionMatcher("""
+                using Behavior
+
+                @then("the feature has not been added to the list") do context
+                    @expect Main.features == []
+                end
+            """)
+
+            # Feature
+            input = Experimental.ParserInput("""
+                Feature: This is a feature description
+
+                    Scenario: Afterfeature adds the feature to a list
+                        Then the feature has not been added to the list
+            """)
+            parser = Experimental.FeatureFileParser()
+            parserresult = parser(input)
+            feature = parserresult.value
+
+            executor = Executor(matcher, QuietRealTimePresenter(), executionenv=env)
+
+            # Act
+            featureresult = executefeature(executor, feature)
+
+            # Assert
+            steps = featureresult.scenarioresults[1].steps
+            @test issuccess(steps[1])
+        end
+
+        @testset "afterfeature saves the feature; Feature runs; Feature is found after execution" begin
+            # Arrange
+            # Define @afterfeature
+            env = FromSourceExecutionEnvironment("""
+                using Behavior
+                using Behavior.Gherkin
+
+                features = Gherkin.Feature[]
+
+                @afterfeature() do feature
+                    push!(features, feature)
+                end
+            """)
+
+            # Step definitions
+            matcher = FromMacroStepDefinitionMatcher("""
+                using Behavior
+
+                @then("the feature has not been added to the list") do context
+                    @expect Main.features == []
+                end
+            """)
+
+            # Feature
+            input = Experimental.ParserInput("""
+                Feature: This is a feature description
+
+                    Scenario: Afterfeature adds the feature to a list
+                        Then the feature has not been added to the list
+            """)
+            parser = Experimental.FeatureFileParser()
+            parserresult = parser(input)
+            feature = parserresult.value
+
+            executor = Executor(matcher, QuietRealTimePresenter(), executionenv=env)
+
+            # Act
+            featureresult = executefeature(executor, feature)
+
+            # Assert
+            @test Main.features == [feature]
+        end
     end
 end

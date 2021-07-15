@@ -197,6 +197,9 @@ function executefeature(executor::Executor, feature::Gherkin.Feature)
     # Execute each scenario and scenario outline in the feature.
     scenarioresults = [executescenario(executor, feature.background, s) for s in feature.scenarios]
 
+    # A hook that runs after each feature
+    afterfeature(executor.executionenv, feature)
+
     # Return a list of `ScenarioResults`.
     # Since regular scenarios return a `ScenarioResult` directly, and scenario outlines return lists
     # of `ScenarioResult`s, we have to flatten that list.
