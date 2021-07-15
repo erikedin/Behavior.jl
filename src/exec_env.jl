@@ -29,14 +29,14 @@ module GlobalExecEnv
 end
 
 macro beforescenario(ex::Expr)
-    envdefinition = :( (context, scenario) -> $ex )
+    envdefinition = :( $ex )
     quote
         GlobalExecEnv.envs[:beforescenario] = $(esc(envdefinition))
     end
 end
 
 macro afterscenario(ex::Expr)
-    envdefinition = :( (context, scenario) -> $ex )
+    envdefinition = :( $ex )
     quote
         GlobalExecEnv.envs[:afterscenario] = $(esc(envdefinition))
     end

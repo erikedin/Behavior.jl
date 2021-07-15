@@ -330,7 +330,7 @@ Feature: Describing tags
     @bar @baz
     Scenario: Some scenario
         Given some step
-    
+
     @ignore
     Scenario: Ignore this scenario
         Given some step
@@ -366,7 +366,7 @@ on the result.
 NOTE: The tag selection syntax is a work in progress.
 
 - `@tag`
-  
+
     Select scenarios with the tag `@tag`.
 
 - `not @tag`
@@ -387,3 +387,27 @@ In the future, you will be able to write a more complex expression using `and`, 
 @foo and (not @ignore)
 ```
 which will run all scenarios with the `@foo` tag that do not also have the `@ignore` tag.
+
+## Before/after steps
+You can create steps that execute before and after each scenario, for set up and tear down of test resources.
+These must be placed in a file `features/environment.jl` (or some custom features directory you specify).
+Note that this is _not_ the `features/steps` directory, where all step definitions are found, but in the
+`features` directory.
+
+The `@beforescenario` and `@afterscenario` definitions run before and after each scenario.
+
+```julia
+@beforescenario() do context, scenario
+    # Some code here
+end
+
+@afterscenario() do context, scenario
+    # Some code here
+end
+```
+
+The intention is that one place test resources in the `context` object. This is the same object that
+the scenario steps will receive as their `context` parameter, so any modifications to it will be
+visible in the scenario steps.
+The `scenario` parameter allows one to see which scenario is being executed, so test resources can
+customized for each scenario.

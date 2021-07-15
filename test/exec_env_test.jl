@@ -125,7 +125,7 @@ end
             env = FromSourceExecutionEnvironment("""
                 using Behavior
 
-                @beforescenario begin
+                @beforescenario() do context, scenario
                     context[:beforescenariowasexecuted] = true
                 end
             """)
@@ -159,7 +159,7 @@ end
             env = FromSourceExecutionEnvironment("""
                 using Behavior
 
-                @afterscenario begin
+                @afterscenario() do context, scenario
                     context[:afterscenariowasexecuted] = true
                 end
             """)
