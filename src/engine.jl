@@ -36,6 +36,8 @@ end
 
 addmatcher!(engine::ExecutorEngine, matcher::StepDefinitionMatcher) = addmatcher!(engine.matcher, matcher)
 
+executionenvironment(engine::ExecutorEngine) = engine.executor.executionenv
+
 """
     runfeature!(::ExecutorEngine, ::Feature)
 
@@ -108,7 +110,7 @@ function runfeatures!(driver::Driver, path::String; parseoptions::ParseOptions =
     featurefiles = findfileswithextension(driver.os, path, ".feature")
 
     # Call the hook that runs before any feature
-    beforeall(driver.engine.executor.executionenv)
+    beforeall(executionenvironment(driver.engine))
 
     for featurefile in featurefiles
         featureparseresult = readfeature(driver, featurefile, parseoptions)
@@ -116,7 +118,7 @@ function runfeatures!(driver::Driver, path::String; parseoptions::ParseOptions =
     end
 
     # Call the hook that runs after all features
-    afterall(driver.engine.executor.executionenv)
+    afterall(executionenvironment(driver.engine))
 
     finish(driver.engine)
 end

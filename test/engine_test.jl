@@ -18,7 +18,7 @@ using Behavior:
     Driver, readstepdefinitions!, OSAbstraction, StepDefinitionMatcher
 using Behavior.Gherkin: Feature, FeatureHeader, Scenario, Given, ParseOptions
 import Behavior: addmatcher!, findfileswithextension, readfile, runfeature!,
-                                 issuccess, finish
+                                 issuccess, finish, executionenvironment
 
 @testset "Engine               " begin
     # Beware: This test actually exercises far too much of the code. It should be isolated to
@@ -115,6 +115,7 @@ runfeature!(engine::FakeEngine, result::Gherkin.OKParseResult{Feature}, featuref
 runfeature!(engine::FakeEngine, result::Gherkin.BadParseResult{Feature}, featurefile::String) = push!(engine.errors, result)
 
 finish(engine::FakeEngine) = engine.finishresult
+executionenvironment(::FakeEngine) = Behavior.NoExecutionEnvironment()
 
 struct FakeOSAbstraction <: OSAbstraction
     fileswithext::Dict{String, Vector{String}}
