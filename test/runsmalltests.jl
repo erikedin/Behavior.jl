@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+include("selection/tag_expressions_test.jl")
 include("gherkin/experimental/runtests.jl")
 
 include("gherkin/feature_test.jl")
