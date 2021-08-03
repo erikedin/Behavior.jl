@@ -241,6 +241,6 @@ function (parser::Transforming{S, T})(input::TagExpressionInput) :: ParseResult{
     end
 end
 
-SingleTagParser() = Transforming{Vector{Char}, String}(Repeating{Char}(NotIn("() ")), xs -> join(xs))
+SingleTagParser() = Transforming{Vector{Char}, Tag}(Repeating{Char}(NotIn("() ")), xs -> Tag(join(xs)))
 
 end

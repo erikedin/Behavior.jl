@@ -108,8 +108,8 @@ using Behavior.Selection: TagExpressionInput, SingleTagParser
             result = parser(input)
 
             # Assert
-            @test result isa Selection.OKParseResult{String}
-            @test result.value == "@foo"
+            @test result isa Selection.OKParseResult{Selection.Tag}
+            @test result.value == Selection.Tag("@foo")
         end
 
         @testset "@bar; OK" begin
@@ -121,8 +121,8 @@ using Behavior.Selection: TagExpressionInput, SingleTagParser
             result = parser(input)
 
             # Assert
-            @test result isa Selection.OKParseResult{String}
-            @test result.value == "@bar"
+            @test result isa Selection.OKParseResult{Selection.Tag}
+            @test result.value == Selection.Tag("@bar")
         end
 
         @testset "Tag followed by a non-tag character; OK" begin
@@ -138,10 +138,25 @@ using Behavior.Selection: TagExpressionInput, SingleTagParser
                     result = parser(input)
 
                     # Assert
-                    @test result isa Selection.OKParseResult{String}
-                    @test result.value == "@foo"
+                    @test result isa Selection.OKParseResult{Selection.Tag}
+                    @test result.value == Selection.Tag("@foo")
                 end
             end
         end
     end
+
+    # @testset "Not parser" begin
+    #     @testset "Not @foo; OK" begin
+    #         # Arrange
+    #         input = TagExpressionInput("not @foo")
+    #         parser = NotTagParser()
+
+    #         # Act
+    #         result = parser(input)
+
+    #         # Assert
+    #         @test result isa Selection.OKParseResult{Selection.Not}
+    #         @test result.value == Selection.Not(Selection.Tag("@foo"))
+    #     end
+    # end
 end
