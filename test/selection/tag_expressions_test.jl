@@ -244,7 +244,6 @@ using Behavior.Selection: TagExpressionInput, SingleTagParser, SequenceParser, T
         @testset "TakeUntil space; Prefix whitespace then cc ; cc" begin
             # Arrange
             input = TagExpressionInput(" cc ")
-            println(input)
             parser = Selection.TakeUntil(" ")
 
             # Act
@@ -273,37 +272,58 @@ using Behavior.Selection: TagExpressionInput, SingleTagParser, SequenceParser, T
     end
 
     @testset "Sequences" begin
-        # @testset "@foo then @bar; OK" begin
-        #     # Arrange
-        #     input = TagExpressionInput("@foo @bar")
-        #     parser = SequenceParser{Tag}(
-        #         SingleTagParser(),
-        #         SingleTagParser()
-        #     )
+        @testset "@foo then @bar; OK" begin
+            # Arrange
+            input = TagExpressionInput("@foo @bar")
+            parser = SequenceParser{Tag}(
+                SingleTagParser(),
+                SingleTagParser()
+            )
 
-        #     # Act
-        #     result = parser(input)
+            # Act
+            result = parser(input)
 
-        #     # Assert
-        #     @test result isa Selection.OKParseResult{Vector{Tag}}
-        #     @test result.value == [Tag("@foo"), Tag("@bar")]
-        # end
+            # Assert
+            @test result isa Selection.OKParseResult{Vector{Tag}}
+            @test result.value == [Tag("@foo"), Tag("@bar")]
+        end
 
-        # @testset "@foo @bar @baz; OK" begin
-        #     # Arrange
-        #     input = TagExpressionInput("@foo @bar @baz")
-        #     parser = SequenceParser{Tag}(
-        #         SingleTagParser(),
-        #         SingleTagParser()
-        #     )
+        @testset "@foo @bar @baz; OK" begin
+            # Arrange
+            input = TagExpressionInput("@foo @bar @baz")
+            parser = SequenceParser{Tag}(
+                SingleTagParser(),
+                SingleTagParser(),
+                SingleTagParser()
+            )
 
-        #     # Act
-        #     result = parser(input)
+            # Act
+            result = parser(input)
 
-        #     # Assert
-        #     @test result isa Selection.OKParseResult{Vector{Tag}}
-        #     @test result.value == [Tag("@foo"), Tag("@bar"), Tag("@baz")]
-        # end
+            # Assert
+            @test result isa Selection.OKParseResult{Vector{Tag}}
+            @test result.value == [Tag("@foo"), Tag("@bar"), Tag("@baz")]
+        end
+
+        @testset "@foo @bar, then a standalone @baz; OK" begin
+            # Arrange
+            input = TagExpressionInput("@foo @bar @baz")
+            parser1 = SequenceParser{Tag}(
+                SingleTagParser(),
+                SingleTagParser()
+            )
+
+            # Act
+            result1 = parser1(input)
+            parser2 = SingleTagParser()
+            result2 = parser2(result1.newinput)
+
+            # Assert
+            @test result1 isa Selection.OKParseResult{Vector{Tag}}
+            @test result1.value == [Tag("@foo"), Tag("@bar")]
+            @test result2 isa Selection.OKParseResult{Tag}
+            @test result2.value == Tag("@baz")
+        end
     end
 
     # @testset "Not parser" begin

@@ -289,7 +289,7 @@ function (parser::SequenceParser{T})(input::TagExpressionInput) :: ParseResult{V
         currentinput = result.newinput
     end
 
-    OKParseResult{Vector{T}}(values, input)
+    OKParseResult{Vector{T}}(values, currentinput)
 end
 
 end
