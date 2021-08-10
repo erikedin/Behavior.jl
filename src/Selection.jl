@@ -156,7 +156,15 @@ struct TagExpressionInput
     source::String
     position::Int
 
-    TagExpressionInput(source::String, position::Int = 1) = new(source, position)
+    function TagExpressionInput(source::String, position::Int = 1)
+        nextnonwhitespace = findnext(c -> c != ' ', source, position)
+        newposition = if nextnonwhitespace !== nothing
+            nextnonwhitespace
+        else
+            length(source) + 1
+        end
+        new(source, newposition)
+    end
 end
 
 currentchar(input::TagExpressionInput) = (input.source[input.position], TagExpressionInput(input.source, input.position + 1))
@@ -241,6 +249,47 @@ function (parser::Transforming{S, T})(input::TagExpressionInput) :: ParseResult{
     end
 end
 
-SingleTagParser() = Transforming{Vector{Char}, Tag}(Repeating{Char}(NotIn("() ")), xs -> Tag(join(xs)))
+struct TakeUntil <: TagExpressionParser{String}
+    anyof::String
+end
+function (parser::TakeUntil)(input::TagExpressionInput) :: ParseResult{String}
+    delimiterindex = findnext(c -> contains(parser.anyof, c), input.source, input.position)
+    lastindex = if delimiterindex !== nothing
+        delimiterindex - 1
+    else
+        length(input.source)
+    end
+    s = input.source[input.position:lastindex]
+    OKParseResult{String}(s, TagExpressionInput(input.source, lastindex + 1))
+end
+
+SingleTagParser() = Transforming{String, Tag}(
+    TakeUntil("() "),
+    s -> Tag(s))
+
+"""
+    SequenceParser{T}(parsers...)
+
+Consumes a sequence of other parsers.
+"""
+struct SequenceParser{T}
+    inner::Vector{<:TagExpressionParser{T}}
+
+    SequenceParser{T}(parsers...) where {T} = new(collect(parsers))
+end
+
+function (parser::SequenceParser{T})(input::TagExpressionInput) :: ParseResult{Vector{T}} where {T}
+    values = Vector{T}()
+    currentinput = input
+
+    for p in parser.inner
+        result = p(currentinput)
+
+        push!(values, result.value)
+        currentinput = result.newinput
+    end
+
+    OKParseResult{Vector{T}}(values, input)
+end
 
 end
