@@ -326,18 +326,73 @@ using Behavior.Selection: TagExpressionInput, SingleTagParser, SequenceParser, T
         end
     end
 
-    # @testset "Not parser" begin
-    #     @testset "Not @foo; OK" begin
-    #         # Arrange
-    #         input = TagExpressionInput("not @foo")
-    #         parser = NotTagParser()
+    @testset "Literal parser" begin
+        @testset "Literal foo; foo; OK" begin
+            # Arrange
+            input = TagExpressionInput("foo")
+            parser = Selection.Literal("foo")
 
-    #         # Act
-    #         result = parser(input)
+            # Act
+            result = parser(input)
 
-    #         # Assert
-    #         @test result isa Selection.OKParseResult{Selection.Not}
-    #         @test result.value == Selection.Not(Selection.Tag("@foo"))
-    #     end
-    # end
+            # Assert
+            @test result isa Selection.OKParseResult{String}
+            @test result.value == "foo"
+        end
+
+        @testset "Literal foo; bar; Not OK" begin
+            # Arrange
+            input = TagExpressionInput("bar")
+            parser = Selection.Literal("foo")
+
+            # Act
+            result = parser(input)
+
+            # Assert
+            @test result isa Selection.BadParseResult{String}
+        end
+
+        @testset "Literal foobar; bar; Not OK" begin
+            # Arrange
+            input = TagExpressionInput("bar")
+            parser = Selection.Literal("foobar")
+
+            # Act
+            result = parser(input)
+
+            # Assert
+            @test result isa Selection.BadParseResult{String}
+        end
+
+        @testset "Literal foo then bar; foobar; OK" begin
+            # Arrange
+            input = TagExpressionInput("foobar")
+
+            # Act
+            parser = SequenceParser{String}(
+                Selection.Literal("foo"),
+                Selection.Literal("bar")
+            )
+            result = parser(input)
+
+            # Assert
+            @test result isa Selection.OKParseResult{Vector{String}}
+            @test result.value == ["foo", "bar"]
+        end
+    end
+
+    @testset "Not parser" begin
+        @testset "Not @foo; OK" begin
+            # Arrange
+            input = TagExpressionInput("not @foo")
+            parser = Selection.NotTagParser()
+
+            # Act
+            result = parser(input)
+
+            # Assert
+            @test result isa Selection.OKParseResult{Selection.Not}
+            @test result.value == Selection.Not(Selection.Tag("@foo"))
+        end
+    end
 end

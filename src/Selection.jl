@@ -272,8 +272,8 @@ SingleTagParser() = Transforming{String, Tag}(
 
 Consumes a sequence of other parsers.
 """
-struct SequenceParser{T}
-    inner::Vector{<:TagExpressionParser{T}}
+struct SequenceParser{T} <: TagExpressionParser{Vector{T}}
+    inner::Vector{TagExpressionParser{<:T}}
 
     SequenceParser{T}(parsers...) where {T} = new(collect(parsers))
 end
@@ -291,5 +291,39 @@ function (parser::SequenceParser{T})(input::TagExpressionInput) :: ParseResult{V
 
     OKParseResult{Vector{T}}(values, currentinput)
 end
+
+"""
+    Literal(::String)
+
+Consumes an exact literal string.
+"""
+struct Literal <: TagExpressionParser{String}
+    value::String
+end
+
+function (parser::Literal)(input::TagExpressionInput) :: ParseResult{String}
+    n = length(parser.value)
+    endposition = min(input.position + n - 1, length(input.source))
+    actual = input.source[input.position:endposition]
+    if parser.value == actual
+        OKParseResult{String}(actual, TagExpressionInput(input.source, endposition + 1))
+    else
+        BadParseResult{String}(input)
+    end
+end
+
+const NotBits = Union{String, Tag}
+"""
+    NotTagParser()
+
+Consumes a logical not of some tag expression.
+"""
+NotTagParser() = Transforming{Vector{NotBits}, Not}(
+    SequenceParser{NotBits}(
+        Literal("not"),
+        SingleTagParser()
+    ),
+    xs -> Not(xs[2])
+)
 
 end
