@@ -74,6 +74,25 @@ end
 matches(anyex::Any, tags::AbstractVector{String}) = any(ex -> matches(ex, tags), anyex.exs)
 
 """
+    Or(::TagExpression, ::TagExpression)
+
+Match either expression.
+"""
+struct Or <: TagExpression
+    a::TagExpression
+    b::TagExpression
+end
+
+"""
+    Parentheses(::TagExpression)
+
+An expression in parentheses.
+"""
+struct Parentheses <: TagExpression
+    ex::TagExpression
+end
+
+"""
     parsetagexpression(s::String) :: TagExpression
 
 Parse the string `s` into a `TagExpression`.
@@ -324,6 +343,36 @@ NotTagParser() = Transforming{Vector{NotBits}, Not}(
         SingleTagParser()
     ),
     xs -> Not(xs[2])
+)
+
+const OrBits = Union{String, Tag}
+"""
+    OrParser()
+
+Consumes a logical or expression.
+"""
+OrParser() = Transforming{Vector{OrBits}, Or}(
+    SequenceParser{OrBits}(
+        SingleTagParser(),
+        Literal("or"),
+        SingleTagParser()
+    ),
+    xs -> Or(xs[1], xs[3])
+)
+
+const ParenthesesBits = Union{String, Tag}
+"""
+    ParenthesesParser()
+
+Consumes a tag expression in parentheses.
+"""
+ParenthesesParser() = Transforming{Vector{ParenthesesBits}, Parentheses}(
+    SequenceParser{ParenthesesBits}(
+        Literal("("),
+        SingleTagParser(),
+        Literal(")")
+    ),
+    xs -> Parentheses(xs[2])
 )
 
 end

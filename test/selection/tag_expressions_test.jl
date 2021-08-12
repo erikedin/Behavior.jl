@@ -395,4 +395,34 @@ using Behavior.Selection: TagExpressionInput, SingleTagParser, SequenceParser, T
             @test result.value == Selection.Not(Selection.Tag("@foo"))
         end
     end
+
+    @testset "Or parser" begin
+        @testset "@foo or @bar; OK" begin
+            # Arrange
+            input = TagExpressionInput("@foo or @bar")
+            parser = Selection.OrParser()
+
+            # Act
+            result = parser(input)
+
+            # Assert
+            @test result isa Selection.OKParseResult{Selection.Or}
+            @test result.value == Selection.Or(Tag("@foo"), Tag("@bar"))
+        end
+    end
+
+    @testset "ParenthesesParser" begin
+        @testset "Parentheses around tag; (@foo); OK, tag @foo" begin
+            # Arrange
+            input = TagExpressionInput("(@foo)")
+            parser = Selection.ParenthesesParser()
+
+            # Act
+            result = parser(input)
+
+            # Assert
+            @test result isa Selection.OKParseResult{Selection.Parentheses}
+            @test result.value == Selection.Parentheses(Tag("@foo"))
+        end
+    end
 end
