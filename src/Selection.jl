@@ -203,6 +203,16 @@ end
 abstract type TagExpressionParser{T} end
 
 """
+    AnyTagExpression()
+
+Consumes any type of tag expression. The actual parser is defined further down below,
+after all expression types have been defined.
+"""
+struct AnyTagExpression <: TagExpressionParser{TagExpression}
+
+end
+
+"""
     NotIn(::String)
 
 Take a single character if it is not one of the specified forbidden values.
@@ -264,7 +274,7 @@ function (parser::Transforming{S, T})(input::TagExpressionInput) :: ParseResult{
     if result isa OKParseResult{S}
         OKParseResult{T}(parser.f(result.value), result.newinput)
     else
-        BadParseResult{T}(newinput)
+        BadParseResult{T}(input)
     end
 end
 
@@ -303,6 +313,10 @@ function (parser::SequenceParser{T})(input::TagExpressionInput) :: ParseResult{V
 
     for p in parser.inner
         result = p(currentinput)
+        
+        if result isa BadParseResult
+            return BadParseResult{Vector{T}}(input)
+        end
 
         push!(values, result.value)
         currentinput = result.newinput
@@ -374,5 +388,29 @@ ParenthesesParser() = Transforming{Vector{ParenthesesBits}, Parentheses}(
     ),
     xs -> Parentheses(xs[2])
 )
+
+"""
+    AnyOfParser(parsers...)
+
+Consume any of the supplied parsers.
+"""
+struct AnyOfParser <: TagExpressionParser{TagExpression}
+    parser1::TagExpressionParser{<:TagExpression}
+    parser2::TagExpressionParser{<:TagExpression}
+end
+
+function (parser::AnyOfParser)(input::TagExpressionInput) :: ParseResult{TagExpression}
+    result1 = parser.parser1(input)
+    if result1 isa OKParseResult{<:TagExpression}
+        OKParseResult{TagExpression}(Or(Tag("@a"), Tag("@b")), input)
+    else
+        result2 = parser.parser2(input)
+        if result2 isa OKParseResult
+            OKParseResult{TagExpression}(result2.value, result2.newinput)
+        else
+            BadParseResult{TagExpression}(input)
+        end
+    end
+end
 
 end
