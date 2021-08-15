@@ -104,6 +104,45 @@ using Behavior.Gherkin
         @test stepfailed.evaluated == "1 == 2"
     end
 
+    @testset "Assert only one variable which contains true" begin
+        matcher = Behavior.FromMacroStepDefinitionMatcher("""
+            using Behavior
+
+            @given("some precondition") do context
+                y = true
+                @expect y
+            end
+        """)
+        given = Gherkin.Given("some precondition")
+        context = Behavior.StepDefinitionContext()
+
+        m = Behavior.findstepdefinition(matcher, given)
+
+        args = Dict{Symbol, Any}()
+        stepAccomplished = m.stepdefinition.definition(context, args)
+
+        @test typeof(stepAccomplished) == Behavior.SuccessfulStepExecution
+    end
+
+    @testset "Assert only a function which result is true" begin
+        matcher = Behavior.FromMacroStepDefinitionMatcher("""
+            using Behavior
+
+            @given("some precondition") do context
+                @expect all([true, true])
+            end
+        """)
+        given = Gherkin.Given("some precondition")
+        context = Behavior.StepDefinitionContext()
+
+        m = Behavior.findstepdefinition(matcher, given)
+
+        args = Dict{Symbol, Any}()
+        stepAccomplished = m.stepdefinition.definition(context, args)
+
+        @test typeof(stepAccomplished) == Behavior.SuccessfulStepExecution
+    end
+
     @testset "Assert failure x == y in included file; Assert is 1 == 2; Failure has human readable string 1 == 2" begin
         matcher = Behavior.FromMacroStepDefinitionMatcher("""
             using Behavior

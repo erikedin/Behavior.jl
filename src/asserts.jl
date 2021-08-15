@@ -45,7 +45,12 @@ end
 """
 macro expect(ex)
     comparisonops = [:(==), :(===), :(!=), :(!==)]
-    iscomparison = ex.head === :call && length(ex.args) == 3 && ex.args[1] in comparisonops
+
+    if hasproperty(ex, :head)
+        iscomparison = ex.head === :call && length(ex.args) == 3 && ex.args[1] in comparisonops
+    else
+        iscomparison = false
+    end
 
     if iscomparison
         comparisonop = QuoteNode(ex.args[1])
@@ -68,7 +73,7 @@ macro expect(ex)
         quote
             local msg = $(string(ex))
             # Check the expectation.
-            if !($(esc(ex)))
+            if !(Bool($(esc(ex))))
                 throw(StepAssertFailure(msg))
             end
         end
