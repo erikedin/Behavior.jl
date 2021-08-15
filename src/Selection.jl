@@ -205,12 +205,12 @@ abstract type TagExpressionParser{T} end
 """
     AnyTagExpression()
 
-Consumes any type of tag expression. The actual parser is defined further down below,
+Consumes any type of tag expression. The actual parser constructor is defined further down below,
 after all expression types have been defined.
 """
-struct AnyTagExpression <: TagExpressionParser{TagExpression}
+struct AnyTagExpression <: TagExpressionParser{TagExpression} end
 
-end
+
 
 """
     NotIn(::String)
@@ -345,7 +345,7 @@ function (parser::Literal)(input::TagExpressionInput) :: ParseResult{String}
     end
 end
 
-const NotBits = Union{String, Tag}
+const NotBits = Union{String, TagExpression}
 """
     NotTagParser()
 
@@ -354,7 +354,7 @@ Consumes a logical not of some tag expression.
 NotTagParser() = Transforming{Vector{NotBits}, Not}(
     SequenceParser{NotBits}(
         Literal("not"),
-        SingleTagParser()
+        AnyTagExpression()
     ),
     xs -> Not(xs[2])
 )
@@ -366,6 +366,7 @@ const OrBits = Union{String, Tag}
 Consumes a logical or expression.
 """
 OrParser() = Transforming{Vector{OrBits}, Or}(
+    # TODO Support tag expressions here
     SequenceParser{OrBits}(
         SingleTagParser(),
         Literal("or"),
@@ -374,7 +375,9 @@ OrParser() = Transforming{Vector{OrBits}, Or}(
     xs -> Or(xs[1], xs[3])
 )
 
-const ParenthesesBits = Union{String, Tag}
+# TODO Create And expression parser
+
+const ParenthesesBits = Union{String, TagExpression}
 """
     ParenthesesParser()
 
@@ -383,7 +386,7 @@ Consumes a tag expression in parentheses.
 ParenthesesParser() = Transforming{Vector{ParenthesesBits}, Parentheses}(
     SequenceParser{ParenthesesBits}(
         Literal("("),
-        SingleTagParser(),
+        AnyTagExpression(),
         Literal(")")
     ),
     xs -> Parentheses(xs[2])
@@ -408,6 +411,21 @@ function (parser::AnyOfParser)(input::TagExpressionInput) :: ParseResult{TagExpr
         end
     end
     BadParseResult{TagExpression}(input)
+end
+
+#
+# The empty AnyTagExpression constructor is defined here at the bottom, where it
+# can find all expression types.
+#
+
+function (::AnyTagExpression)(input::TagExpressionInput) :: ParseResult{TagExpression}
+    inner = AnyOfParser(
+        NotTagParser(),
+        OrParser(),
+        ParenthesesParser(),
+        SingleTagParser(),
+    )
+    inner(input)
 end
 
 end
