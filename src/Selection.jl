@@ -395,22 +395,19 @@ ParenthesesParser() = Transforming{Vector{ParenthesesBits}, Parentheses}(
 Consume any of the supplied parsers.
 """
 struct AnyOfParser <: TagExpressionParser{TagExpression}
-    parser1::TagExpressionParser{<:TagExpression}
-    parser2::TagExpressionParser{<:TagExpression}
+    parsers::Vector{TagExpressionParser{<:TagExpression}}
+
+    AnyOfParser(parsers...) = new(collect(parsers))
 end
 
 function (parser::AnyOfParser)(input::TagExpressionInput) :: ParseResult{TagExpression}
-    result1 = parser.parser1(input)
-    if result1 isa OKParseResult{<:TagExpression}
-        OKParseResult{TagExpression}(Or(Tag("@a"), Tag("@b")), input)
-    else
-        result2 = parser.parser2(input)
-        if result2 isa OKParseResult
-            OKParseResult{TagExpression}(result2.value, result2.newinput)
-        else
-            BadParseResult{TagExpression}(input)
+    for p in parser.parsers
+        result = p(input)
+        if result isa OKParseResult
+            return OKParseResult{TagExpression}(result.value, result.newinput)
         end
     end
+    BadParseResult{TagExpression}(input)
 end
 
 end
