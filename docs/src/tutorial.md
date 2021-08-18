@@ -37,7 +37,7 @@ $ julia
  _/ |\__'_|_|_|\__'_|  |  Official https://julialang.org/ release
 |__/                   |
 
-julia> 
+julia>
 
 ```
 To create a new package `CoffeeMachine`, first enter the Pkg mode by pressing
@@ -45,7 +45,7 @@ the `]` key.
 ```julia-repl
 julia> ]
 # The Julia REPL prompt changes to
-(@v1.6) pkg> 
+(@v1.6) pkg>
 ```
 Create the package by running
 ```julia-repl
@@ -54,7 +54,7 @@ Create the package by running
     CoffeeMachine/Project.toml
     CoffeeMachine/src/CoffeeMachine.jl
 
-(@v1.6) pkg> 
+(@v1.6) pkg>
 ```
 You now have a brand new package in `~/.julia/dev/CoffeeMachine`.
 
@@ -315,7 +315,7 @@ using Behavior
 using CoffeeMachine
 using Test
 
-@test runspec(pkgdir(CoffeeMachine)
+@test runspec(pkgdir(CoffeeMachine))
 ```
 This code calls the `Behavior.runspec` function, which finds all the
 feature files and step implementations, and runs all `Scenarios`.
