@@ -92,7 +92,7 @@ end
 function readstepdefinitions!(driver::Driver, path::String)
     stepdefinitionfiles = findfileswithextension(driver.os, path, ".jl")
     for f in stepdefinitionfiles
-        addmatcher!(driver.engine, FromMacroStepDefinitionMatcher(readfile(driver.os, f)))
+        addmatcher!(driver.engine, FromMacroStepDefinitionMatcher(readfile(driver.os, f), filename = f))
     end
 end
 
