@@ -197,7 +197,7 @@ struct FromMacroStepDefinitionMatcher <: StepDefinitionMatcher
         global currentfilename
         currentfilename = filename
         # Read all step definitions as Julia code.
-        include_string(Main, source)
+        include_string(Main, source, filename)
         # Save the step definitions found in the global variable `currentdefinitions` into a local
         # variable, so that we can clear the global state and read another file.
         mydefinitions = currentdefinitions
