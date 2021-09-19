@@ -14,7 +14,7 @@
 
 using Test
 using Behavior.Selection
-using Behavior.Selection: TagExpressionInput, SingleTagParser, SequenceParser, Tag
+using Behavior.Selection: TagExpressionInput, SingleTagParser, SequenceParser, Tag, AnyTagExpression
 
 @testset "Selection combinators" begin
     @testset "NotIn" begin
@@ -606,7 +606,7 @@ using Behavior.Selection: TagExpressionInput, SingleTagParser, SequenceParser, T
         @testset "AnyTagExpression; @a; OK" begin
             # Arrange
             input = TagExpressionInput("@a")
-            parser = Selection.AnyTagExpression()
+            parser = AnyTagExpression()
 
             # Act
             result = parser(input)
@@ -619,7 +619,7 @@ using Behavior.Selection: TagExpressionInput, SingleTagParser, SequenceParser, T
         @testset "AnyTagExpression; not @a; OK" begin
             # Arrange
             input = TagExpressionInput("not @a")
-            parser = Selection.AnyTagExpression()
+            parser = AnyTagExpression()
 
             # Act
             result = parser(input)
@@ -632,7 +632,7 @@ using Behavior.Selection: TagExpressionInput, SingleTagParser, SequenceParser, T
         @testset "AnyTagExpression; @a or @b; OK" begin
             # Arrange
             input = TagExpressionInput("@a or @b")
-            parser = Selection.AnyTagExpression()
+            parser = AnyTagExpression()
 
             # Act
             result = parser(input)
@@ -645,7 +645,7 @@ using Behavior.Selection: TagExpressionInput, SingleTagParser, SequenceParser, T
         @testset "AnyTagExpression; (@a); OK" begin
             # Arrange
             input = TagExpressionInput("(@a)")
-            parser = Selection.AnyTagExpression()
+            parser = AnyTagExpression()
 
             # Act
             result = parser(input)
@@ -658,7 +658,7 @@ using Behavior.Selection: TagExpressionInput, SingleTagParser, SequenceParser, T
         @testset "AnyTagExpression; (@a or @b); OK" begin
             # Arrange
             input = TagExpressionInput("(@a or @b)")
-            parser = Selection.AnyTagExpression()
+            parser = AnyTagExpression()
 
             # Act
             result = parser(input)
@@ -673,7 +673,7 @@ using Behavior.Selection: TagExpressionInput, SingleTagParser, SequenceParser, T
         @testset "AnyTagExpression; (not @c); OK" begin
             # Arrange
             input = TagExpressionInput("(not @c)")
-            parser = Selection.AnyTagExpression()
+            parser = AnyTagExpression()
 
             # Act
             result = parser(input)
@@ -688,7 +688,7 @@ using Behavior.Selection: TagExpressionInput, SingleTagParser, SequenceParser, T
         @testset "AnyTagExpression; not (@a or @b); OK" begin
             # Arrange
             input = TagExpressionInput("not (@a or @b)")
-            parser = Selection.AnyTagExpression()
+            parser = AnyTagExpression()
 
             # Act
             result = parser(input)
