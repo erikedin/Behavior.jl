@@ -292,9 +292,12 @@ function (parser::TakeUntil)(input::TagExpressionInput) :: ParseResult{String}
     OKParseResult{String}(s, TagExpressionInput(input.source, lastindex + 1))
 end
 
-SingleTagParser() = Transforming{String, Tag}(
-    TakeUntil("() "),
-    s -> Tag(s))
+SingleTagParser() = Transforming{Vector{String}, Tag}(
+    SequenceParser{String}(
+        Literal("@"),
+        TakeUntil("() "),
+    ),
+    s -> Tag(join(s)))
 
 """
     SequenceParser{T}(parsers...)
@@ -359,7 +362,7 @@ NotTagParser() = Transforming{Vector{NotBits}, Not}(
     xs -> Not(xs[2])
 )
 
-const OrBits = Union{String, Tag}
+const OrBits = Union{String, TagExpression}
 """
     OrParser()
 
@@ -404,13 +407,25 @@ struct AnyOfParser <: TagExpressionParser{TagExpression}
 end
 
 function (parser::AnyOfParser)(input::TagExpressionInput) :: ParseResult{TagExpression}
+    results = Vector{OKParseResult{<:TagExpression}}()
+
     for p in parser.parsers
         result = p(input)
         if result isa OKParseResult
-            return OKParseResult{TagExpression}(result.value, result.newinput)
+            push!(results, result)
         end
     end
-    BadParseResult{TagExpression}(input)
+
+    if isempty(results)
+        BadParseResult{TagExpression}(input)
+    else
+        # Return the longest successful parse
+        resultlength = result -> result.newinput.position - input.position
+        maxresultlength = maximum(resultlength, results)
+        maxresultindex = findfirst(result -> resultlength(result) == maxresultlength, results)
+        maxresult = results[maxresultindex]
+        OKParseResult{TagExpression}(maxresult.value, maxresult.newinput)
+    end
 end
 
 #
@@ -421,8 +436,8 @@ end
 function (::AnyTagExpression)(input::TagExpressionInput) :: ParseResult{TagExpression}
     inner = AnyOfParser(
         NotTagParser(),
-        OrParser(),
         ParenthesesParser(),
+        OrParser(),
         SingleTagParser(),
     )
     inner(input)
