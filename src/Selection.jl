@@ -429,9 +429,18 @@ function (parser::AnyOfParser)(input::TagExpressionInput) :: ParseResult{TagExpr
 end
 
 #
-# The empty AnyTagExpression constructor is defined here at the bottom, where it
+# The AnyTagExpression constructor is defined here at the bottom, where it
 # can find all expression types.
 #
+
+const StartExprParser = AnyOfParser(
+    ParenthesesParser(),
+    SingleTagParser()
+)
+
+const EndExprParser = AnyOfParser(
+    NotTagParser()
+)
 
 function (::AnyTagExpression)(input::TagExpressionInput) :: ParseResult{TagExpression}
     inner = AnyOfParser(
