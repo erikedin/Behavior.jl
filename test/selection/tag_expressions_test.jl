@@ -125,6 +125,18 @@ using Behavior.Selection: TagExpressionInput, SingleTagParser, SequenceParser, T
             @test result.value == Selection.Tag("@bar")
         end
 
+        @testset "foo; Not OK" begin
+            # Arrange
+            input = TagExpressionInput("foo")
+            parser = SingleTagParser()
+
+            # Act
+            result = parser(input)
+
+            # Assert
+            @test result isa Selection.BadParseResult{Selection.Tag}
+        end
+
         @testset "Tag followed by a non-tag character; OK" begin
             nontagchars = "() "
 
@@ -424,6 +436,24 @@ using Behavior.Selection: TagExpressionInput, SingleTagParser, SequenceParser, T
             @test result isa Selection.OKParseResult{Selection.Or}
             @test result.value == Selection.Or(Tag("@foo"), Tag("@bar"))
         end
+
+        # TODO When Or parser support tag expressions.
+        #      Currently they only support single tags.
+        # @testset "(not @foo) or @bar; OK" begin
+        #     # Arrange
+        #     input = TagExpressionInput("(not @foo) or @bar")
+        #     parser = Selection.OrParser()
+
+        #     # Act
+        #     result = parser(input)
+
+        #     # Assert
+        #     @test result isa Selection.OKParseResult{Selection.Or}
+        #     @test result.value == Selection.Or(
+        #         Selection.Parentheses(
+        #             Selection.Not(Tag("@foo"))),
+        #         Tag("@bar"))
+        # end
     end
 
     @testset "ParenthesesParser" begin
@@ -553,6 +583,22 @@ using Behavior.Selection: TagExpressionInput, SingleTagParser, SequenceParser, T
             # Assert
             @test result2 isa Selection.OKParseResult{Tag}
             @test result2.value == Tag("@c")
+        end
+
+        @testset "AnyOf SingleTag, Or; @a or @c; Longest, @a or @c, OK" begin
+            # Arrange
+            input = TagExpressionInput("@a or @c")
+            parser = Selection.AnyOfParser(
+                SingleTagParser(),
+                Selection.OrParser(),
+            )
+
+            # Act
+            result = parser(input)
+
+            # Assert
+            @test result isa Selection.OKParseResult{Selection.TagExpression}
+            @test result.value == Selection.Or(Tag("@a"), Tag("@c"))
         end
     end
 
