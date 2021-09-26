@@ -83,6 +83,10 @@ struct Or <: TagExpression
     b::TagExpression
 end
 
+struct OrResult <: TagExpression
+    b::TagExpression
+end
+
 """
     Parentheses(::TagExpression)
 
@@ -91,6 +95,13 @@ An expression in parentheses.
 struct Parentheses <: TagExpression
     ex::TagExpression
 end
+
+"""
+    NothingExpression
+
+Represents an end of the input.
+"""
+struct NothingExpression <: TagExpression end
 
 """
     parsetagexpression(s::String) :: TagExpression
@@ -211,28 +222,6 @@ after all expression types have been defined.
 struct AnyTagExpression <: TagExpressionParser{TagExpression} end
 
 
-
-"""
-    NotIn(::String)
-
-Take a single character if it is not one of the specified forbidden values.
-"""
-struct NotIn <: TagExpressionParser{Char}
-    notchars::String
-end
-
-function (parser::NotIn)(input::TagExpressionInput) :: ParseResult{Char}
-    if iseof(input)
-        return BadParseResult{Char}(input)
-    end
-
-    c, newinput = currentchar(input)
-    if contains(parser.notchars, c)
-        BadParseResult{Char}(input)
-    else
-        OKParseResult{Char}(c, newinput)
-    end
-end
 
 """
     Repeating(::TagExpressionParser)
@@ -368,14 +357,13 @@ const OrBits = Union{String, TagExpression}
 
 Consumes a logical or expression.
 """
-OrParser() = Transforming{Vector{OrBits}, Or}(
+OrParser() = Transforming{Vector{OrBits}, OrResult}(
     # TODO Support tag expressions here
     SequenceParser{OrBits}(
-        SingleTagParser(),
         Literal("or"),
         SingleTagParser()
     ),
-    xs -> Or(xs[1], xs[3])
+    xs -> OrResult(xs[2])
 )
 
 # TODO Create And expression parser
@@ -428,6 +416,21 @@ function (parser::AnyOfParser)(input::TagExpressionInput) :: ParseResult{TagExpr
     end
 end
 
+"""
+    NothingParser()
+
+Verifies that the end of input has been reached, and returns a NothingExpression.
+"""
+struct NothingParser <: TagExpressionParser{TagExpression} end
+
+function (parser::NothingParser)(input::TagExpressionInput) :: ParseResult{TagExpression}
+    if iseof(input)
+        OKParseResult{TagExpression}(NothingExpression(), input)
+    else
+        BadParseResult{TagExpression}(input)
+    end
+end
+
 #
 # The AnyTagExpression constructor is defined here at the bottom, where it
 # can find all expression types.
@@ -435,19 +438,33 @@ end
 
 const StartExprParser = AnyOfParser(
     ParenthesesParser(),
+    NotTagParser(),
     SingleTagParser()
 )
 
 const EndExprParser = AnyOfParser(
-    NotTagParser()
+    # NotTagParser(),
+    # OrParser(),
+    SingleTagParser(),
+    NothingParser(),
 )
 
+function combineResult(a::TagExpression, other::OrResult) :: TagExpression
+    Or(a, other.b)
+end
+
+function combineResult(a::TagExpression, ::NothingExpression) :: TagExpression
+    a
+end
+
 function (::AnyTagExpression)(input::TagExpressionInput) :: ParseResult{TagExpression}
-    inner = AnyOfParser(
-        NotTagParser(),
-        ParenthesesParser(),
-        OrParser(),
-        SingleTagParser(),
+    combineStartAndEnd = (vs) -> combineResult(vs...)
+    inner = Transforming{Vector{TagExpression}, TagExpression}(
+        SequenceParser{TagExpression}(
+            StartExprParser,
+            EndExprParser,
+        ),
+        combineStartAndEnd
     )
     inner(input)
 end
