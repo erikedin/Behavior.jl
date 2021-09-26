@@ -357,7 +357,6 @@ const OrBits = Union{String, TagExpression}
 Consumes a logical or expression.
 """
 OrParser() = Transforming{Vector{OrBits}, OrResult}(
-    # TODO Support tag expressions here
     SequenceParser{OrBits}(
         Literal("or"),
         SingleTagParser()
