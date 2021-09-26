@@ -99,7 +99,7 @@ end
 """
     NothingExpression
 
-Represents an end of the input.
+Represents an empty parse result.
 """
 struct NothingExpression <: TagExpression end
 
@@ -309,7 +309,6 @@ function (parser::SequenceParser{T})(input::TagExpressionInput) :: ParseResult{V
         if result isa BadParseResult
             return BadParseResult{Vector{T}}(input)
         end
-
         push!(values, result.value)
         currentinput = result.newinput
     end
@@ -419,16 +418,12 @@ end
 """
     NothingParser()
 
-Verifies that the end of input has been reached, and returns a NothingExpression.
+Consumes nothing and always succeeds.
 """
 struct NothingParser <: TagExpressionParser{TagExpression} end
 
 function (parser::NothingParser)(input::TagExpressionInput) :: ParseResult{TagExpression}
-    if iseof(input)
-        OKParseResult{TagExpression}(NothingExpression(), input)
-    else
-        BadParseResult{TagExpression}(input)
-    end
+    OKParseResult{TagExpression}(NothingExpression(), input)
 end
 
 #
