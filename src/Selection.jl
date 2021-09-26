@@ -438,8 +438,7 @@ const StartExprParser = AnyOfParser(
 )
 
 const EndExprParser = AnyOfParser(
-    # NotTagParser(),
-    # OrParser(),
+    OrParser(),
     SingleTagParser(),
     NothingParser(),
 )
