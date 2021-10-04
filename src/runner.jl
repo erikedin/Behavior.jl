@@ -117,6 +117,7 @@ function runspec(
     parseoptions::ParseOptions=ParseOptions(),
     presenter::RealTimePresenter=ColorConsolePresenter(),
     tags::String = "",
+    break_by_error::Bool = false,
 )
     os = OSAL()
 
@@ -125,6 +126,9 @@ function runspec(
     else
         NoExecutionEnvironment()
     end
+
+    GlobalExecEnv.envs[:break_after_error] = (() -> break_by_error)
+
 
     if parseoptions.use_experimental
         println("WARNING: Experimental parser used for feature files!")
