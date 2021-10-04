@@ -127,6 +127,8 @@ function runspec(
         NoExecutionEnvironment()
     end
 
+    # set the environment variable for make it possible to break up the test
+    # run after the first failure occurse
     GlobalExecEnv.envs[:break_after_error] = (() -> break_by_error)
 
 

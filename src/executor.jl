@@ -154,6 +154,7 @@ function executescenario(executor::Executor, background::Gherkin.Background, sce
     # Execute the Scenario
     results, _isfailedyet = executesteps(executor, context, scenario.steps, isfailedyet)
 
+    # break if the environment variable for break up was set and an error occures.
     should_break_yet = GlobalExecEnv.envs[:break_after_error]()
     if _isfailedyet && should_break_yet
         throw("Break after error in Scenario $(scenario.description)")
