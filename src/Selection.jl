@@ -83,6 +83,10 @@ struct Or <: TagExpression
     b::TagExpression
 end
 
+struct OrResult <: TagExpression
+    b::TagExpression
+end
+
 """
     Parentheses(::TagExpression)
 
@@ -91,6 +95,13 @@ An expression in parentheses.
 struct Parentheses <: TagExpression
     ex::TagExpression
 end
+
+"""
+    NothingExpression
+
+Represents an empty parse result.
+"""
+struct NothingExpression <: TagExpression end
 
 """
     parsetagexpression(s::String) :: TagExpression
@@ -213,28 +224,6 @@ struct AnyTagExpression <: TagExpressionParser{TagExpression} end
 
 
 """
-    NotIn(::String)
-
-Take a single character if it is not one of the specified forbidden values.
-"""
-struct NotIn <: TagExpressionParser{Char}
-    notchars::String
-end
-
-function (parser::NotIn)(input::TagExpressionInput) :: ParseResult{Char}
-    if iseof(input)
-        return BadParseResult{Char}(input)
-    end
-
-    c, newinput = currentchar(input)
-    if contains(parser.notchars, c)
-        BadParseResult{Char}(input)
-    else
-        OKParseResult{Char}(c, newinput)
-    end
-end
-
-"""
     Repeating(::TagExpressionParser)
 
 Repeat a given parser while it succeeds.
@@ -292,9 +281,12 @@ function (parser::TakeUntil)(input::TagExpressionInput) :: ParseResult{String}
     OKParseResult{String}(s, TagExpressionInput(input.source, lastindex + 1))
 end
 
-SingleTagParser() = Transforming{String, Tag}(
-    TakeUntil("() "),
-    s -> Tag(s))
+SingleTagParser() = Transforming{Vector{String}, Tag}(
+    SequenceParser{String}(
+        Literal("@"),
+        TakeUntil("() "),
+    ),
+    s -> Tag(join(s)))
 
 """
     SequenceParser{T}(parsers...)
@@ -317,7 +309,6 @@ function (parser::SequenceParser{T})(input::TagExpressionInput) :: ParseResult{V
         if result isa BadParseResult
             return BadParseResult{Vector{T}}(input)
         end
-
         push!(values, result.value)
         currentinput = result.newinput
     end
@@ -359,20 +350,18 @@ NotTagParser() = Transforming{Vector{NotBits}, Not}(
     xs -> Not(xs[2])
 )
 
-const OrBits = Union{String, Tag}
+const OrBits = Union{String, TagExpression}
 """
     OrParser()
 
 Consumes a logical or expression.
 """
-OrParser() = Transforming{Vector{OrBits}, Or}(
-    # TODO Support tag expressions here
+OrParser() = Transforming{Vector{OrBits}, OrResult}(
     SequenceParser{OrBits}(
-        SingleTagParser(),
         Literal("or"),
         SingleTagParser()
     ),
-    xs -> Or(xs[1], xs[3])
+    xs -> OrResult(xs[2])
 )
 
 # TODO Create And expression parser
@@ -404,26 +393,71 @@ struct AnyOfParser <: TagExpressionParser{TagExpression}
 end
 
 function (parser::AnyOfParser)(input::TagExpressionInput) :: ParseResult{TagExpression}
+    results = Vector{OKParseResult{<:TagExpression}}()
+
     for p in parser.parsers
         result = p(input)
         if result isa OKParseResult
-            return OKParseResult{TagExpression}(result.value, result.newinput)
+            push!(results, result)
         end
     end
-    BadParseResult{TagExpression}(input)
+
+    if isempty(results)
+        BadParseResult{TagExpression}(input)
+    else
+        # Return the longest successful parse
+        resultlength = result -> result.newinput.position - input.position
+        maxresultlength = maximum(resultlength, results)
+        maxresultindex = findfirst(result -> resultlength(result) == maxresultlength, results)
+        maxresult = results[maxresultindex]
+        OKParseResult{TagExpression}(maxresult.value, maxresult.newinput)
+    end
+end
+
+"""
+    NothingParser()
+
+Consumes nothing and always succeeds.
+"""
+struct NothingParser <: TagExpressionParser{TagExpression} end
+
+function (parser::NothingParser)(input::TagExpressionInput) :: ParseResult{TagExpression}
+    OKParseResult{TagExpression}(NothingExpression(), input)
 end
 
 #
-# The empty AnyTagExpression constructor is defined here at the bottom, where it
+# The AnyTagExpression constructor is defined here at the bottom, where it
 # can find all expression types.
 #
 
+const StartExprParser = AnyOfParser(
+    ParenthesesParser(),
+    NotTagParser(),
+    SingleTagParser()
+)
+
+const EndExprParser = AnyOfParser(
+    OrParser(),
+    SingleTagParser(),
+    NothingParser(),
+)
+
+function combineResult(a::TagExpression, other::OrResult) :: TagExpression
+    Or(a, other.b)
+end
+
+function combineResult(a::TagExpression, ::NothingExpression) :: TagExpression
+    a
+end
+
 function (::AnyTagExpression)(input::TagExpressionInput) :: ParseResult{TagExpression}
-    inner = AnyOfParser(
-        NotTagParser(),
-        OrParser(),
-        ParenthesesParser(),
-        SingleTagParser(),
+    combineStartAndEnd = (vs) -> combineResult(vs...)
+    inner = Transforming{Vector{TagExpression}, TagExpression}(
+        SequenceParser{TagExpression}(
+            StartExprParser,
+            EndExprParser,
+        ),
+        combineStartAndEnd
     )
     inner(input)
 end
