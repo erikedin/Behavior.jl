@@ -14,87 +14,49 @@
 
 using Test
 using Behavior.Selection
-using Behavior.Selection: TagExpressionInput, SingleTagParser, SequenceParser, Tag
+using Behavior.Selection: TagExpressionInput, SingleTagParser, SequenceParser, Tag, AnyTagExpression, NotTagParser, ParenthesesParser
+using Behavior.Selection: TagExpression
 
 @testset "Selection combinators" begin
-    @testset "NotIn" begin
-        @testset "Not b; a; OK" begin
-            # Arrange
-            input = TagExpressionInput("a")
-            parser = Selection.NotIn("b")
-
-            # Act
-            result = parser(input)
-
-            # Assert
-            @test result isa Selection.OKParseResult{Char}
-            @test result.value == 'a'
-        end
-
-        @testset "Not b; c; OK" begin
-            # Arrange
-            input = TagExpressionInput("c")
-            parser = Selection.NotIn("b")
-
-            # Act
-            result = parser(input)
-
-            # Assert
-            @test result isa Selection.OKParseResult{Char}
-            @test result.value == 'c'
-        end
-
-        @testset "Not b; b; Not OK" begin
-            # Arrange
-            input = TagExpressionInput("b")
-            parser = Selection.NotIn("b")
-
-            # Act
-            result = parser(input)
-
-            # Assert
-            @test result isa Selection.BadParseResult{Char}
-        end
-    end
 
     @testset "Repeating" begin
-        @testset "While not b; b; OK, empty" begin
+        @testset "While tag; not @b; OK, empty" begin
             # Arrange
-            input = TagExpressionInput("b")
-            parser = Selection.Repeating(Selection.NotIn("b"))
+            input = TagExpressionInput("not @b")
+            parser = Selection.Repeating(SingleTagParser())
 
             # Act
             result = parser(input)
 
             # Assert
-            @test result isa Selection.OKParseResult{Vector{Char}}
+            @test result isa Selection.OKParseResult{Vector{Tag}}
             @test result.value == []
         end
 
-        @testset "While not b; ab; OK, a" begin
+        @testset "While tag; @a not @b; OK, a" begin
             # Arrange
-            input = TagExpressionInput("ab")
-            parser = Selection.Repeating(Selection.NotIn("b"))
+            input = TagExpressionInput("@a not @b")
+            parser = Selection.Repeating(SingleTagParser())
 
             # Act
             result = parser(input)
 
             # Assert
-            @test result isa Selection.OKParseResult{Vector{Char}}
-            @test result.value == ['a']
+            @test result isa Selection.OKParseResult{Vector{Tag}}
+            @test result.value == [Tag("@a")]
         end
 
-        @testset "While not b; acb; OK, ac" begin
+        @testset "While tag; @a @c not @b; OK, ac" begin
             # Arrange
-            input = TagExpressionInput("acb")
-            parser = Selection.Repeating(Selection.NotIn("b"))
+            input = TagExpressionInput("@a @c not @b")
+            parser = Selection.Repeating(SingleTagParser())
 
             # Act
             result = parser(input)
 
             # Assert
-            @test result isa Selection.OKParseResult{Vector{Char}}
-            @test result.value == ['a', 'c']
+            @test result isa Selection.OKParseResult{Vector{Tag}}
+            @test result.value == [Tag("@a"), Tag("@c")]
         end
     end
 
@@ -123,6 +85,18 @@ using Behavior.Selection: TagExpressionInput, SingleTagParser, SequenceParser, T
             # Assert
             @test result isa Selection.OKParseResult{Selection.Tag}
             @test result.value == Selection.Tag("@bar")
+        end
+
+        @testset "foo; Not OK" begin
+            # Arrange
+            input = TagExpressionInput("foo")
+            parser = SingleTagParser()
+
+            # Act
+            result = parser(input)
+
+            # Assert
+            @test result isa Selection.BadParseResult{Selection.Tag}
         end
 
         @testset "Tag followed by a non-tag character; OK" begin
@@ -325,11 +299,11 @@ using Behavior.Selection: TagExpressionInput, SingleTagParser, SequenceParser, T
             @test result2.value == Tag("@baz")
         end
 
-        @testset "@a or @b then @c; @c; Not OK" begin
+        @testset "not @a then @c; @c; Not OK" begin
             # Arrange
             input = TagExpressionInput("@c")
             parser = SequenceParser{Selection.TagExpression}(
-                Selection.OrParser(),
+                NotTagParser(),
                 SingleTagParser()
             )
 
@@ -396,34 +370,37 @@ using Behavior.Selection: TagExpressionInput, SingleTagParser, SequenceParser, T
         end
     end
 
-    @testset "Not parser" begin
-        @testset "Not @foo; OK" begin
-            # Arrange
-            input = TagExpressionInput("not @foo")
-            parser = Selection.NotTagParser()
-
-            # Act
-            result = parser(input)
-
-            # Assert
-            @test result isa Selection.OKParseResult{Selection.Not}
-            @test result.value == Selection.Not(Selection.Tag("@foo"))
-        end
-    end
-
     @testset "Or parser" begin
         @testset "@foo or @bar; OK" begin
             # Arrange
             input = TagExpressionInput("@foo or @bar")
-            parser = Selection.OrParser()
+            parser = AnyTagExpression()
 
             # Act
             result = parser(input)
 
             # Assert
-            @test result isa Selection.OKParseResult{Selection.Or}
+            @test result isa Selection.OKParseResult{TagExpression}
             @test result.value == Selection.Or(Tag("@foo"), Tag("@bar"))
         end
+
+        # TODO When Or parser support tag expressions.
+        #      Currently they only support single tags.
+        # @testset "(not @foo) or @bar; OK" begin
+        #     # Arrange
+        #     input = TagExpressionInput("(not @foo) or @bar")
+        #     parser = AnyTagExpression()
+
+        #     # Act
+        #     result = parser(input)
+
+        #     # Assert
+        #     @test result isa Selection.OKParseResult{Selection.Or}
+        #     @test result.value == Selection.Or(
+        #         Selection.Parentheses(
+        #             Selection.Not(Tag("@foo"))),
+        #         Tag("@bar"))
+        # end
     end
 
     @testset "ParenthesesParser" begin
@@ -440,27 +417,27 @@ using Behavior.Selection: TagExpressionInput, SingleTagParser, SequenceParser, T
             @test result.value == Selection.Parentheses(Tag("@foo"))
         end
 
-        # @testset "Parentheses around Or; (@foo or @bar); OK, @foo or @bar" begin
-        #     # Arrange
-        #     input = TagExpressionInput("(@foo or @bar)")
-        #     parser = Selection.ParenthesesParser()
+        @testset "Parentheses around Or; (@foo or @bar); OK, @foo or @bar" begin
+            # Arrange
+            input = TagExpressionInput("(@foo or @bar)")
+            parser = Selection.ParenthesesParser()
 
-        #     # Act
-        #     result = parser(input)
+            # Act
+            result = parser(input)
 
-        #     # Assert
-        #     @test result isa Selection.OKParseResult{Selection.Parentheses}
-        #     @test result.value == Selection.Parentheses(Selection.Or(Tag("@foo"), Tag("@bar")))
-        # end
+            # Assert
+            @test result isa Selection.OKParseResult{Selection.Parentheses}
+            @test result.value == Selection.Parentheses(Selection.Or(Tag("@foo"), Tag("@bar")))
+        end
     end
 
     @testset "AnyOfParser" begin
-        @testset "AnyOf Or,Not; @a or @b; OK, @a or @b" begin
+        @testset "AnyOf Tag, Not; @a; OK, @a" begin
             # Arrange
-            input = TagExpressionInput("@a or @b")
+            input = TagExpressionInput("@a")
             parser = Selection.AnyOfParser(
-                Selection.OrParser(),
-                Selection.NotTagParser()
+                SingleTagParser(),
+                NotTagParser()
             )
 
             # Act
@@ -468,15 +445,15 @@ using Behavior.Selection: TagExpressionInput, SingleTagParser, SequenceParser, T
 
             # Assert
             @test result isa Selection.OKParseResult{Selection.TagExpression}
-            @test result.value == Selection.Or(Tag("@a"), Tag("@b"))
+            @test result.value == Tag("@a")
         end
 
-        @testset "AnyOf Or,Not; not @c ; OK, not @c" begin
+        @testset "AnyOf Tag,Not; not @c ; OK, not @c" begin
             # Arrange
             input = TagExpressionInput("not @c")
             parser = Selection.AnyOfParser(
-                Selection.OrParser(),
-                Selection.NotTagParser()
+                SingleTagParser(),
+                NotTagParser()
             )
 
             # Act
@@ -491,8 +468,8 @@ using Behavior.Selection: TagExpressionInput, SingleTagParser, SequenceParser, T
             # Arrange
             input = TagExpressionInput("@c")
             parser = Selection.AnyOfParser(
-                Selection.OrParser(),
-                Selection.NotTagParser()
+                ParenthesesParser(),
+                NotTagParser()
             )
 
             # Act
@@ -502,47 +479,12 @@ using Behavior.Selection: TagExpressionInput, SingleTagParser, SequenceParser, T
             @test result isa Selection.BadParseResult{Selection.TagExpression}
         end
 
-        @testset "AnyOf Or,Not,Parentheses; @c; Not OK" begin
-            # Arrange
-            input = TagExpressionInput("@c")
-            parser = Selection.AnyOfParser(
-                Selection.OrParser(),
-                Selection.NotTagParser(),
-                Selection.ParenthesesParser()
-            )
-
-            # Act
-            result = parser(input)
-
-            # Assert
-            @test result isa Selection.BadParseResult{Selection.TagExpression}
-        end
-
-        @testset "AnyOf Or,Not then @c; not @a @c; OK" begin
-            # Arrange
-            input = TagExpressionInput("not @a @c")
-            parser = Selection.SequenceParser{Selection.TagExpression}(
-                Selection.AnyOfParser(
-                    Selection.OrParser(),
-                    Selection.NotTagParser()
-                ),
-                SingleTagParser(),
-            )
-
-            # Act
-            result = parser(input)
-
-            # Assert
-            @test result isa Selection.OKParseResult{Vector{Selection.TagExpression}}
-            @test result.value == [Selection.Not(Tag("@a")), Tag("@c")]
-        end
-
-        @testset "AnyOf Or,Not; @c; AnyOfParser fails, next parser finds @c" begin
+        @testset "AnyOf Group,Not; @c; AnyOfParser fails, next parser finds @c" begin
             # Arrange
             input = TagExpressionInput("@c")
             parser1 = Selection.AnyOfParser(
-                Selection.OrParser(),
-                Selection.NotTagParser()
+                ParenthesesParser(), 
+                NotTagParser()
             )
             parser2 = SingleTagParser()
 
@@ -554,13 +496,14 @@ using Behavior.Selection: TagExpressionInput, SingleTagParser, SequenceParser, T
             @test result2 isa Selection.OKParseResult{Tag}
             @test result2.value == Tag("@c")
         end
+
     end
 
     @testset "AnyTagExpression" begin
         @testset "AnyTagExpression; @a; OK" begin
             # Arrange
             input = TagExpressionInput("@a")
-            parser = Selection.AnyTagExpression()
+            parser = AnyTagExpression()
 
             # Act
             result = parser(input)
@@ -573,7 +516,7 @@ using Behavior.Selection: TagExpressionInput, SingleTagParser, SequenceParser, T
         @testset "AnyTagExpression; not @a; OK" begin
             # Arrange
             input = TagExpressionInput("not @a")
-            parser = Selection.AnyTagExpression()
+            parser = AnyTagExpression()
 
             # Act
             result = parser(input)
@@ -586,7 +529,7 @@ using Behavior.Selection: TagExpressionInput, SingleTagParser, SequenceParser, T
         @testset "AnyTagExpression; @a or @b; OK" begin
             # Arrange
             input = TagExpressionInput("@a or @b")
-            parser = Selection.AnyTagExpression()
+            parser = AnyTagExpression()
 
             # Act
             result = parser(input)
@@ -599,7 +542,7 @@ using Behavior.Selection: TagExpressionInput, SingleTagParser, SequenceParser, T
         @testset "AnyTagExpression; (@a); OK" begin
             # Arrange
             input = TagExpressionInput("(@a)")
-            parser = Selection.AnyTagExpression()
+            parser = AnyTagExpression()
 
             # Act
             result = parser(input)
@@ -612,7 +555,7 @@ using Behavior.Selection: TagExpressionInput, SingleTagParser, SequenceParser, T
         @testset "AnyTagExpression; (@a or @b); OK" begin
             # Arrange
             input = TagExpressionInput("(@a or @b)")
-            parser = Selection.AnyTagExpression()
+            parser = AnyTagExpression()
 
             # Act
             result = parser(input)
@@ -627,7 +570,7 @@ using Behavior.Selection: TagExpressionInput, SingleTagParser, SequenceParser, T
         @testset "AnyTagExpression; (not @c); OK" begin
             # Arrange
             input = TagExpressionInput("(not @c)")
-            parser = Selection.AnyTagExpression()
+            parser = AnyTagExpression()
 
             # Act
             result = parser(input)
@@ -642,7 +585,7 @@ using Behavior.Selection: TagExpressionInput, SingleTagParser, SequenceParser, T
         @testset "AnyTagExpression; not (@a or @b); OK" begin
             # Arrange
             input = TagExpressionInput("not (@a or @b)")
-            parser = Selection.AnyTagExpression()
+            parser = AnyTagExpression()
 
             # Act
             result = parser(input)
@@ -654,6 +597,19 @@ using Behavior.Selection: TagExpressionInput, SingleTagParser, SequenceParser, T
                     Selection.Or(Tag("@a"), Tag("@b"))
                 )
             )
+        end
+
+        @testset "SingleTag, Or; @a or @c; Longest, @a or @c, OK" begin
+            # Arrange
+            input = TagExpressionInput("@a or @c")
+            parser = AnyTagExpression()
+
+            # Act
+            result = parser(input)
+
+            # Assert
+            @test result isa Selection.OKParseResult{Selection.TagExpression}
+            @test result.value == Selection.Or(Tag("@a"), Tag("@c"))
         end
     end
 end
