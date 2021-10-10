@@ -25,6 +25,7 @@ include("gherkin/data_tables_test.jl")
 include("selection/tag_selection_test.jl")
 
 include("executor_test.jl")
+include("executor_options_test.jl")
 include("executor_presentation_test.jl")
 include("executor_feature_test.jl")
 include("executor_datatables_test.jl")

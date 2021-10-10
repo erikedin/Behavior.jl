@@ -39,11 +39,14 @@ addmatcher!(engine::ExecutorEngine, matcher::StepDefinitionMatcher) = addmatcher
 executionenvironment(engine::ExecutorEngine) = engine.executor.executionenv
 
 """
-    runfeature!(::ExecutorEngine, ::Feature)
+    runfeature!(::ExecutorEngine, ::Feature; [keepgoing=true])
 
 Run the scenarios in a feature and record the result.
+
+The keyword argument `keepgoing` (default: true) controls whether the execution stops
+after a failing scenario (`keepgoing=false`), or continues (`keepgoing=true`).
 """
-function runfeature!(engine::ExecutorEngine, feature::Feature)
+function runfeature!(engine::ExecutorEngine, feature::Feature; keepgoing=true)
     result = executefeature(engine.executor, feature)
     accumulateresult!(engine.accumulator, result)
 end
