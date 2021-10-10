@@ -75,6 +75,9 @@ struct ScenarioResult
     backgroundresult::Vector{StepExecutionResult}
 end
 
+issuccess(sr::ScenarioResult) = all(x -> issuccess(x), sr.steps)
+issuccess(srs::AbstractVector{ScenarioResult}) = all(x -> issuccess(x), srs)
+
 function executesteps(executor::Executor, context::StepDefinitionContext, steps::Vector{ScenarioStep}, isfailedyet::Bool)
     # The `steps` vector contains the results for all steps. At initialization,
     # they are all `Skipped`, because if one step fails then we stop the execution of the following
@@ -183,11 +186,20 @@ struct FeatureResult
 end
 
 """
+    extendresults!(scenarioresults, result::ScenarioResult)
+    extendresults!(scenarioresults, result::AbstractVector{ScenarioResult})
+
+Push or append results from a feature to a list of scenario results.
+"""
+extendresult!(scenarioresults::AbstractVector{ScenarioResult}, result::ScenarioResult) = push!(scenarioresults, result)
+extendresult!(scenarioresults::AbstractVector{ScenarioResult}, result::AbstractVector{ScenarioResult}) = append!(scenarioresults, result)
+
+"""
     executefeature(::Executor, ::Gherkin.Feature)
 
 Execute all scenarios and scenario outlines in a feature.
 """
-function executefeature(executor::Executor, feature::Gherkin.Feature)
+function executefeature(executor::Executor, feature::Gherkin.Feature; keepgoing::Bool=true)
     # A hook that runs before each feature.
     beforefeature(executor.executionenv, feature)
 
@@ -195,7 +207,15 @@ function executefeature(executor::Executor, feature::Gherkin.Feature)
     present(executor.presenter, feature)
 
     # Execute each scenario and scenario outline in the feature.
-    scenarioresults = [executescenario(executor, feature.background, s) for s in feature.scenarios]
+    scenarioresults = ScenarioResult[]
+    for scenario in feature.scenarios
+        scenarioresult = executescenario(executor, feature.background, scenario)
+        extendresult!(scenarioresults, scenarioresult)
+
+        if !issuccess(scenarioresult) && !keepgoing
+            break
+        end
+    end
 
     # A hook that runs after each feature
     afterfeature(executor.executionenv, feature)

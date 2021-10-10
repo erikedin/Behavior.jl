@@ -104,17 +104,17 @@ issuccess(r::FakeResultAccumulator) = r.success
 mutable struct FakeEngine <: Engine
     matchers::Vector{StepDefinitionMatcher}
     features::Vector{Feature}
-    finishresult::FakeResultAccumulator
+    accumulator::FakeResultAccumulator
     errors::Vector{Gherkin.BadParseResult{Feature}}
 
     FakeEngine(; finishresult=FakeResultAccumulator(true)) = new([], [], finishresult, [])
 end
 addmatcher!(engine::FakeEngine, m::StepDefinitionMatcher) = push!(engine.matchers, m)
-runfeature!(engine::FakeEngine, feature::Feature) = push!(engine.features, feature)
-runfeature!(engine::FakeEngine, result::Gherkin.OKParseResult{Feature}, featurefile::String) = runfeature!(engine, result.value)
-runfeature!(engine::FakeEngine, result::Gherkin.BadParseResult{Feature}, featurefile::String) = push!(engine.errors, result)
+runfeature!(engine::FakeEngine, feature::Feature, _keepgoing::Bool) = push!(engine.features, feature)
+runfeature!(engine::FakeEngine, result::Gherkin.OKParseResult{Feature}, featurefile::String, keepgoing::Bool) = runfeature!(engine, result.value, keepgoing)
+runfeature!(engine::FakeEngine, result::Gherkin.BadParseResult{Feature}, featurefile::String, _keepgoing::Bool) = push!(engine.errors, result)
 
-finish(engine::FakeEngine) = engine.finishresult
+finish(engine::FakeEngine) = engine.accumulator
 executionenvironment(::FakeEngine) = Behavior.NoExecutionEnvironment()
 
 struct FakeOSAbstraction <: OSAbstraction
