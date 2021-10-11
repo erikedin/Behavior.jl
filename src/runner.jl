@@ -170,6 +170,21 @@ function runspec(
         printstyled(rpad("$(r.n_failure)", 7), "\n"; color=linecolor)
     end
 
+println()
+
+    errors_occured = (!all([isempty(x.failed_scenarios) for x in results]))
+    if errors_occured
+        printstyled("Detailed error summary \n"; color = :white)
+        for r in results
+            if r.n_failure > 0
+                printstyled("\t", r.feature.header.description, "\n"; color = :blue)
+                for err in r.failed_scenarios
+                    printstyled("\t\t", err.description; color = :red)
+                end
+            end
+        end
+    end
+
     println()
 
     #

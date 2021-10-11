@@ -19,6 +19,7 @@ struct FeatureSuccessAndFailure
     feature::Feature
     n_success::UInt
     n_failure::UInt
+    failed_scenarios::Vector{Gherkin.AbstractScenario}
 end
 
 """
@@ -41,6 +42,8 @@ Check for success or failure in this feature result and update the accumulator a
 function accumulateresult!(acc::ResultAccumulator, result::FeatureResult)
     n_success::UInt = 0
     n_failure::UInt = 0
+    failed_scenarios = Vector{Gherkin.AbstractScenario}()
+
     # Count the number of successes and failures for each step in each scenario. A scenario is
     # successful if all its steps are successful.
     for scenarioresult in result.scenarioresults
@@ -51,12 +54,13 @@ function accumulateresult!(acc::ResultAccumulator, result::FeatureResult)
             n_success += 1
         else
             n_failure += 1
+            push!(failed_scenarios, scenarioresult.scenario)
         end
 
         acc.isaccumsuccess &= isscenariosuccessful
     end
 
-    push!(acc.features, FeatureSuccessAndFailure(result.feature, n_success, n_failure))
+    push!(acc.features, FeatureSuccessAndFailure(result.feature, n_success, n_failure, failed_scenarios))
 end
 
 """
