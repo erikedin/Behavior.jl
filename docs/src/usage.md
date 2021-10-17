@@ -483,3 +483,17 @@ using Behavior
     @expect latestfeature.header.description == "Some feature description"
 end
 ```
+
+## Breaking on failure, or keep going
+During development of a package, it may be advantageous to break on the first failure,
+if the execution of all features takes a long time. This can be achieved by running
+the `runspec` call with the keyword option `keepgoing=false`.
+This means that the execution of features will stop at the first failure. No more scenarios
+or features will execute.
+
+For example,
+```julia
+@test runspec(pkgdir(MyPackage); keepgoing=false)
+```
+
+The `keepgoing` flag defaults to true, meaning that all features are executed.
