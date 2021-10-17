@@ -212,7 +212,7 @@ function executefeature(executor::Executor, feature::Gherkin.Feature; keepgoing:
         scenarioresult = executescenario(executor, feature.background, scenario)
         extendresult!(scenarioresults, scenarioresult)
 
-        if !issuccess(scenarioresult)
+        if !issuccess(scenarioresult) && !keepgoing
             break
         end
     end

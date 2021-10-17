@@ -47,7 +47,7 @@ The keyword argument `keepgoing` (default: true) controls whether the execution 
 after a failing scenario (`keepgoing=false`), or continues (`keepgoing=true`).
 """
 function runfeature!(engine::ExecutorEngine, feature::Feature; keepgoing=true)
-    result = executefeature(engine.executor, feature)
+    result = executefeature(engine.executor, feature; keepgoing=keepgoing)
     accumulateresult!(engine.accumulator, result)
 end
 
