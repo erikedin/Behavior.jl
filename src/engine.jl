@@ -57,7 +57,7 @@ end
 Wrapper method for the above runfeature!.
 """
 const GoodParseResultType = Union{Gherkin.OKParseResult{Feature}, Gherkin.Experimental.OKParseResult{Feature}}
-function runfeature!(engine::ExecutorEngine, parseresult::GoodParseResultType, _featurefile::String)
+function runfeature!(engine::ExecutorEngine, parseresult::GoodParseResultType, _featurefile::String, keepgoing::Bool)
     # Filter all features to run only the scenarios chosen by the tag selector, if any.
     # Any features or scenarios that do not match the tag selector will be removed here.
     filteredfeature = Selection.select(engine.selector, parseresult.value)
@@ -66,7 +66,7 @@ function runfeature!(engine::ExecutorEngine, parseresult::GoodParseResultType, _
     # This matters because we don't want it listed in the results view having 0 successes
     # and 0 failures.
     if !isempty(filteredfeature.scenarios)
-        runfeature!(engine, filteredfeature)
+        runfeature!(engine, filteredfeature; keepgoing=keepgoing)
     end
 end
 
@@ -75,10 +75,10 @@ end
 
 A feature could not be parsed. Record the result.
 """
-function runfeature!(engine::ExecutorEngine, parsefailure::Gherkin.BadParseResult{Feature}, featurefile::String)
+function runfeature!(engine::ExecutorEngine, parsefailure::Gherkin.BadParseResult{Feature}, featurefile::String, _keepgoing::Bool)
     accumulateresult!(engine.accumulator, parsefailure, featurefile)
 end
-function runfeature!(engine::ExecutorEngine, parsefailure::Gherkin.Experimental.BadParseResult{Feature}, featurefile::String)
+function runfeature!(engine::ExecutorEngine, parsefailure::Gherkin.Experimental.BadParseResult{Feature}, featurefile::String, _keepgoing::Bool)
     accumulateresult!(engine.accumulator, parsefailure, featurefile)
 end
 
@@ -109,7 +109,7 @@ function readfeature(driver::Driver, featurefile::String, parseoptions::ParseOpt
     end
 end
 
-function runfeatures!(driver::Driver, path::String; parseoptions::ParseOptions = ParseOptions())
+function runfeatures!(driver::Driver, path::String; parseoptions::ParseOptions = ParseOptions(), keepgoing::Bool=true)
     featurefiles = findfileswithextension(driver.os, path, ".feature")
 
     # Call the hook that runs before any feature
@@ -117,7 +117,11 @@ function runfeatures!(driver::Driver, path::String; parseoptions::ParseOptions =
 
     for featurefile in featurefiles
         featureparseresult = readfeature(driver, featurefile, parseoptions)
-        runfeature!(driver.engine, featureparseresult, featurefile)
+        runfeature!(driver.engine, featureparseresult, featurefile, keepgoing)
+
+        if !issuccess(driver.engine.accumulator) && !keepgoing
+            break
+        end
     end
 
     # Call the hook that runs after all features

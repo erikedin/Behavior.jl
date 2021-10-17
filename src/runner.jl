@@ -117,6 +117,7 @@ function runspec(
     parseoptions::ParseOptions=ParseOptions(),
     presenter::RealTimePresenter=ColorConsolePresenter(),
     tags::String = "",
+    keepgoing::Bool=true
 )
     os = OSAL()
 
@@ -138,7 +139,7 @@ function runspec(
     driver = Driver(os, engine)
 
     readstepdefinitions!(driver, stepspath)
-    resultaccumulator = runfeatures!(driver, featurepath, parseoptions=parseoptions)
+    resultaccumulator = runfeatures!(driver, featurepath, parseoptions=parseoptions, keepgoing=keepgoing)
 
     if isempty(resultaccumulator)
         println("No features found.")
