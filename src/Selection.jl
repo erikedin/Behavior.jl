@@ -25,7 +25,7 @@ module Selection
 
 using Behavior.Gherkin
 
-export select, parsetagselector, TagSelector
+export select, parsetagselector, TagSelector, newparsetagselector
 
 """
 Abstract type for a tag expression.
@@ -172,6 +172,26 @@ julia> parsetagselector("not @bar")
 """
 function parsetagselector(s::String) :: TagSelector
     TagSelector(parsetagexpression(s))
+end
+
+"""
+NewTagSelector is used to select a feature or scenario based on its tags.
+"""
+struct NewTagSelector
+    expression::String
+end
+
+"""
+    newparsetagselector(s::String) :: NewTagSelector
+
+"""
+function newparsetagselector(s::String) :: NewTagSelector
+    NewTagSelector(s)
+end
+
+
+function select(_ts::NewTagSelector, feature::Feature) :: Feature
+    feature
 end
 
 const AllScenarios = TagSelector(All())
