@@ -91,6 +91,13 @@ struct Scenario <: AbstractScenario
     end
 end
 
+function (==)(left::Scenario, right::Scenario) :: Bool
+    left.description == right.description &&
+        left.tags == right.tags &&
+        left.steps == right.steps &&
+        left.long_description == right.long_description
+end
+
 """
 A `ScenarioOutline` is a scenario with multiple examples.
 

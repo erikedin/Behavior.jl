@@ -317,7 +317,7 @@ using Behavior.Gherkin: AbstractScenario
     end
 end
 
-@testset "New Selection" begin
+@testset "New Selection        " begin
     #
     # A feature template is created that shows which scenarios are expected
     # to be selected by the tag expression. Each `Yes` scenario is expected
@@ -378,7 +378,17 @@ end
             FeatureTemplate(["@foo"],
                 [
                     Yes(String[])
-                ] 
+                ]
+            )
+        ),
+
+        TV(
+            "Expression @foo: Feature has @bar, matches no scenarios",
+            "@foo",
+            FeatureTemplate(["@bar"],
+                [
+                    No(String[])
+                ]
             )
         )
     ]
