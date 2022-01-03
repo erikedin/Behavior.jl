@@ -178,7 +178,7 @@ end
 NewTagSelector is used to select a feature or scenario based on its tags.
 """
 struct NewTagSelector
-    expression::String
+    expression::TagExpression
 end
 
 """
@@ -186,12 +186,43 @@ end
 
 """
 function newparsetagselector(s::String) :: NewTagSelector
-    NewTagSelector(s)
+    input = TagExpressionInput(s)
+    parser = AnyTagExpression()
+    # TODO For now expect success all the time, until I have
+    # tests for failure during parsing.
+    result = parser(input)
+
+    NewTagSelector(result.value)
 end
 
 
-function select(_ts::NewTagSelector, feature::Feature) :: Feature
-    feature
+function select(ts::NewTagSelector, feature::Feature) :: Feature
+    select(ts.expression, feature)
+end
+
+"""
+    selectscenario(::TagExpression, feature::Feature, scenario::Scenario) :: Boolean
+
+Check if a given scenario ought to be included in the execution. Returns true if that is the case,
+false otherwise.
+"""
+function select(ts::TagExpression, feature::Feature, scenario::Gherkin.AbstractScenario) :: Bool
+    tags = vcat(feature.header.tags, scenario.tags)
+    matches(ts, tags)
+end
+
+"""
+    select(::TagExpression, feature::Feature) :: Union{Feature,Nothing}
+
+Filter a feature and its scenarios based on the selected tags.
+Returns a feature with zero or more scenarios, or nothing if the feature
+and none of the scenarios matched the tag selector.
+"""
+function select(ts::TagExpression, feature::Feature) :: Feature
+    newscenarios = [scenario
+                    for scenario in feature.scenarios
+                    if select(ts, feature, scenario)]
+    Feature(feature, newscenarios)
 end
 
 const AllScenarios = TagSelector(All())
@@ -325,7 +356,7 @@ function (parser::SequenceParser{T})(input::TagExpressionInput) :: ParseResult{V
 
     for p in parser.inner
         result = p(currentinput)
-        
+
         if result isa BadParseResult
             return BadParseResult{Vector{T}}(input)
         end

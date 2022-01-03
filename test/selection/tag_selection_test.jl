@@ -393,12 +393,6 @@ end
         )
     ]
 
-    @testset "Scenario equality" begin
-        s1 = Scenario("Some scenario", String[], ScenarioStep[])
-        s2 = Scenario("Some scenario", String[], ScenarioStep[])
-        @test s1 == s2
-    end
-
     for tv in testvectors
         @testset "$(tv.description)" begin
             # Arrange
