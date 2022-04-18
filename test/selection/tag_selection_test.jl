@@ -326,6 +326,10 @@ end
     end
 
     testvectors = [
+        #
+        # Single tag expression, match features
+        #
+
         TV(
             "Expression @foo will match all scenarios in this feature",
 
@@ -360,6 +364,88 @@ end
 
             # Expression matches these scenarios
             []
+        ),
+
+        #
+        # Not tag expression, match features
+        #
+
+        TV(
+            "Expression (not @foo) will match no scenarios in this feature",
+
+            """
+            @foo
+            Feature: Some feature
+
+                Scenario: Some scenario
+                    Give some step
+            """,
+
+            "not @foo", # Tag selection expression
+
+            # Expression matches these scenarios
+            []
+        ),
+
+        TV(
+            "Expression (not @bar) will match all scenarios in this feature",
+
+            """
+            @foo
+            Feature: Some feature
+
+                Scenario: Some scenario
+                    Give some step
+            """,
+
+            "not @bar", # Tag selection expression
+
+            # Expression matches these scenarios
+            [
+                "Some scenario",
+            ]
+        ),
+
+        #
+        # Or expression, tags at feature level
+        #
+
+        TV(
+            "Expression (@foo or @bar) will match all scenarios in this feature",
+
+            """
+            @foo
+            Feature: Some feature
+
+                Scenario: Some scenario, or expression
+                    Give some step
+            """,
+
+            "@foo or @bar", # Tag selection expression
+
+            # Expression matches these scenarios
+            [
+                "Some scenario, or expression",
+            ]
+        ),
+
+        TV(
+            "Expression (@foo or @bar) will match all scenarios in this feature",
+
+            """
+            @bar
+            Feature: Some feature
+
+                Scenario: Some scenario, or expression
+                    Give some step
+            """,
+
+            "@foo or @bar", # Tag selection expression
+
+            # Expression matches these scenarios
+            [
+                "Some scenario, or expression",
+            ]
         ),
     ]
 
