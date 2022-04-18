@@ -317,90 +317,70 @@ using Behavior.Gherkin: AbstractScenario
     end
 end
 
-@testset "New Selection" begin
-    #
-    # A feature template is created that shows which scenarios are expected
-    # to be selected by the tag expression. Each `Yes` scenario is expected
-    # to be selected, and each `No` scenario is expected to _not_ be selected.
-    # This is all done for readability, so it's clear what each test actually tests.
-    #
-    # The `FeatureTemplate` struct contains all information needed to create an
-    # actual Feature and its Scenarios, to send into the selection method.
-    #
-
-    abstract type SelectedOrNot end
-
-    struct Yes <: SelectedOrNot
-        tags::Vector{String}
-    end
-
-    struct No <: SelectedOrNot
-        tags::Vector{String}
-    end
-
-    struct FeatureTemplate
-        tags::Vector{String}
-        selections::Vector{<:SelectedOrNot}
-    end
-
+@testset "New Selection        " begin
     struct TV
         description::String
+        gherkin::String
         expression::String
-        featuretemplate::FeatureTemplate
-    end
-
-    function makescenarios(tv::TV)
-        AbstractScenario[
-            Scenario("Some scenario: $(i)", selectedornot.tags, ScenarioStep[])
-            for (i, selectedornot) in enumerate(tv.featuretemplate.selections)
-        ]
-    end
-
-    function makeyesscenarios(tv::TV)
-        AbstractScenario[
-            Scenario("Some scenario: $(i)", selectedornot.tags, ScenarioStep[])
-            for (i, selectedornot) in enumerate(tv.featuretemplate.selections)
-            if isa(selectedornot, Yes)
-        ]
-    end
-
-    function makefeature(tv::TV)
-        scenarios = makescenarios(tv)
-        Feature(
-            FeatureHeader("Some feature", String[], tv.featuretemplate.tags),
-            scenarios)
+        expectedscenariodescriptions::Vector{String}
     end
 
     testvectors = [
         TV(
-            "Expression @foo: Feature has @foo, matches all scenarios",
-            "@foo",
-            FeatureTemplate(["@foo"],
-                [
-                    Yes(String[])
-                ] 
-            )
-        )
-    ]
+            "Expression @foo will match all scenarios in this feature",
 
-    @testset "Scenario equality" begin
-        s1 = Scenario("Some scenario", String[], ScenarioStep[])
-        s2 = Scenario("Some scenario", String[], ScenarioStep[])
-        @test s1 == s2
-    end
+            """
+            @foo
+            Feature: Some feature
+
+                Scenario: Some scenario
+                    Give some step
+            """,
+
+            "@foo", # Tag selection expression
+
+            # Expression matches these scenarios
+            [
+                "Some scenario",
+            ]
+        ),
+
+        TV(
+            "Expression @bar will match no scenarios in this feature",
+
+            """
+            @foo
+            Feature: Some feature
+
+                Scenario: Some scenario
+                    Give some step
+            """,
+
+            "@bar", # Tag selection expression
+
+            # Expression matches these scenarios
+            []
+        ),
+    ]
 
     for tv in testvectors
         @testset "$(tv.description)" begin
             # Arrange
-            feature = makefeature(tv)
+            # Parse the Gherkin file, using the good experimental parser
+            parser = FeatureFileParser()
+            gherkinsource = ParserInput(tv.gherkin)
+            parseresult = parser(gherkinsource)
+            # Pre-condition: The parse ought to be successful
+            @test isparseok(parseresult)
+            feature = parseresult.value
 
             # Act
             selector = newparsetagselector(tv.expression)
             newfeature = select(selector, feature)
 
             # Assert
-            expectedscenarios = makeyesscenarios(tv)
-            @test newfeature.scenarios == expectedscenarios
+            actualscenariodescriptions = [scenario.description for scenario in newfeature.scenarios]
+            @test actualscenariodescriptions == tv.expectedscenariodescriptions
         end
     end
 end
