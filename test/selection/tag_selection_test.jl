@@ -325,6 +325,29 @@ end
         expectedscenariodescriptions::Vector{String}
     end
 
+    # These are the types of expressions, and combinations of expressions, that
+    # we'd like to test.
+    # - [x] Single tags. Example: Expression @foo matches a feature that has tag @foo
+    # - [x] Not expressions. Example: Expression "not @foo" matches a feature that has tag @bar
+    # - [x] Or expressions: @foo or @bar
+    # - [x] Parentheses expressions: (@foo)
+    # - [ ] And expressions: @foo and @bar
+    #
+    # Combinations of the above:
+    # - [x] Parentheses with single tags: (@foo)
+    # - [ ] Parentheses with or expression inside: (@foo or @bar)
+    # - [ ] Parentheses with and expression inside: (@foo and @bar)
+    # - [ ] Parentheses with or expression inside, and and outside: (@foo or @bar) and @baz
+    # - [ ] Parentheses with or expression inside, and and outside: @baz and (@foo or @bar)
+    # - [ ] Parentheses with and expression inside: (@foo and @bar)
+    # - [ ] Parentheses with and expression inside, or outside: (@foo and @bar) or @baz
+    # - [ ] Parentheses with and expression inside, or outside: @baz or (@foo and @bar)
+    # - [ ] Disallow multiple chained expressions without parentheses, due to missing priority
+    #       Example: @foo and @bar or @baz, must be one of:
+    #                - (@foo and @bar) or @baz
+    #                - @foo and (@bar or @baz)
+    #       This can be implemented by only making parentheses optional at the first level
+
     testvectors = [
         #
         # Single tag expression, match features
