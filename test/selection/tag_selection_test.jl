@@ -482,6 +482,47 @@ end
             [
             ]
         ),
+
+        #
+        # Parentheses expression, tags at feature level
+        #
+
+        TV(
+            "Expression (@foo) will match a feature with tag @foo",
+
+            """
+            @foo
+            Feature: Some feature
+
+                Scenario: Some scenario, or expression
+                    Give some step
+            """,
+
+            "(@foo)", # Tag selection expression
+
+            # Expression matches these scenarios
+            [
+                "Some scenario, or expression",
+            ]
+        ),
+
+        TV(
+            "Expression (@foo) will not match a feature with tag @bar",
+
+            """
+            @bar
+            Feature: Some feature
+
+                Scenario: Some scenario, or expression
+                    Give some step
+            """,
+
+            "(@foo)", # Tag selection expression
+
+            # Expression matches these scenarios
+            [
+            ]
+        ),
     ]
 
     for tv in testvectors

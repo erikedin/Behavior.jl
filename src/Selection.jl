@@ -95,8 +95,10 @@ end
 An expression in parentheses.
 """
 struct Parentheses <: TagExpression
-    ex::TagExpression
+    inner::TagExpression
 end
+
+matches(ex::Parentheses, tags::AbstractVector{String}) = matches(ex.inner, tags)
 
 """
     NothingExpression
