@@ -83,6 +83,8 @@ struct Or <: TagExpression
     b::TagExpression
 end
 
+matches(ex::Or, tags::AbstractVector{String}) = matches(ex.a, tags) || matches(ex.b, tags)
+
 struct OrResult <: TagExpression
     b::TagExpression
 end

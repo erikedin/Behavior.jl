@@ -447,6 +447,41 @@ end
                 "Some scenario, or expression",
             ]
         ),
+
+        TV(
+            "Expression (@foo or @bar) will not match the feature tag @quux",
+
+            """
+            @quux
+            Feature: Some feature
+
+                Scenario: Some scenario, or expression
+                    Give some step
+            """,
+
+            "@foo or @bar", # Tag selection expression
+
+            # Expression matches these scenarios
+            [
+            ]
+        ),
+
+        TV(
+            "Expression (@foo or @bar) will not match a feature without tags",
+
+            """
+            Feature: Some feature
+
+                Scenario: Some scenario, or expression
+                    Give some step
+            """,
+
+            "@foo or @bar", # Tag selection expression
+
+            # Expression matches these scenarios
+            [
+            ]
+        ),
     ]
 
     for tv in testvectors
