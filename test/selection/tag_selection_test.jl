@@ -332,6 +332,7 @@ end
     # - [x] Or expressions: @foo or @bar
     # - [x] Parentheses expressions: (@foo)
     # - [ ] And expressions: @foo and @bar
+    # - [x] An empty tag expression
     #
     # Combinations of the above:
     # - [x] Parentheses with single tags: (@foo)
@@ -544,6 +545,65 @@ end
 
             # Expression matches these scenarios
             [
+            ]
+        ),
+
+        #
+        # Empty tag expressions
+        #
+
+        TV(
+            "An empty expression will match a feature with tag @foo",
+
+            """
+            @foo
+            Feature: Some feature
+
+                Scenario: Some scenario, or expression
+                    Give some step
+            """,
+
+            "", # Tag selection expression
+
+            # Expression matches these scenarios
+            [
+                "Some scenario, or expression",
+            ]
+        ),
+
+        TV(
+            "An empty expression will match a feature without tags",
+
+            """
+            Feature: Some feature
+
+                Scenario: Some scenario, or expression
+                    Give some step
+            """,
+
+            "", # Tag selection expression
+
+            # Expression matches these scenarios
+            [
+                "Some scenario, or expression",
+            ]
+        ),
+
+        TV(
+            "An expression with only whitespace will match a feature without tags",
+
+            """
+            Feature: Some feature
+
+                Scenario: Some scenario, or expression
+                    Give some step
+            """,
+
+            " ", # Tag selection expression
+
+            # Expression matches these scenarios
+            [
+                "Some scenario, or expression",
             ]
         ),
     ]
