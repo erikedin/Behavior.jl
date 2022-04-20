@@ -190,13 +190,17 @@ end
 
 """
 function newparsetagselector(s::String) :: NewTagSelector
-    input = TagExpressionInput(s)
-    parser = AnyTagExpression()
-    # TODO For now expect success all the time, until I have
-    # tests for failure during parsing.
-    result = parser(input)
+    if isempty(strip(s))
+        NewTagSelector(All())
+    else
+        input = TagExpressionInput(s)
+        parser = AnyTagExpression()
+        # TODO For now expect success all the time, until I have
+        # tests for failure during parsing.
+        result = parser(input)
 
-    NewTagSelector(result.value)
+        NewTagSelector(result.value)
+    end
 end
 
 
