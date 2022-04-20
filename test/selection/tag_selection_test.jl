@@ -336,7 +336,7 @@ end
     #
     # Combinations of the above:
     # - [x] Parentheses with single tags: (@foo)
-    # - [ ] Parentheses with or expression inside: (@foo or @bar)
+    # - [x] Parentheses with or expression inside: (@foo or @bar)
     # - [ ] Parentheses with and expression inside: (@foo and @bar)
     # - [ ] Parentheses with or expression inside, and and outside: (@foo or @bar) and @baz
     # - [ ] Parentheses with or expression inside, and and outside: @baz and (@foo or @bar)
@@ -604,6 +604,48 @@ end
             # Expression matches these scenarios
             [
                 "Some scenario, or expression",
+            ]
+        ),
+
+        #
+        # Combined expressions
+        #
+
+        # Parentheses/Or
+
+        TV(
+            "A combined parentheses expression with inner Or, matches @foo",
+
+            """
+            @foo
+            Feature: Some feature
+
+                Scenario: Some scenario, or expression
+                    Give some step
+            """,
+
+            "(@foo or @bar)", # Tag selection expression
+
+            # Expression matches these scenarios
+            [
+                "Some scenario, or expression",
+            ]
+        ),
+
+        TV(
+            "A combined parentheses expression with inner Or, does not match no tags",
+
+            """
+            Feature: Some feature
+
+                Scenario: Some scenario, or expression
+                    Give some step
+            """,
+
+            "(@foo or @bar)", # Tag selection expression
+
+            # Expression matches these scenarios
+            [
             ]
         ),
     ]
