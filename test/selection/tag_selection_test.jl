@@ -670,4 +670,23 @@ end
             @test actualscenariodescriptions == tv.expectedscenariodescriptions
         end
     end
+
+    struct TVFails
+        description::String
+        expression::String
+    end
+
+    failing_testvectors = [
+        TVFails(
+            "A tag must start with a @",
+            "notatag",
+        )
+    ]
+
+    for tv in failing_testvectors
+        @testset "$(tv.description)" begin
+            # Act
+            @test_throws TagSelectorError newparsetagselector(tv.expression)
+        end
+    end
 end

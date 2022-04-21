@@ -25,7 +25,7 @@ module Selection
 
 using Behavior.Gherkin
 
-export select, parsetagselector, TagSelector, newparsetagselector
+export select, parsetagselector, TagSelector, newparsetagselector, TagSelectorError
 
 """
 Abstract type for a tag expression.
@@ -179,6 +179,13 @@ function parsetagselector(s::String) :: TagSelector
 end
 
 """
+TagSelectorError is an exception used for invalid tag expressions.
+"""
+struct TagSelectorError <: Exception
+    description::String
+end
+
+"""
 NewTagSelector is used to select a feature or scenario based on its tags.
 """
 struct NewTagSelector
@@ -188,6 +195,8 @@ end
 """
     newparsetagselector(s::String) :: NewTagSelector
 
+Parses a tag expression, and returns a NewTagSelector that can
+be used for selecting features and scenarios.
 """
 function newparsetagselector(s::String) :: NewTagSelector
     if isempty(strip(s))
@@ -195,9 +204,10 @@ function newparsetagselector(s::String) :: NewTagSelector
     else
         input = TagExpressionInput(s)
         parser = AnyTagExpression()
-        # TODO For now expect success all the time, until I have
-        # tests for failure during parsing.
         result = parser(input)
+        if !(result isa OKParseResult)
+            throw(TagSelectorError("Parse failed: '$(s)'"))
+        end
 
         NewTagSelector(result.value)
     end
