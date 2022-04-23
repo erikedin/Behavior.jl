@@ -317,7 +317,7 @@ FullExpressionParser() = Transforming{Vector{TagExpression}, TagExpression}(
         AnyTagExpression(),
         EOFParser(),
     ),
-    xs -> Parentheses(xs[1])
+    xs -> xs[1]
 )
 
 """
