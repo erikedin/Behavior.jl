@@ -384,6 +384,34 @@ using Behavior.Selection: TagExpression
             @test result.value == Selection.Or(Tag("@foo"), Tag("@bar"))
         end
 
+        @testset "@foo or (@bar or @baz); OK" begin
+            # Arrange
+            input = TagExpressionInput("@foo or (@bar or @baz)")
+            parser = AnyTagExpression()
+
+            # Act
+            result = parser(input)
+
+            # Assert
+            @test result isa Selection.OKParseResult{TagExpression}
+            # TODO Fix this expectation
+            @test result.value == Selection.Or(Tag("@foo"), Selection.Parentheses(Selection.Or(Tag("@bar"), Tag("@baz"))))
+        end
+
+        # @testset "@foo or (@bar or @baz); is fully parsed; OK" begin
+        #     # Arrange
+        #     input = TagExpressionInput("@foo or (@bar or @baz)")
+        #     parser = Selection.FullExpressionParser()
+
+        #     # Act
+        #     result = parser(input)
+
+        #     # Assert
+        #     @test result isa Selection.OKParseResult{TagExpression}
+        #     # TODO Fix this expectation
+        #     @test result.value == Selection.Or(Tag("@foo"), Selection.Parentheses(Selection.Or(Tag("@bar"), Tag("@baz"))))
+        # end
+
         # TODO When Or parser support tag expressions.
         #      Currently they only support single tags.
         # @testset "(not @foo) or @bar; OK" begin
@@ -483,7 +511,7 @@ using Behavior.Selection: TagExpression
             # Arrange
             input = TagExpressionInput("@c")
             parser1 = Selection.AnyOfParser(
-                ParenthesesParser(), 
+                ParenthesesParser(),
                 NotTagParser()
             )
             parser2 = SingleTagParser()
