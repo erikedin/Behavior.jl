@@ -648,6 +648,67 @@ end
             [
             ]
         ),
+
+        #
+        # Chain or, with parentheses
+        #
+
+        # TV(
+        #     "Chained or expression matches left expression, @foo",
+
+        #     """
+        #     @foo
+        #     Feature: Some feature
+
+        #         Scenario: Some scenario, or expression
+        #             Give some step
+        #     """,
+
+        #     "@foo or (@bar or baz)", # Tag selection expression
+
+        #     # Expression matches these scenarios
+        #     [
+        #         "Some scenario, or expression",
+        #     ]
+        # ),
+
+        # TV(
+        #     "Chained or expression matches right expression, @bar",
+
+        #     """
+        #     @bar
+        #     Feature: Some feature
+
+        #         Scenario: Some scenario, or expression
+        #             Give some step
+        #     """,
+
+        #     "@foo or (@bar or baz)", # Tag selection expression
+
+        #     # Expression matches these scenarios
+        #     [
+        #         "Some scenario, or expression",
+        #     ]
+        # ),
+
+        # TV(
+        #     "Chained or expression matches right expression, @baz",
+
+        #     """
+        #     @baz
+        #     Feature: Some feature
+
+        #         Scenario: Some scenario, or expression
+        #             Give some step
+        #     """,
+
+        #     "@foo or (@bar or baz)", # Tag selection expression
+
+        #     # Expression matches these scenarios
+        #     [
+        #         "Some scenario, or expression",
+        #     ]
+        # ),
     ]
 
     for tv in testvectors
@@ -680,7 +741,12 @@ end
         TVFails(
             "A tag must start with a @",
             "notatag",
-        )
+        ),
+
+        TVFails(
+            "An expression must be parseable in its entirety",
+            "@foo trailing nonsense",
+        ),
     ]
 
     for tv in failing_testvectors
