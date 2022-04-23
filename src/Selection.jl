@@ -206,7 +206,7 @@ function newparsetagselector(s::String) :: NewTagSelector
         parser = FullExpressionParser()
         result = parser(input)
         if !(result isa OKParseResult)
-            throw(TagSelectorError("Parse failed: '$(s)'"))
+            throw(TagSelectorError("Parse failed: '$(s)': $(result)"))
         end
 
         NewTagSelector(result.value)
@@ -456,7 +456,7 @@ Consumes a logical or expression.
 OrParser() = Transforming{Vector{OrBits}, OrResult}(
     SequenceParser{OrBits}(
         Literal("or"),
-        SingleTagParser()
+        AnyTagExpression()
     ),
     xs -> OrResult(xs[2])
 )

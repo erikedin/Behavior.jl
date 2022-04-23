@@ -653,62 +653,80 @@ end
         # Chain or, with parentheses
         #
 
-        # TV(
-        #     "Chained or expression matches left expression, @foo",
+        TV(
+            "Chained or expression matches left expression, @foo",
 
-        #     """
-        #     @foo
-        #     Feature: Some feature
+            """
+            @foo
+            Feature: Some feature
 
-        #         Scenario: Some scenario, or expression
-        #             Give some step
-        #     """,
+                Scenario: Some scenario, or expression
+                    Give some step
+            """,
 
-        #     "@foo or (@bar or baz)", # Tag selection expression
+            "@foo or (@bar or @baz)", # Tag selection expression
 
-        #     # Expression matches these scenarios
-        #     [
-        #         "Some scenario, or expression",
-        #     ]
-        # ),
+            # Expression matches these scenarios
+            [
+                "Some scenario, or expression",
+            ]
+        ),
 
-        # TV(
-        #     "Chained or expression matches right expression, @bar",
+        TV(
+            "Chained or expression matches right expression, @bar",
 
-        #     """
-        #     @bar
-        #     Feature: Some feature
+            """
+            @bar
+            Feature: Some feature
 
-        #         Scenario: Some scenario, or expression
-        #             Give some step
-        #     """,
+                Scenario: Some scenario, or expression
+                    Give some step
+            """,
 
-        #     "@foo or (@bar or baz)", # Tag selection expression
+            "@foo or (@bar or @baz)", # Tag selection expression
 
-        #     # Expression matches these scenarios
-        #     [
-        #         "Some scenario, or expression",
-        #     ]
-        # ),
+            # Expression matches these scenarios
+            [
+                "Some scenario, or expression",
+            ]
+        ),
 
-        # TV(
-        #     "Chained or expression matches right expression, @baz",
+        TV(
+            "Chained or expression matches right expression, @baz",
 
-        #     """
-        #     @baz
-        #     Feature: Some feature
+            """
+            @baz
+            Feature: Some feature
 
-        #         Scenario: Some scenario, or expression
-        #             Give some step
-        #     """,
+                Scenario: Some scenario, or expression
+                    Give some step
+            """,
 
-        #     "@foo or (@bar or baz)", # Tag selection expression
+            "@foo or (@bar or @baz)", # Tag selection expression
 
-        #     # Expression matches these scenarios
-        #     [
-        #         "Some scenario, or expression",
-        #     ]
-        # ),
+            # Expression matches these scenarios
+            [
+                "Some scenario, or expression",
+            ]
+        ),
+
+        TV(
+            "Chained or expression does not match @quux",
+
+            """
+            @quux
+            Feature: Some feature
+
+                Scenario: Some scenario, or expression
+                    Give some step
+            """,
+
+            "@foo or (@bar or @baz)", # Tag selection expression
+
+            # Expression matches these scenarios
+            [
+            ]
+        ),
     ]
 
     for tv in testvectors
