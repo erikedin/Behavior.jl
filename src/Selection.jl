@@ -203,7 +203,7 @@ function newparsetagselector(s::String) :: NewTagSelector
         NewTagSelector(All())
     else
         input = TagExpressionInput(s)
-        parser = AnyTagExpression()
+        parser = FullExpressionParser()
         result = parser(input)
         if !(result isa OKParseResult)
             throw(TagSelectorError("Parse failed: '$(s)'"))
@@ -291,6 +291,34 @@ after all expression types have been defined.
 struct AnyTagExpression <: TagExpressionParser{TagExpression} end
 
 
+"""
+    EOFParser()
+
+Matches EOF, ignoring any trailing whitespace.
+This ensures that a tag expression is parsed in its entirety.
+"""
+struct EOFParser <: TagExpressionParser{NothingExpression} end
+
+function (parser::EOFParser)(input::TagExpressionInput) :: ParseResult{NothingExpression}
+    if iseof(input)
+        OKParseResult{NothingExpression}(NothingExpression(), input)
+    else
+        BadParseResult{NothingExpression}(input)
+    end
+end
+
+"""
+    FullExpressionParser()
+
+Consumes an expression and ensures that all of it was actually parsed.
+"""
+FullExpressionParser() = Transforming{Vector{TagExpression}, TagExpression}(
+    SequenceParser{TagExpression}(
+        AnyTagExpression(),
+        EOFParser(),
+    ),
+    xs -> Parentheses(xs[1])
+)
 
 """
     Repeating(::TagExpressionParser)
