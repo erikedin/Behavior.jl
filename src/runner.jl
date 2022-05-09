@@ -32,6 +32,32 @@ readfile(::OSAL, path::String) = read(path, String)
 fileexists(::OSAL, path::String) = isfile(path)
 
 """
+    FeatureFlags(:featureflag1, :featureflag2, ...)
+
+This struct manages feature flags: switches that turn on or off some
+behavior of this package.
+
+Warning: The members of this struct are private; you cannot depend on
+them in any way. This struct is meant to shield you from changes in the
+interface by having you supply only variable keyword arguments.
+
+# Example
+This flags turns on the use of the new beta tag parser.
+
+    flags = Flags(:use_beta_tag_parser)
+
+"""
+struct FeatureFlags
+    use_beta_tag_parser::Boolean
+
+    function FeatureFlags(flag_symbols...)
+        use_beta_tag_parser = contains(symbols, :use_beta_tag_parser)
+
+        new(use_beta_tag_parser)
+    end
+end
+
+"""
     rglob(pattern, path)
 
 Find files recursively.
