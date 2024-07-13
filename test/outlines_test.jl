@@ -15,6 +15,7 @@
 using Test
 using Behavior
 using Behavior.Gherkin
+using Behavior.Gherkin.Experimental
 using Behavior: transformoutline
 
 @testset "Scenario Outline     " begin
@@ -159,4 +160,38 @@ using Behavior: transformoutline
     end
 
     # TODO: Mismatching placeholders
+
+    @testset "Issue 117: Scenario Outlines with new parser" begin
+        @testset "" begin
+            # Arrange
+            engine = ExecutorEngine(QuietRealTimePresenter())
+            matcher = FromMacroStepDefinitionMatcher("""
+                using Behavior
+
+                @given("value {Int}") do context, v
+                end
+            """)
+            addmatcher!(engine, matcher)
+
+            source = ParserInput("""
+                Feature: Scenario Outline with new parser
+
+                    Scenario Outline: This will not run with keepgoing=true
+                        Given value <v>
+
+                    Examples:
+                        |  v |
+                        | 17 |
+                        | 42 |
+            """)
+            parser = FeatureFileParser()
+            parseresult = parser(source)
+            feature = parseresult.value
+
+            # Act and Assert
+            # The test passes if executing the scenario does not
+            # throw an exception.
+            runfeature!(engine, feature; keepgoing=true)
+        end
+    end
 end
