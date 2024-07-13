@@ -109,7 +109,9 @@ using Behavior.Gherkin: parsescenario!, issuccessful, Given, When, Then, ByLineP
 
             @test issuccessful(result)
             scenario = result.value
-            @test size(scenario.examples) == (3,2)
+            @test length(scenario.examples) == 2
+            @test length(scenario.examples[1]) == 3
+            @test length(scenario.examples[2]) == 3
         end
 
         @testset "Three examples with four placeholders are provided; Examples array is 4x3" begin
@@ -129,7 +131,10 @@ using Behavior.Gherkin: parsescenario!, issuccessful, Given, When, Then, ByLineP
 
             @test issuccessful(result)
             scenario = result.value
-            @test size(scenario.examples) == (4,3)
+            @test length(scenario.examples) == 3
+            @test length(scenario.examples[1]) == 4
+            @test length(scenario.examples[2]) == 4
+            @test length(scenario.examples[3]) == 4
         end
 
         @testset "Two examples with three placeholders are provided; Examples array has all values" begin
@@ -148,8 +153,8 @@ using Behavior.Gherkin: parsescenario!, issuccessful, Given, When, Then, ByLineP
 
             @test issuccessful(result)
             scenario = result.value
-            @test scenario.examples[:,1] == ["1", "2", "3"]
-            @test scenario.examples[:,2] == ["4", "5", "6"]
+            @test scenario.examples[1] == ["1", "2", "3"]
+            @test scenario.examples[2] == ["4", "5", "6"]
         end
 
         @testset "Examples with spaces; Examples are split on | not on spaces" begin
@@ -168,8 +173,8 @@ using Behavior.Gherkin: parsescenario!, issuccessful, Given, When, Then, ByLineP
 
             @test issuccessful(result)
             scenario = result.value
-            @test scenario.examples[:,1] == ["word"]
-            @test scenario.examples[:,2] == ["two words"]
+            @test scenario.examples[1] == ["word"]
+            @test scenario.examples[2] == ["two words"]
         end
 
         @testset "Example with an empty element; The empty line results in an empty value" begin
@@ -188,8 +193,8 @@ using Behavior.Gherkin: parsescenario!, issuccessful, Given, When, Then, ByLineP
 
             @test issuccessful(result)
             scenario = result.value
-            @test scenario.examples[:,1] == [""]
-            @test scenario.examples[:,2] == ["two words"]
+            @test scenario.examples[1] == [""]
+            @test scenario.examples[2] == ["two words"]
         end
 
         @testset "A placeholder is non-alphanumerical; The placeholders are correct" begin

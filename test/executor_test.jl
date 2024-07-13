@@ -165,7 +165,7 @@ Behavior.findstepdefinition(matcher::ThrowingStepDefinitionMatcher, ::Behavior.G
     end
 
     @testset "Execute a ScenarioOutline; Outline has two examples; Two scenarios are returned" begin
-        outline = ScenarioOutline("", String[], ScenarioStep[Given("step <stepnumber>")], ["stepnumber"], ["1" "2"])
+        outline = ScenarioOutline("", String[], ScenarioStep[Given("step <stepnumber>")], ["stepnumber"], [["1"], ["2"]])
         step1 = Given("step 1")
         step2 = Given("step 2")
         stepdefmatcher = FakeStepDefinitionMatcher(Dict(step1 => successful_step_definition,
@@ -178,7 +178,7 @@ Behavior.findstepdefinition(matcher::ThrowingStepDefinitionMatcher, ::Behavior.G
     end
 
     @testset "Execute a ScenarioOutline; Outline has a successful and a failing example; First is success, second is fail" begin
-        outline = ScenarioOutline("", String[], ScenarioStep[Given("step <stepnumber>")], ["stepnumber"], ["1" "2"])
+        outline = ScenarioOutline("", String[], ScenarioStep[Given("step <stepnumber>")], ["stepnumber"], [["1"], ["2"]])
         step1 = Given("step 1")
         step2 = Given("step 2")
         stepdefmatcher = FakeStepDefinitionMatcher(Dict(step1 => successful_step_definition,
@@ -192,7 +192,7 @@ Behavior.findstepdefinition(matcher::ThrowingStepDefinitionMatcher, ::Behavior.G
     end
 
     @testset "Execute a ScenarioOutline; Outline has three examples; Three scenarios are returned" begin
-        outline = ScenarioOutline("", String[], ScenarioStep[Given("step <stepnumber>")], ["stepnumber"], ["1" "2" "3"])
+        outline = ScenarioOutline("", String[], ScenarioStep[Given("step <stepnumber>")], ["stepnumber"], [["1"], ["2"], ["3"]])
         step1 = Given("step 1")
         step2 = Given("step 2")
         step3 = Given("step 3")

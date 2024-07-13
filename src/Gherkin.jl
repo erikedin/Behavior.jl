@@ -115,7 +115,7 @@ struct ScenarioOutline <: AbstractScenario
     tags::Vector{String}
     steps::Vector{ScenarioStep}
     placeholders::Vector{String}
-    examples::AbstractArray
+    examples::Vector{Vector{<:AbstractString}}
     long_description::String
 
     function ScenarioOutline(
@@ -123,7 +123,7 @@ struct ScenarioOutline <: AbstractScenario
             tags::Vector{String},
             steps::Vector{ScenarioStep},
             placeholders::AbstractVector{String},
-            examples::AbstractArray;
+            examples::Vector{<:Vector{<:AbstractString}};
             long_description::AbstractString = "")
         new(description, tags, steps, placeholders, examples, long_description)
     end
@@ -691,7 +691,7 @@ function parsescenario!(byline::ByLineParser)
 
         # Parse the examples, until we hit an empty line.
         # TODO: This needs to be updated to allow for multiple Examples sections.
-        examples = Array{String,2}(undef, length(placeholders), 0)
+        examples = Vector{String}[]
         @untilnextsection begin
             # Each variable is in a column, separated by |
             example = split(strip(byline.current), "|")
@@ -702,7 +702,7 @@ function parsescenario!(byline::ByLineParser)
 
             # Remove surrounding whitespace around each value.
             example = map(strip, example)
-            examples = [examples example]
+            push!(examples, example)
         end
         return OKParseResult{ScenarioOutline}(
             ScenarioOutline(description, tags, steps, placeholders, examples; long_description=long_description))

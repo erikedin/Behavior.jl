@@ -15,6 +15,7 @@
 using Test
 using Behavior
 using Behavior.Gherkin
+using Behavior.Gherkin.Experimental
 using Behavior: transformoutline
 
 @testset "Scenario Outline     " begin
@@ -22,7 +23,7 @@ using Behavior: transformoutline
         outline = ScenarioOutline("Some description", String[],
             ScenarioStep[Given("placeholder <foo>")],
             ["foo"],
-            ["bar"])
+            [["bar"]])
 
         scenarios = transformoutline(outline)
 
@@ -33,7 +34,7 @@ using Behavior: transformoutline
         outline = ScenarioOutline("", ["@foo", "@bar"],
             ScenarioStep[Given("some <foo>")],
             ["foo"],
-            ["bar"])
+            [["bar"]])
 
         scenarios = transformoutline(outline)
 
@@ -44,7 +45,7 @@ using Behavior: transformoutline
         outline = ScenarioOutline("", String[],
             ScenarioStep[Given("placeholder <foo>")],
             ["foo"],
-            ["bar"])
+            [["bar"]])
 
         scenarios = transformoutline(outline)
 
@@ -57,7 +58,7 @@ using Behavior: transformoutline
         outline = ScenarioOutline("", String[],
             ScenarioStep[Given("placeholder <quux>")],
             ["quux"],
-            ["baz"])
+            [["baz"]])
 
         scenarios = transformoutline(outline)
 
@@ -69,7 +70,7 @@ using Behavior: transformoutline
         outline = ScenarioOutline("", String[],
             ScenarioStep[Given("placeholders <foo> <quux>")],
             ["foo", "quux"],
-            ["bar"; "baz"])
+            [["bar", "baz"]])
 
         scenarios = transformoutline(outline)
 
@@ -82,7 +83,7 @@ using Behavior: transformoutline
         outline = ScenarioOutline("", String[],
             steps,
             ["quux"],
-            ["baz"])
+            [["baz"]])
 
         scenarios = transformoutline(outline)
 
@@ -96,7 +97,7 @@ using Behavior: transformoutline
         outline = ScenarioOutline("", String[],
             steps,
             ["quux"],
-            ["baz"])
+            [["baz"]])
 
         scenarios = transformoutline(outline)
 
@@ -110,7 +111,7 @@ using Behavior: transformoutline
         outline = ScenarioOutline("", String[],
             steps,
             ["quux"],
-            ["baz"])
+            [["baz"]])
 
         scenarios = transformoutline(outline)
 
@@ -122,7 +123,7 @@ using Behavior: transformoutline
         outline = ScenarioOutline("", String[],
             ScenarioStep[Given("step <quux>")],
             ["quux"],
-            ["bar" "baz"])
+            [["bar"], ["baz"]])
 
         scenarios = transformoutline(outline)
 
@@ -137,7 +138,7 @@ using Behavior: transformoutline
              When(""; block_text="when <quux>"),
              Then(""; block_text="then <quux>")],
             ["quux"],
-            ["bar"])
+            [["bar"]])
 
         scenarios = transformoutline(outline)
 
@@ -151,7 +152,7 @@ using Behavior: transformoutline
         outline = ScenarioOutline("Some description", String[],
             ScenarioStep[Given("placeholder <foo>")],
             ["foo"],
-            AbstractString["bar"])
+            Vector{AbstractString}[AbstractString["bar"]])
 
         scenarios = transformoutline(outline)
 
@@ -159,4 +160,38 @@ using Behavior: transformoutline
     end
 
     # TODO: Mismatching placeholders
+
+    @testset "Issue 117: Scenario Outlines with new parser" begin
+        @testset "" begin
+            # Arrange
+            engine = ExecutorEngine(QuietRealTimePresenter())
+            matcher = FromMacroStepDefinitionMatcher("""
+                using Behavior
+
+                @given("value {Int}") do context, v
+                end
+            """)
+            addmatcher!(engine, matcher)
+
+            source = ParserInput("""
+                Feature: Scenario Outline with new parser
+
+                    Scenario Outline: This will not run with keepgoing=true
+                        Given value <v>
+
+                    Examples:
+                        |  v |
+                        | 17 |
+                        | 42 |
+            """)
+            parser = FeatureFileParser()
+            parseresult = parser(source)
+            feature = parseresult.value
+
+            # Act and Assert
+            # The test passes if executing the scenario does not
+            # throw an exception.
+            runfeature!(engine, feature; keepgoing=true)
+        end
+    end
 end

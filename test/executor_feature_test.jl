@@ -88,7 +88,7 @@ import Behavior: present
         step1 = Given("step 1")
         step2 = Given("step 2")
         scenario = Scenario("some scenario", String[], ScenarioStep[step1])
-        outline = ScenarioOutline("", String[], ScenarioStep[Given("step <stepnumber>")], ["stepnumber"], ["1" "2"])
+        outline = ScenarioOutline("", String[], ScenarioStep[Given("step <stepnumber>")], ["stepnumber"], [["1"], ["2"]])
         matcher = FakeStepDefinitionMatcher(Dict(step1 => successful_step_definition,
                                                  step2 => successful_step_definition))
 

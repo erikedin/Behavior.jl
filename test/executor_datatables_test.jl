@@ -123,7 +123,7 @@ using .Gherkin: DataTable, DataTableRow
             String[],                        # Tags
             ScenarioStep[given, when, then], # Steps
             ["foo"],                         # Placeholders
-            [ "1" "2"]                       # Examples
+            [["1"], ["2"]]                       # Examples
         )
 
         scenarioresult = Behavior.executescenario(executor, Background(), scenario)
