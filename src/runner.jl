@@ -92,6 +92,16 @@ function printbadparseresult(featurefile::String, err::Gherkin.BadParseResult{T}
 end
 
 """
+    printbadparseresult(error::Gherkin.Experimental.BadParseResult{T})
+
+Print parse errors.
+"""
+function printbadparseresult(featurefile::String, err::Gherkin.Experimental.BadParseResult{T}) where {T}
+    println("ERROR: $(featurefile)")
+    println("$(err)")
+end
+
+"""
     runspec(rootpath; featurepath, stepspath, execenvpath, parseoptions, presenter, tags)
 
 Execute all features found from the `rootpath`.
