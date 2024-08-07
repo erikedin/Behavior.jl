@@ -21,6 +21,9 @@ struct FeatureSuccessAndFailure
     n_failure::UInt
 end
 
+# Bad parse results can be both from the old and the new experimental Gherkin parser.
+const BadParseType = Union{Gherkin.BadParseResult{Feature}, Gherkin.Experimental.BadParseResult{Feature}}
+
 """
 Accumulate results from executed features as they are being executed. Keep track of whether the
 total run is a success of a failure.
@@ -28,7 +31,7 @@ total run is a success of a failure.
 mutable struct ResultAccumulator
     isaccumsuccess::Bool
     features::Vector{FeatureSuccessAndFailure}
-    errors::Vector{Tuple{String, Gherkin.BadParseResult{Feature}}}
+    errors::Vector{Tuple{String, BadParseType}}
 
     ResultAccumulator() = new(true, [], [])
 end
@@ -64,7 +67,6 @@ end
 
 A feature file could not be parsed properly. Record the error.
 """
-const BadParseType = Union{Gherkin.BadParseResult{Feature}, Gherkin.Experimental.BadParseResult{Feature}}
 function accumulateresult!(acc::ResultAccumulator, parsefailure::BadParseType, featurefile::String)
     push!(acc.errors, (featurefile, parsefailure))
     acc.isaccumsuccess = false

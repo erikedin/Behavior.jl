@@ -13,6 +13,7 @@
 # limitations under the License.
 
 using Behavior.Gherkin
+using Behavior.Gherkin.Experimental
 using Behavior:
     ResultAccumulator, accumulateresult!, issuccess, featureresults,
     FeatureResult, ScenarioResult, Given, SuccessfulStepExecution, Scenario, StepFailed
@@ -231,6 +232,19 @@ using Behavior:
         accumulator = ResultAccumulator()
 
         parseresult = Gherkin.BadParseResult{Feature}(:somereason, :someexpected, :someactual, 0, "Some line")
+
+        accumulateresult!(accumulator, parseresult, "features/some/path/to/my.feature")
+
+        @test issuccess(accumulator) == false
+    end
+
+    @testset "Accumulate results; One feature (experimental) with syntax error; Total result is failure" begin
+        feature = ""
+        input = Gherkin.Experimental.ParserInput(feature)
+        parser = Gherkin.Experimental.FeatureFileParser()
+        parseresult = parser(input)
+
+        accumulator = ResultAccumulator()
 
         accumulateresult!(accumulator, parseresult, "features/some/path/to/my.feature")
 
