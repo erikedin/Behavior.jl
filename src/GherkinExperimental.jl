@@ -631,7 +631,7 @@ ScenarioOutlineParser() = Transformer{Vector{ScenarioOutlineBits}, ScenarioOutli
         KeywordParser("Scenario Outline:"),
         Optionally(LongDescription),
         StepsParser(),
-        Line("Examples:"),
+        Line("Examples:") | Line("Scenarios:"),
         DataTableParser()
     ),
     sequence -> begin

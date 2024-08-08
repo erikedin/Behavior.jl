@@ -583,6 +583,32 @@
             @test result.value.examples[1] == ["baz", "quux"]
             @test result.value.examples[2] == ["fnord", "quuxbaz"]
         end
+
+        @testset "Scenario Outline with two rows of Scenarios instead of Examples; OK" begin
+            # Arrange
+            input = ParserInput("""
+                @tag1 @tag2
+                Scenario Outline: Some scenario outline
+
+                    Given some value <Foo>
+                     When some action
+                     Then some postcondition
+
+                    Scenarios:
+                        | Foo   | Bar     |
+                        | baz   | quux    |
+                        | fnord | quuxbaz |
+            """)
+
+            # Act
+            parser = ScenarioOutlineParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{ScenarioOutline}
+            @test result.value.examples[1] == ["baz", "quux"]
+            @test result.value.examples[2] == ["fnord", "quuxbaz"]
+        end
     end
 
     @testset "And/But*" begin
