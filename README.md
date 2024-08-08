@@ -1,6 +1,5 @@
-# Behavior 
+# Behavior
 
-[![codecov.io](http://codecov.io/github/erikedin/Behavior.jl/coverage.svg?branch=master)](http://codecov.io/github/erikedin/Behavior.jl?branch=master)
 ![CI](https://github.com/erikedin/Behavior.jl/actions/workflows/ci.yml/badge.svg)
 
 BDD is an acronym for _Behaviour Driven Development_. It is a process for creating and verifying
