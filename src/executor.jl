@@ -14,6 +14,8 @@
 
 using Base.StackTraces
 
+using Behavior.Gherkin.Experimental: And
+
 "Executes a feature or scenario, and presents the results in real time."
 struct Executor
     stepdefmatcher::StepDefinitionMatcher
@@ -344,6 +346,9 @@ interpolatestep(step::When, fromplaceholders::Function) = When(interpolatestepte
                                                                block_text=interpolatesteptext(step.block_text, fromplaceholders),
                                                                datatable=step.datatable)
 interpolatestep(step::Then, fromplaceholders::Function) = Then(interpolatesteptext(step.text, fromplaceholders);
+                                                               block_text=interpolatesteptext(step.block_text, fromplaceholders),
+                                                               datatable=step.datatable)
+interpolatestep(step::And, fromplaceholders::Function) = And(interpolatesteptext(step.text, fromplaceholders);
                                                                block_text=interpolatesteptext(step.block_text, fromplaceholders),
                                                                datatable=step.datatable)
 

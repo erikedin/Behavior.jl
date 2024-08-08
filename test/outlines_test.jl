@@ -119,6 +119,19 @@ using Behavior: transformoutline
         @test scenario.steps[1] == Then("step baz")
     end
 
+    @testset "Transform; Step Then; Step is transformed" begin
+        steps = ScenarioStep[And("step <quux>")]
+        outline = ScenarioOutline("", String[],
+            steps,
+            ["quux"],
+            [["baz"]])
+
+        scenarios = transformoutline(outline)
+
+        scenario = scenarios[1]
+        @test scenario.steps[1] == And("step baz")
+    end
+
     @testset "Transform; Two examples; Two scenarios in the result" begin
         outline = ScenarioOutline("", String[],
             ScenarioStep[Given("step <quux>")],
@@ -136,7 +149,8 @@ using Behavior: transformoutline
         outline = ScenarioOutline("", String[],
             [Given(""; block_text="given <quux>"),
              When(""; block_text="when <quux>"),
-             Then(""; block_text="then <quux>")],
+             Then(""; block_text="then <quux>"),
+             And(""; block_text="and <quux>")],
             ["quux"],
             [["bar"]])
 
@@ -146,6 +160,7 @@ using Behavior: transformoutline
         @test scenarios[1].steps[1] == Given(""; block_text="given bar")
         @test scenarios[1].steps[2] == When(""; block_text="when bar")
         @test scenarios[1].steps[3] == Then(""; block_text="then bar")
+        @test scenarios[1].steps[4] == And(""; block_text="and bar")
     end
 
     @testset "Transform; Outline examples are AbstractStrings; Interpolation works" begin
@@ -157,6 +172,44 @@ using Behavior: transformoutline
         scenarios = transformoutline(outline)
 
         @test scenarios[1].description == "Some description"
+    end
+
+    @testset "Scenario Outline interpolation; And step; And step is interpolated correctly" begin
+        # Arrange
+        engine = ExecutorEngine(QuietRealTimePresenter())
+        matcher = FromMacroStepDefinitionMatcher("""
+            using Behavior
+
+            @given("value {Int}") do context, v
+            end
+
+            @given("and step 17") do context end
+            @given("and step 42") do context end
+        """)
+        addmatcher!(engine, matcher)
+
+        source = ParserInput("""
+            Feature: Scenario Outline with new parser
+
+                Scenario Outline: This will not run with keepgoing=true
+                    Given value <v>
+                      And and step <v>
+
+                Examples:
+                    |  v |
+                    | 17 |
+                    | 42 |
+        """)
+        parser = FeatureFileParser()
+        parseresult = parser(source)
+        feature = parseresult.value
+
+        # Act and Assert
+        # The test passes if executing the scenario does not
+        # throw an exception.
+        runfeature!(engine, feature; keepgoing=true)
+        result = engine.accumulator
+        @test issuccess(result)
     end
 
     # TODO: Mismatching placeholders
