@@ -215,17 +215,28 @@ end
 Or matches either of the provided parsers. It short-circuits.
 """
 struct Or{T} <: Parser{T}
-    a::Parser{<:T}
-    b::Parser{<:T}
+    inners::Vector{Parser{<:T}}
+
+    function Or{T}(inners::Parser{<:T}...) where {T}
+        new{T}([inners...])
+    end
 end
 
 function (parser::Or{T})(input::ParserInput) :: ParseResult{<:T} where {T}
-    result = parser.a(input)
-    if isparseok(result)
-        result
-    else
-        parser.b(input)
+    #result = parser.a(input)
+    #if isparseok(result)
+    #    result
+    #else
+    #    parser.b(input)
+    #end
+    result = nothing
+    for inner in parser.inners
+        result = inner(input)
+        if isparseok(result)
+            return result
+        end
     end
+    result
 end
 
 (|)(a::Parser{T}, b::Parser{T}) where {T} = Or{T}(a, b)
@@ -560,12 +571,13 @@ GivenParser() = StepParser(Given, "Given ")
 WhenParser() = StepParser(When, "When ")
 ThenParser() = StepParser(Then, "Then ")
 AndParser() = StepParser(And, "And ")
+ButParser() = StepParser(And, "But ")
+StarParser() = StepParser(And, "* ")
 
 # TODO Find a way to express this as
 #      GivenParser() | WhenParser() | ThenParser()
 const AnyStepParser = Or{ScenarioStep}(
-    Or{ScenarioStep}(GivenParser(), WhenParser()),
-    Or{ScenarioStep}(ThenParser(), AndParser())
+    GivenParser(), WhenParser(), ThenParser(), AndParser(), ButParser(), StarParser()
 )
 """
     StepsParser

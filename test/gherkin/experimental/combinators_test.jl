@@ -231,6 +231,19 @@ using Behavior.Gherkin.Experimental: BadExpectationParseResult
             # Assert
             @test result isa BadParseResult{String}
         end
+
+        @testset "Foo or Bar or Baz; Baz; OK" begin
+            # Arrange
+            input = ParserInput("Baz")
+
+            # Act
+            p = Or{String}(Line("Foo"), Line("Bar"), Line("Baz"))
+            result = p(input)
+
+            # Assert
+            @test result isa OKParseResult{String}
+            @test result.value == "Baz"
+        end
     end
 
     @testset "Transformer" begin

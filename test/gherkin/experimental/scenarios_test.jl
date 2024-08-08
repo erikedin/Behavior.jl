@@ -603,5 +603,41 @@
             @test result.value.description == "Some new description"
             @test result.value.steps == [Given("some precondition"), And("some other precondition")]
         end
+
+        @testset "Scenario has a But; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario: Some new description
+                    Given some precondition
+                      But some other precondition
+            """)
+
+            # Act
+            parser = ScenarioParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Scenario}
+            @test result.value.description == "Some new description"
+            @test result.value.steps == [Given("some precondition"), And("some other precondition")]
+        end
+
+        @testset "Scenario has a *; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario: Some new description
+                    Given some precondition
+                        * some other precondition
+            """)
+
+            # Act
+            parser = ScenarioParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Scenario}
+            @test result.value.description == "Some new description"
+            @test result.value.steps == [Given("some precondition"), And("some other precondition")]
+        end
     end
 end
