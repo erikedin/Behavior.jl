@@ -212,6 +212,40 @@ using Behavior: transformoutline
         @test issuccess(result)
     end
 
+    # Issue #119: This reproduces the issue. It is commented out until the issue is fixed.
+    #@testset "Scenario Outline interpolation; Escaped | in an example; Scenario is successful" begin
+    #    # Arrange
+    #    engine = ExecutorEngine(QuietRealTimePresenter())
+    #    matcher = FromMacroStepDefinitionMatcher("""
+    #        using Behavior
+
+    #        @given("value |") do context, v
+    #        end
+    #    """)
+    #    addmatcher!(engine, matcher)
+
+    #    source = ParserInput("""
+    #        Feature: Scenario Outline with new parser
+
+    #            Scenario Outline: This will not run with keepgoing=true
+    #                Given value <v>
+
+    #            Examples:
+    #                |  v |
+    #                | (\\|) |
+    #    """)
+    #    parser = FeatureFileParser()
+    #    parseresult = parser(source)
+    #    feature = parseresult.value
+
+    #    # Act and Assert
+    #    # The test passes if executing the scenario does not
+    #    # throw an exception.
+    #    runfeature!(engine, feature; keepgoing=true)
+    #    result = engine.accumulator
+    #    @test issuccess(result)
+    #end
+
     # TODO: Mismatching placeholders
 
     @testset "Issue 117: Scenario Outlines with new parser" begin
