@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-using Behavior.Gherkin.Experimental: BadExpectationParseResult, EscapedChar
+using Behavior.Gherkin.Experimental: BadExpectationParseResult, EscapedChar, EscapedStringParser
 
 @testset "Combinators          " begin
     @testset "Line" begin
@@ -931,6 +931,77 @@ using Behavior.Gherkin.Experimental: BadExpectationParseResult, EscapedChar
             # Assert
             @test result isa OKParseResult{Char}
             @test result.value == '|'
+        end
+
+        @testset "EscapedChar; String is A; Read A then a BadParseResult" begin
+            # Arrange
+            input = ParserInput(
+                "A"
+            )
+
+            # Act
+            parser = EscapedChar()
+            result1 = parser(input)
+            result2 = parser(result1.newinput)
+
+            # Assert
+            @test !isparseok(result2)
+        end
+
+        @testset "EscapedChar; String has two lines; Read A then B" begin
+            # Arrange
+            input = ParserInput(
+                """
+                A
+                B
+                """
+            )
+
+            # Act
+            parser = EscapedChar()
+            result1 = parser(input)
+            result2 = parser(result1.newinput)
+
+            # Assert
+            @test result1.value == 'A'
+            @test result2.value == 'B'
+        end
+
+        @testset "EscapedChar; String has two lines; Read A then B, then EOF" begin
+            # Arrange
+            input = ParserInput(
+                """
+                A
+                B
+                """
+            )
+
+            # Act
+            parser = EscapedChar()
+            result1 = parser(input)
+            result2 = parser(result1.newinput)
+            result3 = parser(result2.newinput)
+
+            # Assert
+            @test result1.value == 'A'
+            @test result2.value == 'B'
+            @test !isparseok(result3)
+        end
+
+        @testset "EscapedString; String is AB\\|; Read AB|" begin
+            # Arrange
+            input = ParserInput(
+                """
+                AB\\|
+                """
+            )
+
+            # Act
+            parser = EscapedStringParser()
+            result = parser(input)
+
+            # Assert
+            @test result.value == "AB|"
         end
     end
 end

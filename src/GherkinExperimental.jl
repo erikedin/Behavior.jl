@@ -23,7 +23,7 @@ using Behavior.Gherkin: ScenarioOutline
 struct GherkinSource
     lines::Vector{String}
 
-    GherkinSource(source::String) = new(split(source, "\n"))
+    GherkinSource(source::String) = new(split(strip(source), "\n"))
 end
 
 notempty(s) = !isempty(strip(s))
@@ -39,8 +39,19 @@ struct ParserState
     ParserState(nextline::Int, nextchar::Int) = new(nextline, nextchar)
 end
 
+isendofline(state::ParserState, source::GherkinSource) = state.nextchar > lastindex(source.lines[state.nextline])
+islastline(state::ParserState, source::GherkinSource) = state.nextline >= lastindex(source.lines)
+iseof(state::ParserState, source::GherkinSource) = islastline(state, source) && isendofline(state, source)
+
+
 consume(state::ParserState, nlines::Int) = ParserState(state.nextline + nlines, 1)
-function consumechar(state::ParserState, source::GherkinSource) :: Tuple{Char, ParserState}
+function consumechar(initialstate::ParserState, source::GherkinSource) :: Tuple{Char, ParserState}
+    state = if isendofline(initialstate, source)
+        # Start of next line
+        ParserState(initialstate.nextline + 1, 1)
+    else
+        initialstate
+    end
     c = source.lines[state.nextline][state.nextchar]
     (c, ParserState(state.nextline, state.nextchar + 1))
 end
@@ -80,6 +91,8 @@ function line(input::ParserInput) :: Tuple{Union{Nothing, String}, ParserInput}
     end
     strip(input.source.lines[input.state.nextline + nextline - 1]), consume(input, nextline)
 end
+
+iseof(input::ParserInput) = iseof(input.state, input.source)
 
 """
     Parser{T}
@@ -176,7 +189,6 @@ function Base.show(io::IO, result::BadExceptionParseResult{T}) where {T}
     show(io, "Exception: $(result.ex)")
 end
 
-
 """
     EscapedChar()
 
@@ -185,8 +197,14 @@ Parse a single character, that is possibly an escape sequence.
 struct EscapedChar <: Parser{Char} end
 
 function (parser::EscapedChar)(input::ParserInput) :: ParseResult{Char}
+    if iseof(input)
+        return BadUnexpectedEOFParseResult{Char}(input)
+    end
     c, newinput = consumechar(input)
     if c == '\\'
+        # TODO: Currently, the only escape sequence we need is \|, so we just fetch
+        # the next char and return that. However, other sequences will need to be
+        # converted from one character to another.
         escape, newinput = consumechar(newinput)
         OKParseResult{Char}(escape, newinput)
     else
@@ -428,6 +446,13 @@ function (parser::EOFParser)(input::ParserInput) :: ParseResult{Nothing}
         BadExpectedEOFParseResult{Nothing}(input)
     end
 end
+
+"""
+    EscapedString
+
+Parse a string that potentially has escape sequences in it.
+"""
+const EscapedStringParser = () -> Transformer{Vector{Char}, String}(Repeating{Char}(EscapedChar()), join)
 
 ##
 ## Gherkin-specific parser
