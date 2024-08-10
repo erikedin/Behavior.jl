@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-using Behavior.Gherkin.Experimental: BadExpectationParseResult
+using Behavior.Gherkin.Experimental: BadExpectationParseResult, EscapedChar
 
 @testset "Combinators          " begin
     @testset "Line" begin
@@ -860,6 +860,77 @@ using Behavior.Gherkin.Experimental: BadExpectationParseResult
 
             # Assert
             @test result isa BadParseResult{Vector{Union{Nothing, Feature}}}
+        end
+    end
+
+    @testset "EscapedChar" begin
+        @testset "EscapedChar; String is A; OK" begin
+            # Arrange
+            input = ParserInput(
+                """
+                A
+                """
+            )
+
+            # Act
+            parser = EscapedChar()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Char}
+            @test result.value == 'A'
+        end
+
+        @testset "EscapedChar; String is B; OK" begin
+            # Arrange
+            input = ParserInput(
+                """
+                B
+                """
+            )
+
+            # Act
+            parser = EscapedChar()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Char}
+            @test result.value == 'B'
+        end
+
+        @testset "EscapedChar; String is AB; Read A then B" begin
+            # Arrange
+            input = ParserInput(
+                """
+                AB
+                """
+            )
+
+            # Act
+            parser = EscapedChar()
+            result1 = parser(input)
+            result2 = parser(result1.newinput)
+
+            # Assert
+            @test result1.value == 'A'
+            @test result2.value == 'B'
+        end
+
+        @testset "EscapedChar; String is | escaped; Char is |" begin
+            # Arrange
+            input = ParserInput(
+                """
+                \\|
+                """
+            )
+
+            # Act
+            parser = EscapedChar()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Char}
+            @test result.value == '|'
         end
     end
 end

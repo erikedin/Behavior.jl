@@ -31,32 +31,54 @@ notcomment(s) = !startswith(strip(s), "#")
 defaultlinecondition(s) = notempty(s) && notcomment(s)
 anyline(s) = true
 
+struct ParserState
+    nextline::Int
+    nextchar::Int
+
+    ParserState() = new(1, 1)
+    ParserState(nextline::Int, nextchar::Int) = new(nextline, nextchar)
+end
+
+consume(state::ParserState, nlines::Int) = ParserState(state.nextline + nlines, 1)
+function consumechar(state::ParserState, source::GherkinSource) :: Tuple{Char, ParserState}
+    c = source.lines[state.nextline][state.nextchar]
+    (c, ParserState(state.nextline, state.nextchar + 1))
+end
+
+function Base.show(io::IO, state::ParserState)
+    println(io, "$(state.nextline):$(state.nextchar)")
+end
+
 """
     ParserInput
 
 ParserInput encapsulates
 - the Gherkin source
-- the parser state (current line)
+- the parser state (current line and character)
 - the parser line operation (not implemented yet)
 """
 struct ParserInput
     source::GherkinSource
-    index::Int
+    state::ParserState
     condition::Function
 
-    ParserInput(source::String) = new(GherkinSource(source), 1, defaultlinecondition)
-    ParserInput(input::ParserInput, index::Int) = new(input.source, index, defaultlinecondition)
-    ParserInput(input::ParserInput, index::Int, condition::Function) = new(input.source, index, condition)
+    ParserInput(source::String) = new(GherkinSource(source), ParserState(), defaultlinecondition)
+    ParserInput(input::ParserInput, newstate::ParserState) = new(input.source, newstate, defaultlinecondition)
+    ParserInput(input::ParserInput, condition::Function) = new(input.source, input.state, condition)
 end
 
-consume(input::ParserInput, n::Int) :: ParserInput = ParserInput(input, input.index + n)
+consume(input::ParserInput, n::Int) :: ParserInput = ParserInput(input, consume(input.state, n))
+function consumechar(input::ParserInput) :: Tuple{Char, ParserInput}
+    c, newstate = consumechar(input.state, input.source)
+    c, ParserInput(input, newstate)
+end
 
 function line(input::ParserInput) :: Tuple{Union{Nothing, String}, ParserInput}
-    nextline = findfirst(input.condition, input.source.lines[input.index:end])
+    nextline = findfirst(input.condition, input.source.lines[input.state.nextline:end])
     if nextline === nothing
         return nothing, input
     end
-    strip(input.source.lines[input.index + nextline - 1]), consume(input, nextline)
+    strip(input.source.lines[input.state.nextline + nextline - 1]), consume(input, nextline)
 end
 
 """
@@ -141,7 +163,7 @@ end
 
 function Base.show(io::IO, result::BadExpectedEOFParseResult{T}) where {T}
     s, _newinput = line(result.newinput)
-    println(io, "Expected EOF but found at line $(result.newinput.index):")
+    println(io, "Expected EOF but found at line $(result.newinput.state):")
     println(io)
     println(io, "  $s")
 end
@@ -154,6 +176,23 @@ function Base.show(io::IO, result::BadExceptionParseResult{T}) where {T}
     show(io, "Exception: $(result.ex)")
 end
 
+
+"""
+    EscapedChar()
+
+Parse a single character, that is possibly an escape sequence.
+"""
+struct EscapedChar <: Parser{Char} end
+
+function (parser::EscapedChar)(input::ParserInput) :: ParseResult{Char}
+    c, newinput = consumechar(input)
+    if c == '\\'
+        escape, newinput = consumechar(newinput)
+        OKParseResult{Char}(escape, newinput)
+    else
+        OKParseResult{Char}(c, newinput)
+    end
+end
 
 """
     Line(expected::String)
@@ -344,7 +383,7 @@ end
 function (parser::LineIfNot)(realinput::ParserInput) :: ParseResult{String}
     # This parser has support for providing the inner parser with a
     # non-default line condition.
-    input = ParserInput(realinput, realinput.index, parser.linecondition)
+    input = ParserInput(realinput, parser.linecondition)
     result = parser.inner(input)
     if isparseok(result)
         badline, _badinput = line(input)
