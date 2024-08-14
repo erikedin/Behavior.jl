@@ -56,6 +56,12 @@ function consumechar(initialstate::ParserState, source::GherkinSource) :: Tuple{
     (c, ParserState(state.nextline, state.nextchar + 1))
 end
 
+function consumechars(state::ParserState, source::GherkinSource, n::Int) :: Tuple{String, ParserState}
+    thisline = source.lines[state.nextline]
+    s = thisline[state.nextchar : state.nextchar + n - 1]
+    (s, ParserState(state.nextline, state.nextchar + n))
+end
+
 function Base.show(io::IO, state::ParserState)
     println(io, "$(state.nextline):$(state.nextchar)")
 end
@@ -82,6 +88,10 @@ consume(input::ParserInput, n::Int) :: ParserInput = ParserInput(input, consume(
 function consumechar(input::ParserInput) :: Tuple{Char, ParserInput}
     c, newstate = consumechar(input.state, input.source)
     c, ParserInput(input, newstate)
+end
+function consumechars(input::ParserInput, n::Int) :: Tuple{String, ParserInput}
+    s, newstate = consumechars(input.state, input.source, n)
+    s, ParserInput(input, newstate)
 end
 
 function line(input::ParserInput) :: Tuple{Union{Nothing, String}, ParserInput}
@@ -232,6 +242,15 @@ function (parser::Line)(input::ParserInput) :: ParseResult{String}
     else
         BadExpectationParseResult{String}(parser.expected, s, input)
     end
+end
+
+struct Literal <: Parser{String}
+    expected::String
+end
+
+function (parser::Literal)(input::ParserInput) :: ParseResult{String}
+    s, newinput = consumechars(input, length(parser.expected))
+    OKParseResult{String}(s, input)
 end
 
 """
@@ -507,8 +526,15 @@ function (parser::DataTableRowParser)(input::ParserInput) :: ParseResult{DataTab
     end
 end
 
-DataTableParser() = Transformer{Vector{DataTableRow}, DataTable}(
-    Repeating{DataTableRow}(DataTableRowParser(), atleast=1),
+struct DataTableRowsParser <: Parser{Vector{DataTableRow}}
+end
+
+function (parser::DataTableRowsParser)(input::ParserInput) :: ParseResult{Vector{DataTableRow}}
+    OKParseResult{Vector{DataTableRow}}([["Foo"]], input)
+end
+
+DataTableParser(; usenew::Bool = false) = Transformer{Vector{DataTableRow}, DataTable}(
+    if usenew DataTableRowsParser() else Repeating{DataTableRow}(DataTableRowParser(), atleast=1) end,
     rows -> rows
 )
 

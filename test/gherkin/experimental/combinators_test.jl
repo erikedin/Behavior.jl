@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-using Behavior.Gherkin.Experimental: BadExpectationParseResult, EscapedChar, EscapedStringParser
+using Behavior.Gherkin.Experimental: BadExpectationParseResult, EscapedChar, EscapedStringParser, Literal
 
 @testset "Combinators          " begin
     @testset "Line" begin
@@ -110,6 +110,36 @@ using Behavior.Gherkin.Experimental: BadExpectationParseResult, EscapedChar, Esc
             @test result.newinput == input
         end
     end
+
+    @testset "Literal" begin
+        @testset "Match Foo; Input is Foo; OK" begin
+            # Arrange
+            input = ParserInput("Foo")
+
+            # Act
+            p = Literal("Foo")
+            result = p(input)
+
+            # Assert
+            @test result isa OKParseResult{String}
+            @test result.value == "Foo"
+        end
+
+        @testset "Match Quux; Input is Quux; OK" begin
+            # Arrange
+            input = ParserInput("Quux")
+
+            # Act
+            p = Literal("Quux")
+            result = p(input)
+
+            # Assert
+            @test result isa OKParseResult{String}
+            @test result.value == "Quux"
+        end
+
+
+    end # Literal
 
     @testset "Optionally" begin
         @testset "Optionally Foo; Foo; OK" begin

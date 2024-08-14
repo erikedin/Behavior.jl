@@ -871,7 +871,7 @@
             """)
 
             # Act
-            parser = DataTableParser()
+            parser = DataTableParser(usenew=true)
             result = parser(input)
 
             # Assert
