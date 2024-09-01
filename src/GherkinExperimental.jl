@@ -208,20 +208,6 @@ function Base.show(io::IO, result::BadExceptionParseResult{T}) where {T}
     show(io, "Exception: $(result.ex)")
 end
 
-struct ButNotParser{T} <: Parser{T}
-    inner::Parser{T}
-    butnot::T
-end
-
-function (parser::ButNotParser{T})(input::ParserInput) where {T}
-    result = parser.inner(input)
-    if result.value != parser.butnot
-        OKParseResult{T}(result.value, result.newinput)
-    else
-        BadExpectationParseResult{T}("not $(parser.butnot)", "$(result.value)", input)
-    end
-end
-
 """
     EscapedChar()
 
@@ -399,6 +385,10 @@ Joins a sequence of strings together into one string.
 """
 Joined(inner::Parser{Vector{String}}) = Transformer{Vector{String}, String}(inner, x -> join(x, "\n"))
 
+function innerparserfailedcondition(_input::ParserInput, result::ParseResult{T}) where {T}
+    !isparseok(result)
+end
+
 """
     Repeating{T}
 
@@ -407,8 +397,9 @@ Repeats the provided parser until it no longer recognizes the input.
 struct Repeating{T} <: Parser{Vector{T}}
     inner::Parser{T}
     atleast::Int
+    stopcondition::Function
 
-    Repeating{T}(inner::Parser{T}; atleast::Int = 0) where {T} = new(inner, atleast)
+    Repeating{T}(inner::Parser{T}; atleast::Int = 0, stopcondition::Function = innerparserfailedcondition) where {T} = new(inner, atleast, stopcondition)
 end
 
 function (parser::Repeating{T})(input::ParserInput) :: ParseResult{Vector{T}} where {T}
@@ -417,7 +408,7 @@ function (parser::Repeating{T})(input::ParserInput) :: ParseResult{Vector{T}} wh
 
     while true
         result = parser.inner(currentinput)
-        if !isparseok(result)
+        if !isparseok(result) || parser.stopcondition(currentinput, result)
             cardinality = length(values)
             if cardinality < parser.atleast
                 return BadCardinalityParseResult{T, Vector{T}}(result, parser.atleast, cardinality, input)
@@ -498,7 +489,13 @@ end
 
 Parse a string that potentially has escape sequences in it.
 """
-const EscapedStringParser = (butnot::Char) -> Transformer{Vector{Char}, String}(Repeating{Char}(ButNotParser{Char}(EscapedChar(), butnot)), join)
+function EscapedStringParser(butnot::String) :: Parser{String}
+    # Stop repeating the EscapedChar parser when the current input is the
+    # delimiter literal.
+    # Example: Stop reading when the end of this column is found by the literal |
+    isdelimiterliteral = (input, _result) -> isparseok(Literal(butnot)(input))
+    Transformer{Vector{Char}, String}(Repeating{Char}(EscapedChar(), stopcondition=isdelimiterliteral), join)
+end
 
 ##
 ## Gherkin-specific parser
@@ -559,12 +556,12 @@ end
 function (parser::DataTableRowsParser)(input::ParserInput) :: ParseResult{Vector{DataTableRow}}
     rowparser = Sequence{String}(
         Literal("|"),
-        EscapedStringParser(),
+        EscapedStringParser("|"),
         Literal("|"),
     )
     result = rowparser(input)
-    s = result.value[2]
-    OKParseResult{Vector{DataTableRow}}([s], input)
+    s = strip(result.value[2])
+    OKParseResult{Vector{DataTableRow}}([[s]], input)
 end
 
 DataTableParser(; usenew::Bool = false) = Transformer{Vector{DataTableRow}, DataTable}(

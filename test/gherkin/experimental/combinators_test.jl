@@ -13,7 +13,6 @@
 # limitations under the License.
 
 using Behavior.Gherkin.Experimental: BadExpectationParseResult, EscapedChar, EscapedStringParser, Literal
-using Behavior.Gherkin.Experimental: ButNotParser
 
 @testset "Combinators          " begin
     @testset "Line" begin
@@ -1063,38 +1062,6 @@ using Behavior.Gherkin.Experimental: ButNotParser
             @test !isparseok(result3)
         end
 
-        @testset "EscapedChar, read until |; String is AB|; Read AB" begin
-            # Arrange
-            input = ParserInput(
-                "AB|"
-            )
-
-            # Act
-            charparser = ButNotParser{Char}(EscapedChar(), '|')
-            parser = Repeating{Char}(charparser)
-            result = parser(input)
-
-            # Assert
-            @test isparseok(result)
-            @test join(result.value) == "AB"
-        end
-
-        @testset "EscapedChar, read until |; String is AB\\||; Read AB|" begin
-            # Arrange
-            input = ParserInput(
-                "AB\\||"
-            )
-
-            # Act
-            charparser = ButNotParser{Char}(EscapedChar(), '|')
-            parser = Repeating{Char}(charparser)
-            result = parser(input)
-
-            # Assert
-            @test isparseok(result)
-            @test join(result.value) == "AB|"
-        end
-
         @testset "EscapedString; String is AB\\|; Read AB|" begin
             # Arrange
             input = ParserInput(
@@ -1104,7 +1071,7 @@ using Behavior.Gherkin.Experimental: ButNotParser
             )
 
             # Act
-            parser = EscapedStringParser('|')
+            parser = EscapedStringParser("|")
             result = parser(input)
 
             # Assert
@@ -1120,79 +1087,11 @@ using Behavior.Gherkin.Experimental: ButNotParser
             )
 
             # Act
-            parser = EscapedStringParser('|')
+            parser = EscapedStringParser("|")
             result = parser(input)
 
             # Assert
             @test result.value == "AB"
         end
     end
-
-    @testset "ButNot" begin
-        @testset "ButNot B; String is A; Read A" begin
-            # Arrange
-            input = ParserInput(
-                "A"
-            )
-
-            # Act
-            charparser = EscapedChar()
-            parser = ButNotParser{Char}(charparser, 'B')
-            result = parser(input)
-
-            # Assert
-            @test isparseok(result)
-            @test result.value == 'A'
-        end
-
-        @testset "ButNot B; String is B; Not OK" begin
-            # Arrange
-            input = ParserInput(
-                "B"
-            )
-
-            # Act
-            charparser = EscapedChar()
-            parser = ButNotParser{Char}(charparser, 'B')
-            result = parser(input)
-
-            # Assert
-            @test !isparseok(result)
-        end
-
-        @testset "ButNot A; String is B; OK" begin
-            # Arrange
-            input = ParserInput(
-                "B"
-            )
-
-            # Act
-            charparser = EscapedChar()
-            parser = ButNotParser{Char}(charparser, 'A')
-            result = parser(input)
-
-            # Assert
-            @test isparseok(result)
-            @test result.value == 'B'
-        end
-
-        @testset "ButNot C; String is AB; Read A then B" begin
-            # Arrange
-            input = ParserInput(
-                "AB"
-            )
-
-            # Act
-            charparser = EscapedChar()
-            parser = ButNotParser{Char}(charparser, 'C')
-            result1 = parser(input)
-            result2 = parser(result1.newinput)
-
-            # Assert
-            @test isparseok(result1)
-            @test result1.value == 'A'
-            @test isparseok(result2)
-            @test result2.value == 'B'
-        end
-    end # ButNot
 end
