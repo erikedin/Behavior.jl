@@ -57,8 +57,17 @@ function consumechar(initialstate::ParserState, source::GherkinSource) :: Tuple{
 end
 
 function consumechars(state::ParserState, source::GherkinSource, n::Int) :: Tuple{String, ParserState}
+    # Indexes: 123456
+    # Example: abcdef
     thisline = source.lines[state.nextline]
-    s = thisline[state.nextchar : state.nextchar + n - 1]
+
+    # If nextchar = 2 (b)
+    #    n = 3
+    # thislastindex = 2 + 3 - 1 = 4
+    # so the result should be bcd
+    # Protect against indexing past the end of the string by checking lastindex too.
+    thislastindex = min(state.nextchar + n - 1, lastindex(thisline))
+    s = thisline[state.nextchar : thislastindex]
     (s, ParserState(state.nextline, state.nextchar + n))
 end
 
@@ -199,6 +208,20 @@ function Base.show(io::IO, result::BadExceptionParseResult{T}) where {T}
     show(io, "Exception: $(result.ex)")
 end
 
+struct ButNotParser{T} <: Parser{T}
+    inner::Parser{T}
+    butnot::T
+end
+
+function (parser::ButNotParser{T})(input::ParserInput) where {T}
+    result = parser.inner(input)
+    if result.value != parser.butnot
+        OKParseResult{T}(result.value, result.newinput)
+    else
+        BadExpectationParseResult{T}("not $(parser.butnot)", "$(result.value)", input)
+    end
+end
+
 """
     EscapedChar()
 
@@ -250,7 +273,11 @@ end
 
 function (parser::Literal)(input::ParserInput) :: ParseResult{String}
     s, newinput = consumechars(input, length(parser.expected))
-    OKParseResult{String}(s, input)
+    if s == parser.expected
+        OKParseResult{String}(s, newinput)
+    else
+        BadUnexpectedParseResult{String}(s, input)
+    end
 end
 
 """
@@ -530,7 +557,14 @@ struct DataTableRowsParser <: Parser{Vector{DataTableRow}}
 end
 
 function (parser::DataTableRowsParser)(input::ParserInput) :: ParseResult{Vector{DataTableRow}}
-    OKParseResult{Vector{DataTableRow}}([["Foo"]], input)
+    rowparser = Sequence{String}(
+        Literal("|"),
+        EscapedStringParser(),
+        Literal("|"),
+    )
+    result = rowparser(input)
+    s = result.value[2]
+    OKParseResult{Vector{DataTableRow}}([s], input)
 end
 
 DataTableParser(; usenew::Bool = false) = Transformer{Vector{DataTableRow}, DataTable}(

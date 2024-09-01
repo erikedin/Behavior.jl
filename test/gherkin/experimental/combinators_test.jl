@@ -13,6 +13,7 @@
 # limitations under the License.
 
 using Behavior.Gherkin.Experimental: BadExpectationParseResult, EscapedChar, EscapedStringParser, Literal
+using Behavior.Gherkin.Experimental: ButNotParser
 
 @testset "Combinators          " begin
     @testset "Line" begin
@@ -138,6 +139,50 @@ using Behavior.Gherkin.Experimental: BadExpectationParseResult, EscapedChar, Esc
             @test result.value == "Quux"
         end
 
+        @testset "Match Foo; Input is Bar; No match" begin
+            # Arrange
+            input = ParserInput("Foo")
+
+            # Act
+            p = Literal("Bar")
+            result = p(input)
+
+            # Assert
+            @test result isa BadParseResult{String}
+        end
+
+        @testset "Match Quux then Bar; Input is Quux and Bar; OK" begin
+            # Arrange
+            input = ParserInput("QuuxBar")
+
+            # Act
+            p1 = Literal("Quux")
+            p2 = Literal("Bar")
+            result1 = p1(input)
+            result2 = p2(result1.newinput)
+
+            # Assert
+            @test result1 isa OKParseResult{String}
+            @test result1.value == "Quux"
+            @test result2 isa OKParseResult{String}
+            @test result2.value == "Bar"
+        end
+
+        @testset "Fail to match Quux then match Bar; Input is Bar; OK" begin
+            # Arrange
+            input = ParserInput("Bar")
+
+            # Act
+            p1 = Literal("Quux")
+            p2 = Literal("Bar")
+            result1 = p1(input)
+            result2 = p2(result1.newinput)
+
+            # Assert
+            @test result1 isa BadParseResult{String}
+            @test result2 isa OKParseResult{String}
+            @test result2.value == "Bar"
+        end
 
     end # Literal
 
@@ -1034,4 +1079,72 @@ using Behavior.Gherkin.Experimental: BadExpectationParseResult, EscapedChar, Esc
             @test result.value == "AB|"
         end
     end
+
+    @testset "ButNot" begin
+        @testset "ButNot B; String is A; Read A" begin
+            # Arrange
+            input = ParserInput(
+                "A"
+            )
+
+            # Act
+            charparser = EscapedChar()
+            parser = ButNotParser{Char}(charparser, 'B')
+            result = parser(input)
+
+            # Assert
+            @test isparseok(result)
+            @test result.value == 'A'
+        end
+
+        @testset "ButNot B; String is B; Not OK" begin
+            # Arrange
+            input = ParserInput(
+                "B"
+            )
+
+            # Act
+            charparser = EscapedChar()
+            parser = ButNotParser{Char}(charparser, 'B')
+            result = parser(input)
+
+            # Assert
+            @test !isparseok(result)
+        end
+
+        @testset "ButNot A; String is B; OK" begin
+            # Arrange
+            input = ParserInput(
+                "B"
+            )
+
+            # Act
+            charparser = EscapedChar()
+            parser = ButNotParser{Char}(charparser, 'A')
+            result = parser(input)
+
+            # Assert
+            @test isparseok(result)
+            @test result.value == 'B'
+        end
+
+        @testset "ButNot C; String is AB; Read A then B" begin
+            # Arrange
+            input = ParserInput(
+                "AB"
+            )
+
+            # Act
+            charparser = EscapedChar()
+            parser = ButNotParser{Char}(charparser, 'C')
+            result1 = parser(input)
+            result2 = parser(result1.newinput)
+
+            # Assert
+            @test isparseok(result1)
+            @test result1.value == 'A'
+            @test isparseok(result2)
+            @test result2.value == 'B'
+        end
+    end # ButNot
 end
