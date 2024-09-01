@@ -1063,6 +1063,38 @@ using Behavior.Gherkin.Experimental: ButNotParser
             @test !isparseok(result3)
         end
 
+        @testset "EscapedChar, read until |; String is AB|; Read AB" begin
+            # Arrange
+            input = ParserInput(
+                "AB|"
+            )
+
+            # Act
+            charparser = ButNotParser{Char}(EscapedChar(), '|')
+            parser = Repeating{Char}(charparser)
+            result = parser(input)
+
+            # Assert
+            @test isparseok(result)
+            @test join(result.value) == "AB"
+        end
+
+        @testset "EscapedChar, read until |; String is AB\\||; Read AB|" begin
+            # Arrange
+            input = ParserInput(
+                "AB\\||"
+            )
+
+            # Act
+            charparser = ButNotParser{Char}(EscapedChar(), '|')
+            parser = Repeating{Char}(charparser)
+            result = parser(input)
+
+            # Assert
+            @test isparseok(result)
+            @test join(result.value) == "AB|"
+        end
+
         @testset "EscapedString; String is AB\\|; Read AB|" begin
             # Arrange
             input = ParserInput(
@@ -1072,11 +1104,27 @@ using Behavior.Gherkin.Experimental: ButNotParser
             )
 
             # Act
-            parser = EscapedStringParser()
+            parser = EscapedStringParser('|')
             result = parser(input)
 
             # Assert
             @test result.value == "AB|"
+        end
+
+        @testset "EscapedString; String is AB|; Read AB" begin
+            # Arrange
+            input = ParserInput(
+                """
+                AB|
+                """
+            )
+
+            # Act
+            parser = EscapedStringParser('|')
+            result = parser(input)
+
+            # Assert
+            @test result.value == "AB"
         end
     end
 

@@ -498,7 +498,7 @@ end
 
 Parse a string that potentially has escape sequences in it.
 """
-const EscapedStringParser = () -> Transformer{Vector{Char}, String}(Repeating{Char}(EscapedChar()), join)
+const EscapedStringParser = (butnot::Char) -> Transformer{Vector{Char}, String}(Repeating{Char}(ButNotParser{Char}(EscapedChar(), butnot)), join)
 
 ##
 ## Gherkin-specific parser
