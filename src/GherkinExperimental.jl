@@ -253,6 +253,11 @@ function (parser::Line)(input::ParserInput) :: ParseResult{String}
     end
 end
 
+"""
+    Literal
+
+Parse a known literal value, useful for keywords and delimiters.
+"""
 struct Literal <: Parser{String}
     expected::String
 end
@@ -385,9 +390,7 @@ Joins a sequence of strings together into one string.
 """
 Joined(inner::Parser{Vector{String}}) = Transformer{Vector{String}, String}(inner, x -> join(x, "\n"))
 
-function innerparserfailedcondition(_input::ParserInput, result::ParseResult{T}) where {T}
-    !isparseok(result)
-end
+nostopcondition(_input::ParserInput, _result::ParseResult{T}) where {T} = false
 
 """
     Repeating{T}
@@ -399,7 +402,7 @@ struct Repeating{T} <: Parser{Vector{T}}
     atleast::Int
     stopcondition::Function
 
-    Repeating{T}(inner::Parser{T}; atleast::Int = 0, stopcondition::Function = innerparserfailedcondition) where {T} = new(inner, atleast, stopcondition)
+    Repeating{T}(inner::Parser{T}; atleast::Int = 0, stopcondition::Function = nostopcondition) where {T} = new(inner, atleast, stopcondition)
 end
 
 function (parser::Repeating{T})(input::ParserInput) :: ParseResult{Vector{T}} where {T}
@@ -485,15 +488,25 @@ function (parser::EOFParser)(input::ParserInput) :: ParseResult{Nothing}
 end
 
 """
-    EscapedString
+    EscapedStringParser
 
 Parse a string that potentially has escape sequences in it.
+
+:param stopat: Stop when this literal is encountered
+
+# Example
+Parse a column in a markdown table
+
+    | foo | bar |
+
+The delimiter is the pipe character (|) and the EscapedStringParser could be used
+to parse "foo" and "bar", and the parser will stop when discovering the delimiter..
 """
-function EscapedStringParser(butnot::String) :: Parser{String}
+function EscapedStringParser(stopat::String) :: Parser{String}
     # Stop repeating the EscapedChar parser when the current input is the
     # delimiter literal.
     # Example: Stop reading when the end of this column is found by the literal |
-    isdelimiterliteral = (input, _result) -> isparseok(Literal(butnot)(input))
+    isdelimiterliteral = (input, _result) -> isparseok(Literal(stopat)(input))
     Transformer{Vector{Char}, String}(Repeating{Char}(EscapedChar(), stopcondition=isdelimiterliteral), join)
 end
 
