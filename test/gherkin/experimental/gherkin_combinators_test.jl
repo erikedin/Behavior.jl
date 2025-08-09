@@ -818,6 +818,26 @@
             @test outline.placeholders == ["Foo"]
             @test outline.examples == [["bar"]]
         end
+
+        @testset "Feature has a first scenario with @tag1; First scenario has tag @tag1" begin
+            # Arrange
+            input = ParserInput("""
+                Feature: Some feature
+
+                    @tag1
+                    Scenario: Some scenario
+            """)
+
+            # Act
+            parser = FeatureParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Feature}
+            @test result.value.header.description == "Some feature"
+            @test result.value.scenarios[1].description == "Some scenario"
+            @test result.value.scenarios[1].tags == ["@tag1"]
+        end
     end
 
     @testset "FeatureFileParser" begin

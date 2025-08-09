@@ -445,7 +445,7 @@ function (parser::LineIfNot)(realinput::ParserInput) :: ParseResult{String}
     result = parser.inner(input)
     if isparseok(result)
         badline, _badinput = line(input)
-        BadUnexpectedParseResult{String}(badline, input)
+        BadUnexpectedParseResult{String}(string(badline), input)
     else
         s, newinput = line(input)
         if s === nothing
@@ -733,6 +733,7 @@ const AnyKeyword = (
 const MaybeTags = Union{Nothing, Vector{String}}
 const ScenarioBits = Union{Keyword, String, Vector{ScenarioStep}, MaybeTags}
 
+
 const LongDescription = Joined(Repeating{String}(LineIfNot(AnyKeyword)))
 """
     ScenarioParser()
@@ -846,11 +847,17 @@ const ScenarioOrRule = Or{AbstractScenario}(
     Or{AbstractScenario}(ScenarioParser(), ScenarioOutlineParser()),
     RuleParser()
 )
+
+# The long descriptions in features have different ending conditions than in a
+# scenario, so we have separate parsers for them.
+ScenarioOrBackground() = Or{Any}(ScenarioOrRule, BackgroundParser())
+const LongFeatureDescription = Joined(Repeating{String}(LineIfNot(ScenarioOrBackground())))
+
 FeatureParser() = Transformer{Vector{FeatureBits}, Feature}(
     Sequence{FeatureBits}(
         Optionally(TagLinesParser()),
         KeywordParser("Feature:"),
-        Optionally(LongDescription),
+        Optionally(LongFeatureDescription),
         Optionally(BackgroundParser()),
         Repeating{AbstractScenario}(ScenarioOrRule)),
     sequence -> begin
