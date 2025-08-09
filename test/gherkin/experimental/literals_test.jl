@@ -14,7 +14,7 @@
 
 using Behavior.Gherkin.Experimental: Literal, ParserInput, line
 
-@testset "Literal" begin
+@testset "Literal              " begin
 
 @testset "Match Foo; Input is Foo; OK" begin
     # Arrange
@@ -87,21 +87,19 @@ end
     @test result2.value == "Bar"
 end
 
-# This test is currently failing, because of a bug in the Gherkin parser.
-# Some other combinators will need to be improved before this can be fixed.
-# @testset "Match Foo; Input is EOF; Bad parse result" begin
-#     # Arrange
-#     # Consume the first line to force an EOF where the next
-#     # line is beyond the last line.
-#     initialinput = ParserInput("a")
-#     _value, input = line(initialinput)
-#
-#     # Act
-#     p = Literal("Foo")
-#     result = p(input)
-#
-#     # Assert
-#     @test result isa BadUnexpectedEOFParseResult{String}
-# end
+@testset "Match Foo; Input is EOF; Bad parse result" begin
+    # Arrange
+    # Consume the first line to force an EOF where the next
+    # line is beyond the last line.
+    initialinput = ParserInput("a")
+    _value, input = line(initialinput)
+
+    # Act
+    p = Literal("Foo")
+    result = p(input)
+
+    # Assert
+    @test result isa BadParseResult{String}
+end
 
 end # Literal

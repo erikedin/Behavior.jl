@@ -40,8 +40,9 @@ struct ParserState
 end
 
 isendofline(state::ParserState, source::GherkinSource) = state.nextchar > lastindex(source.lines[state.nextline])
-islastline(state::ParserState, source::GherkinSource) = state.nextline >= lastindex(source.lines)
-iseof(state::ParserState, source::GherkinSource) = islastline(state, source) && isendofline(state, source)
+islastline(state::ParserState, source::GherkinSource) = state.nextline == lastindex(source.lines)
+ispastlastline(state::ParserState, source::GherkinSource) = state.nextline > lastindex(source.lines)
+iseof(state::ParserState, source::GherkinSource) = ispastlastline(state, source) || islastline(state, source) && isendofline(state, source)
 
 
 consume(state::ParserState, nlines::Int) = ParserState(state.nextline + nlines, 1)

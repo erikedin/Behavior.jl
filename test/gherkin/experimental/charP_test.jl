@@ -14,7 +14,7 @@
 
 using Behavior.Gherkin.Experimental: charP, ParserInput
 
-@testset "charP" begin
+@testset "charP                " begin
 
 @testset "charP; Input is EOF; BadParseResult" begin
     # Arrange

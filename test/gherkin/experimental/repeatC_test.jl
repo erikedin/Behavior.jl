@@ -14,7 +14,7 @@
 
 using Behavior.Gherkin.Experimental: repeatC, charP, ParserInput
 
-@testset "repeatC" begin
+@testset "repeatC              " begin
 
 @testset "repeatC over charP; Input is EOF; BadParseResult" begin
     # Arrange
