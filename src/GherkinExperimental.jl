@@ -209,6 +209,24 @@ function Base.show(io::IO, result::BadExceptionParseResult{T}) where {T}
 end
 
 """
+    charP
+
+Consume a single character.
+"""
+struct charC <: Parser{Char} end
+
+function (parser::charC)(input::ParserInput)
+    if iseof(input)
+        BadUnexpectedEOFParseResult{Char}(input)
+    else
+        c, newinput = consumechar(input)
+        OKParseResult{Char}(c, newinput)
+    end
+end
+
+const charP = charC()
+
+"""
     EscapedChar()
 
 Parse a single character, that is possibly an escape sequence.
