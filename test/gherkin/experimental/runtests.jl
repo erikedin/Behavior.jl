@@ -20,6 +20,7 @@ using Test
 
 include("combinators_test.jl")
 include("charP_test.jl")
+include("repeatC_test.jl")
 include("literals_test.jl")
 include("gherkin_combinators_test.jl")
 include("scenarios_test.jl")

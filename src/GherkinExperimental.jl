@@ -227,6 +227,31 @@ end
 const charP = charC()
 
 """
+    repeatC(inner, n)
+
+Repeat a parser n times.
+"""
+struct repeatC{T} <: Parser{Vector{T}}
+    inner::Parser{T}
+    n::Int
+end
+
+function (parser::repeatC{T})(input::ParserInput) where {T}
+    values = T[]
+    currentinput = input
+    for i in 1:parser.n
+        result = charP(currentinput)
+        if isparseok(result)
+            push!(values, result.value)
+        else
+            return BadInnerParseResult{T, Vector{T}}(result, input)
+        end
+        currentinput = result.newinput
+    end
+    OKParseResult{Vector{T}}(values, currentinput)
+end
+
+"""
     EscapedChar()
 
 Parse a single character, that is possibly an escape sequence.
