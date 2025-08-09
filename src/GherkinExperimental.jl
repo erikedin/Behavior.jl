@@ -306,11 +306,17 @@ struct Literal <: Parser{String}
 end
 
 function (parser::Literal)(input::ParserInput) :: ParseResult{String}
-    s, newinput = consumechars(input, length(parser.expected))
-    if s == parser.expected
-        OKParseResult{String}(s, newinput)
+    charparser = repeatC(charP, length(parser.expected))
+    result = charparser(input)
+    if isparseok(result)
+        s = join(result.value)
+        if s == parser.expected
+            OKParseResult{String}(s, result.newinput)
+        else
+            BadUnexpectedParseResult{String}(s, input)
+        end
     else
-        BadUnexpectedParseResult{String}(s, input)
+        BadInnerParseResult{Vector{Char}, String}(result, input)
     end
 end
 
