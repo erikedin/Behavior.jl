@@ -253,6 +253,20 @@ function (parser::repeatC{T})(input::ParserInput) where {T}
 end
 
 """
+    satisfyC()
+
+Given some parser, accept the result if it satisfies some condition.
+"""
+struct satisfyC{T} <: Parser{T}
+    condition::Function
+    p::Parser{T}
+end
+
+function (parser::satisfyC{T})(input::ParserInput) :: ParseResult{T} where {T}
+    charP(input)
+end
+
+"""
     EscapedChar()
 
 Parse a single character, that is possibly an escape sequence.
@@ -631,6 +645,24 @@ DataTableParser(; usenew::Bool = false) = Transformer{Vector{DataTableRow}, Data
     if usenew DataTableRowsParser() else Repeating{DataTableRow}(DataTableRowParser(), atleast=1) end,
     rows -> rows
 )
+
+# tablecellP parses a single cell in a data table.
+struct tablecellC <: Parser{String} end
+
+function (parser::tablecellC)(input::ParserInput) :: ParseResult{String}
+    seq = Sequence{String}(
+        Literal("abc"),
+        Literal("|")
+    )
+    # Take only the first element of the sequence.
+    p = Transformer{Vector{String}, String}(
+        seq,
+        takeelement(1)
+    )
+    p(input)
+end
+
+const tablecellP = tablecellC()
 
 struct AnyLine <: Parser{String} end
 
