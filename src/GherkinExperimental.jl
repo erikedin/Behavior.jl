@@ -253,6 +253,15 @@ function (parser::repeatC{T})(input::ParserInput) where {T}
 end
 
 """
+    result |> f
+
+Apply some function f to the OK parse result.
+Any bad parse result is simply returned.
+"""
+Base.:(|>)(result::OKParseResult{T}, f::Function) where {T} = f(result)
+Base.:(|>)(result::BadParseResult{T}, ::Function) where {T} = result
+
+"""
     satisfyC()
 
 Given some parser, accept the result if it satisfies some condition.
@@ -263,7 +272,12 @@ struct satisfyC{T} <: Parser{T}
 end
 
 function (parser::satisfyC{T})(input::ParserInput) :: ParseResult{T} where {T}
-    charP(input)
+    s = okresult -> if parser.condition(okresult.value)
+        okresult
+    else
+        BadUnexpectedParseResult{T}(string(okresult.value), input)
+    end
+    charP(input) |> s
 end
 
 """

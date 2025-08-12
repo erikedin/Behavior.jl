@@ -41,4 +41,61 @@ end
     @test result isa BadParseResult{Char}
 end
 
+@testset "satisfyC, not space; Input is space; BadParseResult" begin
+    # Arrange
+    # The input is (at the moment at least) stripped of leading and trailing
+    # whitespace. In this case we weant to recognize the whitespace, so we have
+    # to protect it with non-whitespace characters.
+    initialinput = ParserInput("a b")
+    # This consumes the 'a' character leaving the space character as the next character.
+    initialresult = charP(initialinput)
+    input = initialresult.newinput
+    parser = satisfyC(c -> !isspace(c), charP)
+
+    # Act
+    result = parser(input)
+
+    # Assert
+    @test result isa BadParseResult{Char}
+end
+
+@testset "satisfyC, not space; Input is space; Next parser recognizes space" begin
+    # Arrange
+    # The input is (at the moment at least) stripped of leading and trailing
+    # whitespace. In this case we weant to recognize the whitespace, so we have
+    # to protect it with non-whitespace characters.
+    initialinput = ParserInput("a b")
+    # This consumes the 'a' character leaving the space character as the next character.
+    initialresult = charP(initialinput)
+    input = initialresult.newinput
+    parser = satisfyC(c -> !isspace(c), charP)
+
+    # Don't accept the space.
+    result = parser(input)
+    @test result isa BadParseResult{Char}
+
+    # Act
+    nextresult = charP(result.newinput)
+
+    # Assert
+    @test nextresult isa OKParseResult{Char}
+    @test nextresult.value == ' '
+end
+
+@testset "satisfyC, not space; Input is ab; Next parser accepts b" begin
+    # Arrange
+    input = ParserInput("ab")
+    parser = satisfyC(c -> !isspace(c), charP)
+
+    # Accept the a
+    result = parser(input)
+    @test result isa OKParseResult{Char}
+
+    # Act
+    nextresult = charP(result.newinput)
+
+    # Assert
+    @test nextresult isa OKParseResult{Char}
+    @test nextresult.value == 'b'
+end
 end # satisfyC
