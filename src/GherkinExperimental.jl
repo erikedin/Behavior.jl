@@ -281,6 +281,25 @@ function (parser::satisfyC{T})(input::ParserInput) :: ParseResult{T} where {T}
 end
 
 """
+    choiceC
+
+Choose between one of two parsers.
+"""
+struct choiceC{S, T} <: Parser{Union{S, T}}
+    one::Parser{S}
+    two::Parser{T}
+end
+
+function (parser::choiceC{S, T})(input::ParserInput) :: ParseResult{Union{S, T}} where {S, T}
+    result = parser.one(input)
+    if isparseok(result)
+        result
+    else
+        parser.two(input)
+    end
+end
+
+"""
     EscapeChar
 
 A character escaped with a backslash.
