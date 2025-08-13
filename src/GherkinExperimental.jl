@@ -261,6 +261,20 @@ Any bad parse result is simply returned.
 Base.:(|>)(result::OKParseResult{T}, f::Function) where {T} = f(result)
 Base.:(|>)(result::BadParseResult{T}, ::Function) where {T} = result
 
+struct chainC{S, T} <: Parser{T}
+    a::Parser{S}
+    b::Parser{T}
+end
+
+function Base.:(|>)(a::Parser{S}, b::Parser{T}) where {S, T}
+    chainC{S, T}(a, b)
+end
+
+function (parser::chainC{S, T})(input::ParserInput) where {S, T}
+    chain = result -> parser.b(result.newinput)
+    parser.a(input) |> chain
+end
+
 """
     satisfyC()
 
@@ -309,6 +323,37 @@ struct EscapeChar
 end
 Base.print(io::IO, e::EscapeChar) = print(io, e.c)
 const CharOrEscape = Union{Char, EscapeChar}
+
+struct to{T} end
+
+(::to{T})(result::OKParseResult{S}) where {T, S} = OKParseResult{T}(T(result.value), result.newinput)
+(::to{T})(result::BadParseResult{S}) where {T, S} = BadInnerParseResult{S, T}(result, result.newinput)
+
+struct _transform{S, T}
+    inner::Parser{S}
+end
+
+(parser::_transform{S, T})(input::ParserInput) where {S, T} = to{T}()(parser.inner(input))
+
+function Base.:(|>)(parser::Parser{S}, ::to{T}) where {S, T}
+    _transform{S, T}(parser)
+end
+
+Base.:(|>)(parser::Parser{S}, ::Type{to{T}}) where {S, T} = parser |> to{T}()
+
+"""
+    escapedP
+
+Parse a single character that is definitely an escape character.
+"""
+struct escapedC <: Parser{EscapeChar} end
+
+function (::escapedC)(input::ParserInput) :: ParseResult{EscapeChar}
+    parser = satisfyC(c -> c == '\\', charP) |> charP |> to{EscapeChar}()
+    parser(input)
+end
+
+const escapedP = escapedC()
 
 """
     escapeP

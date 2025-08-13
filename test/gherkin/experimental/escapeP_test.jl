@@ -12,7 +12,46 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-using Behavior.Gherkin.Experimental: ParserInput, charP, escapeP, CharOrEscape, EscapeChar
+using Behavior.Gherkin.Experimental: ParserInput, charP, escapeP, CharOrEscape, EscapeChar, escapedP
+
+# Parse a single character that is definitely an escape character.
+@testset "escapedP             " begin
+
+@testset "escapedP; Input is \\|; Result is EscapeChar('|')" begin
+    # Arrange
+    input = ParserInput(raw"\|")
+
+    # Act
+    result = escapedP(input)
+
+    # Assert
+    @test result isa OKParseResult{EscapeChar}
+    @test result.value == EscapeChar('|')
+end
+
+@testset "escapedP; Input is EOF; BadParseResult" begin
+    # Arrange
+    input = ParserInput("")
+
+    # Act
+    result = escapedP(input)
+
+    # Assert
+    @test result isa BadParseResult{EscapeChar}
+end
+
+@testset "escapedP; Input is a|; BadParseResult" begin
+    # Arrange
+    input = ParserInput("a|")
+
+    # Act
+    result = escapedP(input)
+
+    # Assert
+    @test result isa BadParseResult{EscapeChar}
+end
+
+end # escapedP
 
 @testset "escapeP              " begin
 
