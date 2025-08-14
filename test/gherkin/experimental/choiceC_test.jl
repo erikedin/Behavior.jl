@@ -63,4 +63,20 @@ end
     @test result.value == 'b'
 end
 
+@testset "choiceC, then c; Input is ac; Last result is c" begin
+    # Arrange
+    input = ParserInput("ac")
+
+    a = satisfyC(c -> c == 'a', charP)
+    b = satisfyC(c -> c == 'b', charP)
+
+    # Act
+    parser = choiceC(a, b) |> charP
+    result = parser(input)
+
+    # Assert
+    @test result isa OKParseResult{Char}
+    @test result.value == 'c'
+end
+
 end # choiceC
