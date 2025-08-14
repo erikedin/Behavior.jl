@@ -295,25 +295,6 @@ function (parser::satisfyC{T})(input::ParserInput) :: ParseResult{T} where {T}
 end
 
 """
-    choiceC
-
-Choose between one of two parsers.
-"""
-struct choiceC{S, T} <: Parser{Union{S, T}}
-    one::Parser{S}
-    two::Parser{T}
-end
-
-function (parser::choiceC{S, T})(input::ParserInput) :: ParseResult{Union{S, T}} where {S, T}
-    result = parser.one(input)
-    if isparseok(result)
-        result
-    else
-        parser.two(input)
-    end
-end
-
-"""
     EscapeChar
 
 A character escaped with a backslash.
@@ -324,9 +305,16 @@ end
 Base.print(io::IO, e::EscapeChar) = print(io, e.c)
 const CharOrEscape = Union{Char, EscapeChar}
 
+Base.convert(::Type{EscapeChar}, c::Char) = EscapeChar(c)
+
+"""
+    to{T}
+
+Convert the result of a parser to a different type.
+"""
 struct to{T} end
 
-(::to{T})(result::OKParseResult{S}) where {T, S} = OKParseResult{T}(T(result.value), result.newinput)
+(::to{T})(result::OKParseResult{S}) where {T, S} = OKParseResult{T}(result.value, result.newinput)
 (::to{T})(result::BadParseResult{S}) where {T, S} = BadInnerParseResult{S, T}(result, result.newinput)
 
 struct _transform{S, T}
@@ -340,6 +328,26 @@ function Base.:(|>)(parser::Parser{S}, ::to{T}) where {S, T}
 end
 
 Base.:(|>)(parser::Parser{S}, ::Type{to{T}}) where {S, T} = parser |> to{T}()
+
+"""
+    choiceC
+
+Choose between one of two parsers.
+"""
+struct choiceC{S, T} <: Parser{Union{S, T}}
+    one::Parser{S}
+    two::Parser{T}
+end
+
+function (parser::choiceC{S, T})(input::ParserInput) :: ParseResult{Union{S, T}} where {S, T}
+    result = parser.one(input)
+    if isparseok(result)
+        OKParseResult{Union{S, T}}(result.value, result.newinput)
+    else
+        p = parser.two |> to{Union{S, T}}
+        p(input)
+    end
+end
 
 """
     escapedP

@@ -79,4 +79,20 @@ end
     @test result.value == 'c'
 end
 
+@testset "choiceC, a or escaped b; Input is \\b; Result is EscapeChar(b)" begin
+    # Arrange
+    input = ParserInput(raw"\b")
+
+    a = satisfyC(c -> c == 'a', charP)
+    b = escapedP
+
+    # Act
+    parser = choiceC(a, b)
+    result = parser(input)
+
+    # Assert
+    @test result isa OKParseResult{Union{Char, EscapeChar}}
+    @test result.value == EscapeChar('b')
+end
+
 end # choiceC
