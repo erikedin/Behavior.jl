@@ -28,7 +28,7 @@ using Behavior.Gherkin.Experimental: ParserInput, charP, satisfyC, choiceC
     result = parser(input)
 
     # Assert
-    @test result isa OKParseResult{Union{Char, Char}}
+    @test result isa OKParseResult{Char}
     @test result.value == 'a'
 end
 
@@ -44,7 +44,7 @@ end
     result = parser(input)
 
     # Assert
-    @test result isa BadParseResult{Union{Char, Char}}
+    @test result isa BadParseResult{Char}
 end
 
 @testset "choiceC, a or b; Input is b; Result is b" begin
@@ -59,7 +59,7 @@ end
     result = parser(input)
 
     # Assert
-    @test result isa OKParseResult{Union{Char, Char}}
+    @test result isa OKParseResult{Char}
     @test result.value == 'b'
 end
 
