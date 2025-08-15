@@ -317,7 +317,7 @@ struct to{T} end
 (::to{T})(result::OKParseResult{S}) where {T, S} = OKParseResult{T}(result.value, result.newinput)
 (::to{T})(result::BadParseResult{S}) where {T, S} = BadInnerParseResult{S, T}(result, result.newinput)
 
-struct _transform{S, T}
+struct _transform{S, T} <: Parser{T}
     inner::Parser{S}
 end
 
@@ -381,7 +381,18 @@ struct manyC{T} <: Parser{Vector{T}}
 end
 
 function (parser::manyC{T})(input::ParserInput) :: ParseResult{Vector{T}} where {T}
-    OKParseResult{Vector{Char}}(['a'], input)
+    values = T[]
+    nextinput = input
+    while true
+        result = parser.inner(nextinput)
+        if isparseok(result)
+            push!(values, result.value)
+            nextinput = result.newinput
+        else
+            break
+        end
+    end
+    OKParseResult{Vector{T}}(values, nextinput)
 end
 
 """

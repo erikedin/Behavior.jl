@@ -29,4 +29,57 @@ using Behavior.Gherkin.Experimental: ParserInput, charP, escapeP, CharOrEscape, 
     @test result.value == Char['a']
 end
 
+@testset "manyC of charP; Input is empty; Result is OK but empty []" begin
+    # Arrange
+    input = ParserInput("")
+
+    # Act
+    parser = manyC(charP)
+    result = parser(input)
+
+    # Assert
+    @test result isa OKParseResult{Vector{Char}}
+    @test result.value == Char[]
+end
+
+@testset "manyC of charP; Input is ab; Result is [a, b]" begin
+    # Arrange
+    input = ParserInput("ab")
+
+    # Act
+    parser = manyC(charP)
+    result = parser(input)
+
+    # Assert
+    @test result isa OKParseResult{Vector{Char}}
+    @test result.value == Char['a', 'b']
+end
+
+@testset "manyC of satisfyC(is a); Input is aab; Followed by b" begin
+    # Arrange
+    input = ParserInput("aab")
+
+    # Act
+    parser = manyC(satisfyC(c -> c == 'a', charP))
+    result = parser(input)
+    @test result isa OKParseResult{Vector{Char}}
+    nextresult = charP(result.newinput)
+
+    # Assert
+    @test nextresult.value == 'b'
+end
+
+@testset "manyC of escapeP; Input is a\\b; Result is [a, EscapeChar(b)]" begin
+    # Arrange
+    input = ParserInput("a\\b")
+
+    # Act
+    parser = manyC(escapeP)
+    result = parser(input)
+
+    # Assert
+    @test result isa OKParseResult{Vector{Union{Char, EscapeChar}}}
+    @test result.value == Union{Char, EscapeChar}['a', EscapeChar('b')]
+end
+
 end # manyC
