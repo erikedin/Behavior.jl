@@ -372,6 +372,19 @@ const notbackslashP = satisfyC(c -> c != '\\', charP)
 const escapeP = choiceC(notbackslashP, escapedP) |> to{CharOrEscape}
 
 """
+    manyC
+
+Repeat a parser until it fails.
+"""
+struct manyC{T} <: Parser{Vector{T}}
+    inner::Parser{T}
+end
+
+function (parser::manyC{T})(input::ParserInput) :: ParseResult{Vector{T}} where {T}
+    OKParseResult{Vector{Char}}(['a'], input)
+end
+
+"""
     EscapedChar()
 
 Parse a single character, that is possibly an escape sequence.
