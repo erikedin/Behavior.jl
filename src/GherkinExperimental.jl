@@ -368,27 +368,8 @@ const escapedP = escapedC()
 
 Parse a character that is possibly an escape sequenced character.
 """
-struct escapeC <: Parser{CharOrEscape} end
-
-function (parser::escapeC)(input::ParserInput) :: ParseResult{CharOrEscape}
-    result = charP(input)
-    if isparseok(result)
-        if result.value == '\\'
-            escresult = charP(result.newinput)
-            if isparseok(escresult)
-                OKParseResult{CharOrEscape}(EscapeChar(escresult.value), escresult.newinput)
-            else
-                BadInnerParseResult{Char, CharOrEscape}(escresult, result.newinput)
-            end
-        else
-            OKParseResult{CharOrEscape}(result.value, result.newinput)
-        end
-    else
-        BadInnerParseResult{Char, CharOrEscape}(result, result.newinput)
-    end
-end
-
-const escapeP = escapeC()
+const notbackslashP = satisfyC(c -> c != '\\', charP)
+const escapeP = choiceC(notbackslashP, escapedP) |> to{CharOrEscape}
 
 """
     EscapedChar()
