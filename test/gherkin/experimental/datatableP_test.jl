@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-using Behavior.Gherkin.Experimental: ParserInput, tablecellP, escapeP, charP, manyC, satisfyC
+using Behavior.Gherkin.Experimental: ParserInput, tablecellP, escapeP, charP, manyC, satisfyC, datatableP
+using Behavior.Gherkin: DataTable
 
 @testset "datatableP           " begin
 
@@ -76,6 +77,64 @@ end
     # Assert
     @test result isa OKParseResult{String}
     @test result.value == "def"
+end
+
+@testset "datatableP; Input is |def|; Table is [[def]]" begin
+    # Arrange
+    input = ParserInput("|def|")
+
+    # Act
+    result = datatableP(input)
+
+    # Assert
+    @test result isa OKParseResult{DataTable}
+    @test result.value == DataTable([["def"]])
+end
+
+@testset "datatableP; Input is empty; BadParseResult" begin
+    # Arrange
+    input = ParserInput("")
+
+    # Act
+    result = datatableP(input)
+
+    # Assert
+    @test result isa BadParseResult{DataTable}
+end
+
+@testset "datatableP; Input is |abc|def|; Table is [[abc, def]]" begin
+    # Arrange
+    input = ParserInput("|abc|def|")
+
+    # Act
+    result = datatableP(input)
+
+    # Assert
+    @test result isa OKParseResult{DataTable}
+    @test result.value == DataTable([["abc", "def"]])
+end
+
+@testset "datatableP; Input is |abc|def|ghi|; Table is [[abc, def, ghi]]" begin
+    # Arrange
+    input = ParserInput("|abc|def|ghi|")
+
+    # Act
+    result = datatableP(input)
+
+    # Assert
+    @test result isa OKParseResult{DataTable}
+    @test result.value == DataTable([["abc", "def", "ghi"]])
+end
+
+@testset "datatableP; Input is |abc; BadParseResult" begin
+    # Arrange
+    input = ParserInput("|abc")
+
+    # Act
+    result = datatableP(input)
+
+    # Assert
+    @test result isa BadParseResult{DataTable}
 end
 
 end # datatableP

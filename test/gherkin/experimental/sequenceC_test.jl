@@ -110,4 +110,17 @@ end
     @test nextresult.value == 'a'
 end
 
+@testset "sequenceC, ignore a, then b as string; Input is ab; Result is b" begin
+    # Arrange
+    input = ParserInput("ab")
+
+    # Act
+    parser = ignoreC(charP) >> (charP |> to{String}(string))
+    result = parser(input)
+
+    # Assert
+    @test result isa OKParseResult{String}
+    @test result.value == "b"
+end
+
 end # sequenceC

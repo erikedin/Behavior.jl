@@ -469,12 +469,12 @@ function Base.:(>>)(parser::Parser{T}, ignoredparser::ignoreC{S}) :: Parser{T} w
 end
 
 function Base.:(>>)(ignoredparser::ignoreC{S}, parser::Parser{T}) :: Parser{T} where {S, T}
-    ignoreLC{T, S}(ignoredparser, parser)
+    ignoreLC{S, T}(ignoredparser, parser)
 end
 
 _ignoreRC(::ParserInput, result::OKParseResult{T}, ignoredresult::OKParseResult{S}) where {S, T} = OKParseResult{T}(result.value, ignoredresult.newinput)
 # The second parser failed, so the full parser fails.
-_ignoreRC(originput::ParserInput, result::OKParseResult{T}, ignoredresult::BadParseResult{S}) where {S, T} = BadInnerParseResult{S, T}(ignoredresult, originput)
+_ignoreRC(originput::ParserInput, ::OKParseResult{T}, ignoredresult::BadParseResult{S}) where {S, T} = BadInnerParseResult{S, T}(ignoredresult, originput)
 # The inner parser succeeded, so parse the second one.
 _ignoreRC(originput::ParserInput, result::OKParseResult{T}, ignoredparser::ignoreC{S}) where {T, S} = _ignoreRC(originput, result, ignoredparser(result.newinput))
 # First inner parser fails, so just fail right away
@@ -849,9 +849,14 @@ DataTableParser(; usenew::Bool = false) = Transformer{Vector{DataTableRow}, Data
     rows -> rows
 )
 
+
+atleastC(n::Int, p::Parser{T}) where {T} = satisfyC(x -> length(x) >= n, manyC(p))
+const pipeP = satisfyC(c -> c == '|', charP)
 const notpipeP = satisfyC(c -> c != '|', escapeP)
 const untilpipeP = manyC(notpipeP) |> to{String}(join)
 const tablecellP = untilpipeP >> ignoreC(satisfyC(c -> c == '|', charP))
+const tablerowP = ignoreC(pipeP) >> atleastC(1, tablecellP)
+const datatableP = tablerowP |> to{DataTable}(x -> [x])
 
 struct AnyLine <: Parser{String} end
 
