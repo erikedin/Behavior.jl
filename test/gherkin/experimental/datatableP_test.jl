@@ -52,38 +52,30 @@ end
 
 # This test implements tablecellP, which ensures that we have all the necessary
 # parts to finish the implementation in the Gherkin module.
-# @testset "tablecellP implementation check; Input is def|; Element is def" begin
-#      # Arrange
-#      input = ParserInput("def|")
-#
-#      # Act
-#      notpipeP = satisfyC(c != '|', escapeP)
-#      untilpipeP = manyC(notpipeP) |> to{String}(join)
-#      result = parser(input)
-#
-#      # Assert
-#      @test result isa OKParseResult{String}
-#      @test result.value == "def"
-# end
+@testset "tablecellP implementation check; Input is def|; Element is def" begin
+     # Arrange
+     input = ParserInput("def|")
 
-# @testset "tablecellP implementation check; Input is def|g; Next char is g" begin
-#     # Arrange
-#
-#     # Act
-#
-#     # Assert
-# end
-#
-# @testset "tablecellP; Input is def|; Element is def " begin
-#     # Arrange
-#     input = ParserInput("def|")
-#
-#     # Act
-#     result = tablecellP(input)
-#
-#     # Assert
-#     @test result isa OKParseResult{String}
-#     @test result.value == "def"
-# end
+     # Act
+     notpipeP = satisfyC(c -> c != '|', escapeP)
+     untilpipeP = manyC(notpipeP) |> to{String}(join)
+     result = untilpipeP(input)
+
+     # Assert
+     @test result isa OKParseResult{String}
+     @test result.value == "def"
+end
+
+@testset "tablecellP; Input is def|; Element is def " begin
+    # Arrange
+    input = ParserInput("def|")
+
+    # Act
+    result = tablecellP(input)
+
+    # Assert
+    @test result isa OKParseResult{String}
+    @test result.value == "def"
+end
 
 end # datatableP

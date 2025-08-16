@@ -98,4 +98,17 @@ end
     @test nextresult isa OKParseResult{Char}
     @test nextresult.value == 'b'
 end
+
+@testset "satisfyC, escapedP; Input is \\a; Result is EscapeChar(a)" begin
+    # Arrange
+    input = ParserInput("\\a")
+    parser = satisfyC(c -> c == EscapeChar('a'), escapedP)
+
+    # Act
+    result = parser(input)
+
+    # Assert
+    @test result isa OKParseResult{EscapeChar}
+    @test result.value == EscapeChar('a')
+end
 end # satisfyC

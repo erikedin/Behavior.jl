@@ -282,7 +282,7 @@ Given some parser, accept the result if it satisfies some condition.
 """
 struct satisfyC{T} <: Parser{T}
     condition::Function
-    p::Parser{T}
+    inner::Parser{T}
 end
 
 function (parser::satisfyC{T})(input::ParserInput) :: ParseResult{T} where {T}
@@ -291,7 +291,7 @@ function (parser::satisfyC{T})(input::ParserInput) :: ParseResult{T} where {T}
     else
         BadUnexpectedParseResult{T}(string(okresult.value), input)
     end
-    charP(input) |> s
+    parser.inner(input) |> s
 end
 
 """
@@ -794,9 +794,16 @@ DataTableParser(; usenew::Bool = false) = Transformer{Vector{DataTableRow}, Data
 # tablecellP parses a single cell in a data table.
 struct tablecellC <: Parser{String} end
 
+const notpipeP = satisfyC(c -> c != '|', escapeP)
+const untilpipeP = manyC(notpipeP) |> to{String}(join)
+
 function (parser::tablecellC)(input::ParserInput) :: ParseResult{String}
+    # TODO:
+    # I would like to write this more like
+    #   untilpipeP >> ignoreC(literalC("|"))
+    # which would recognize the literal |, but discard the value.
     seq = Sequence{String}(
-        Literal("abc"),
+        untilpipeP,
         Literal("|")
     )
     # Take only the first element of the sequence.
