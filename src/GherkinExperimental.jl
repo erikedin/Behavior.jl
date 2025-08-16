@@ -312,21 +312,37 @@ Base.convert(::Type{EscapeChar}, c::Char) = EscapeChar(c)
 
 Convert the result of a parser to a different type.
 """
-struct to{T} end
+struct to{T}
+    f::Function
 
-(::to{T})(result::OKParseResult{S}) where {T, S} = OKParseResult{T}(result.value, result.newinput)
+    to{T}() where {T} = new{T}(identity)
+    to{T}(f::Function) where {T} = new{T}(f)
+end
+
+(t::to{T})(result::OKParseResult{S}) where {T, S} = OKParseResult{T}(t.f(result.value), result.newinput)
 (::to{T})(result::BadParseResult{S}) where {T, S} = BadInnerParseResult{S, T}(result, result.newinput)
 
 struct _transform{S, T} <: Parser{T}
+    t::to{T}
     inner::Parser{S}
 end
 
-(parser::_transform{S, T})(input::ParserInput) where {S, T} = to{T}()(parser.inner(input))
+(parser::_transform{S, T})(input::ParserInput) where {S, T} = parser.t(parser.inner(input))
 
-function Base.:(|>)(parser::Parser{S}, ::to{T}) where {S, T}
-    _transform{S, T}(parser)
+function Base.:(|>)(parser::Parser{S}, t::to{T}) where {S, T}
+    _transform{S, T}(t, parser)
 end
 
+"""
+    parser |> to{T}
+
+Shorthand for
+
+    parser |> to{T}()
+
+intended to make it clear that to{T} only carries type information and does not do transformations of
+the data, and to avoid writing unnecessary parentheses.
+"""
 Base.:(|>)(parser::Parser{S}, ::Type{to{T}}) where {S, T} = parser |> to{T}()
 
 """

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-using Behavior.Gherkin.Experimental: ParserInput, charP, satisfyC, to, EscapeChar
+using Behavior.Gherkin.Experimental: ParserInput, charP, satisfyC, to, EscapeChar, escapedP, manyC
 
 @testset "to                   " begin
 
@@ -52,6 +52,32 @@ end
     # Assert
     @test result isa OKParseResult{EscapeChar}
     @test result.value == EscapeChar('a')
+end
+
+@testset "to with function; Input is character a; Result is string a" begin
+    # Arrange
+    input = ParserInput("a")
+
+    # Act
+    parser = charP |> to{String}(string)
+    result = parser(input)
+
+    # Assert
+    @test result isa OKParseResult{String}
+    @test result.value == "a"
+end
+
+@testset "to with function; Input is [a, b, \\|]; Result is string ab|" begin
+    # Arrange
+    input = ParserInput("ab\\|")
+
+    # Act
+    parser = manyC(escapeP) |> to{String}(join)
+    result = parser(input)
+
+    # Assert
+    @test result isa OKParseResult{String}
+    @test result.value == "ab|"
 end
 
 end # to

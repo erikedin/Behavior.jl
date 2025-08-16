@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-using Behavior.Gherkin.Experimental: ParserInput, tablecellP
+using Behavior.Gherkin.Experimental: ParserInput, tablecellP, escapeP, charP, manyC, satisfyC
 
 @testset "datatableP           " begin
 
@@ -50,7 +50,30 @@ end
     @test result isa BadParseResult{String}
 end
 
-# Needs a manyC combinator with a satisyfC.
+# This test implements tablecellP, which ensures that we have all the necessary
+# parts to finish the implementation in the Gherkin module.
+# @testset "tablecellP implementation check; Input is def|; Element is def" begin
+#      # Arrange
+#      input = ParserInput("def|")
+#
+#      # Act
+#      notpipeP = satisfyC(c != '|', escapeP)
+#      untilpipeP = manyC(notpipeP) |> to{String}(join)
+#      result = parser(input)
+#
+#      # Assert
+#      @test result isa OKParseResult{String}
+#      @test result.value == "def"
+# end
+
+# @testset "tablecellP implementation check; Input is def|g; Next char is g" begin
+#     # Arrange
+#
+#     # Act
+#
+#     # Assert
+# end
+#
 # @testset "tablecellP; Input is def|; Element is def " begin
 #     # Arrange
 #     input = ParserInput("def|")
