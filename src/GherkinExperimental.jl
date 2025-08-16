@@ -849,30 +849,9 @@ DataTableParser(; usenew::Bool = false) = Transformer{Vector{DataTableRow}, Data
     rows -> rows
 )
 
-# tablecellP parses a single cell in a data table.
-struct tablecellC <: Parser{String} end
-
 const notpipeP = satisfyC(c -> c != '|', escapeP)
 const untilpipeP = manyC(notpipeP) |> to{String}(join)
-
-function (parser::tablecellC)(input::ParserInput) :: ParseResult{String}
-    # TODO:
-    # I would like to write this more like
-    #   untilpipeP >> ignoreC(literalC("|"))
-    # which would recognize the literal |, but discard the value.
-    seq = Sequence{String}(
-        untilpipeP,
-        Literal("|")
-    )
-    # Take only the first element of the sequence.
-    p = Transformer{Vector{String}, String}(
-        seq,
-        takeelement(1)
-    )
-    p(input)
-end
-
-const tablecellP = tablecellC()
+const tablecellP = untilpipeP >> ignoreC(satisfyC(c -> c == '|', charP))
 
 struct AnyLine <: Parser{String} end
 
