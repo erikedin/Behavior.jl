@@ -435,6 +435,64 @@ function (parser::EscapedChar)(input::ParserInput) :: ParseResult{Char}
 end
 
 """
+    ignoreC(::Parser{T})
+
+Recognize and consume the inner parser, but discard its result.
+This is useful when parsing things like "(abc)", where the parentheses must
+be present, but ignored after the parse is accepted.
+"""
+struct ignoreC{T} <: Parser{T}
+    inner::Parser{T}
+end
+
+(parser::ignoreC{T})(input::ParserInput) where {T} = parser.inner(input)
+
+"""
+    ignoreRC(parser1, parser2)
+    ignoreLC(parser1, parser2)
+
+Accept one parser, then accept but ignore a second parser.
+Ignore the right one (R) or the left one (L).
+"""
+struct ignoreRC{T, S} <: Parser{T}
+    inner::Parser{T}
+    ignoredparser::ignoreC{S}
+end
+
+struct ignoreLC{S, T} <: Parser{T}
+    ignoredparser::ignoreC{S}
+    inner::Parser{T}
+end
+
+function Base.:(>>)(parser::Parser{T}, ignoredparser::ignoreC{S}) :: Parser{T} where {S, T}
+    ignoreRC{T, S}(parser, ignoredparser)
+end
+
+function Base.:(>>)(ignoredparser::ignoreC{S}, parser::Parser{T}) :: Parser{T} where {S, T}
+    ignoreLC{T, S}(ignoredparser, parser)
+end
+
+_ignoreRC(::ParserInput, result::OKParseResult{T}, ignoredresult::OKParseResult{S}) where {S, T} = OKParseResult{T}(result.value, ignoredresult.newinput)
+# The second parser failed, so the full parser fails.
+_ignoreRC(originput::ParserInput, result::OKParseResult{T}, ignoredresult::BadParseResult{S}) where {S, T} = BadInnerParseResult{S, T}(ignoredresult, originput)
+# The inner parser succeeded, so parse the second one.
+_ignoreRC(originput::ParserInput, result::OKParseResult{T}, ignoredparser::ignoreC{S}) where {T, S} = _ignoreRC(originput, result, ignoredparser(result.newinput))
+# First inner parser fails, so just fail right away
+_ignoreRC(::ParserInput, result::BadParseResult{T}, ::ignoreC{S}) where {T, S} = result
+
+# Both parser succeeded, so ignore the first parser.
+_ignoreLC(::ParserInput, ::OKParseResult{S}, result::OKParseResult{T}) where {S, T} = OKParseResult{T}(result.value, result.newinput)
+# The inner parser failed, so the full one fails.
+_ignoreLC(originput::ParserInput, ::OKParseResult{S}, result::BadParseResult{T}) where {S, T} = BadUnexpectedParseResult{T}(string(result), originput)
+# The ignored parser succeeded, so parse the inner one.
+_ignoreLC(originput::ParserInput, ignoredresult::OKParseResult{S}, innerparser::Parser{T}) where {T, S} = _ignoreLC(originput, ignoredresult, innerparser(ignoredresult.newinput))
+# First ignored parser failed, so fail right away.
+_ignoreLC(::ParserInput, ignoredresult::BadParseResult{S}, ::Parser{T}) where {T, S} = BadInnerParseResult{S, T}(ignoredresult, ignoredresult.newinput)
+
+(parser::ignoreRC{T, S})(input::ParserInput) where {T, S} = _ignoreRC(input, parser.inner(input), parser.ignoredparser)
+(parser::ignoreLC{S, T})(input::ParserInput) where {S, T} = _ignoreLC(input, parser.ignoredparser(input), parser.inner)
+
+"""
     Line(expected::String)
 
 Line is a parser that recognizes when a line is exactly an expected value.
