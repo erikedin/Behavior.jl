@@ -79,6 +79,17 @@ end
     @test result.value == "def"
 end
 
+# @testset "tablecellP; Input has a newline in the cell; BadParseResult" begin
+#     # Arrange
+#     input = ParserInput("abc\ndef|")
+#
+#     # Act
+#     result = tablecellP(input)
+#
+#     # Assert
+#     @test result isa BadParseResult{String}
+# end
+
 @testset "datatableP; Input is |def|; Table is [[def]]" begin
     # Arrange
     input = ParserInput("|def|")
@@ -136,5 +147,17 @@ end
     # Assert
     @test result isa BadParseResult{DataTable}
 end
+
+# @testset "datatableP; Input is |abc| then |def|; Table is [[abc], [def]]" begin
+#     # Arrange
+#     input = ParserInput("|abc|\n|def|")
+#
+#     # Act
+#     result = datatableP(input)
+#
+#     # Assert
+#     @test result isa OKParseResult{DataTable}
+#     @test result.value == DataTable([["abc"], ["def"]])
+# end
 
 end # datatableP

@@ -228,6 +228,23 @@ end
 const charP = charC()
 
 """
+    eofP
+
+Recognize end of input.
+"""
+struct eofC <: Parser{Nothing} end
+
+function (parser::eofC)(input::ParserInput) :: ParseResult{Nothing}
+    if iseof(input)
+        OKParseResult{Nothing}(nothing, input)
+    else
+        BadExpectedEOFParseResult{Nothing}(input)
+    end
+end
+
+const eofP = eofC()
+
+"""
     repeatC(inner, n)
 
 Repeat a parser n times.

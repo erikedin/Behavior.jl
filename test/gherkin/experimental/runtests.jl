@@ -20,6 +20,7 @@ using Test
 
 include("combinators_test.jl")
 include("charP_test.jl")
+include("eofP_test.jl")
 include("repeatC_test.jl")
 include("escapeP_test.jl")
 include("satisfyC_test.jl")
