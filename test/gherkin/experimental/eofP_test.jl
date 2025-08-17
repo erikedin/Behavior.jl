@@ -14,7 +14,7 @@
 
 using Behavior.Gherkin.Experimental: ParserInput, eofP
 
-@testset "eofP                          " begin
+@testset "eofP                 " begin
 
 @testset "eofP; Input is a; BadParseResult" begin
     # Arrange

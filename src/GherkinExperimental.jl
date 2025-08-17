@@ -536,24 +536,9 @@ end
 
 Parse a known literal value, useful for keywords and delimiters.
 """
-struct Literal <: Parser{String}
-    expected::String
-end
-
-function (parser::Literal)(input::ParserInput) :: ParseResult{String}
-    charparser = repeatC(charP, length(parser.expected))
-    result = charparser(input)
-    if isparseok(result)
-        s = join(result.value)
-        if s == parser.expected
-            OKParseResult{String}(s, result.newinput)
-        else
-            BadUnexpectedParseResult{String}(s, input)
-        end
-    else
-        BadInnerParseResult{Vector{Char}, String}(result, input)
-    end
-end
+const repeatedCharsC = n -> repeatC(charP, n) |> to{String}(join)
+const literalC = s -> satisfyC(x -> x == s, repeatedCharsC(length(s)))
+const Literal = literalC
 
 """
     Optionally{T}
