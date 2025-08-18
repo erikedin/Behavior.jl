@@ -113,6 +113,7 @@ function line(input::ParserInput) :: Tuple{Union{Nothing, String}, ParserInput}
 end
 
 iseof(input::ParserInput) = iseof(input.state, input.source)
+isendofline(input::ParserInput) = isendofline(input.state, input.source)
 
 """
     Parser{T}
@@ -208,6 +209,23 @@ end
 function Base.show(io::IO, result::BadExceptionParseResult{T}) where {T}
     show(io, "Exception: $(result.ex)")
 end
+
+"""
+    eolP
+
+Recognize the end of a line.
+"""
+struct eolC <: Parser{Nothing} end
+
+function (parser::eolC)(input::ParserInput) :: ParseResult{Nothing}
+    if isendofline(input)
+        OKParseResult{Nothing}(nothing, input)
+    else
+        BadExpectationParseResult{Nothing}("newline", "not newline", input)
+    end
+end
+
+const eolP = eolC()
 
 """
     charP

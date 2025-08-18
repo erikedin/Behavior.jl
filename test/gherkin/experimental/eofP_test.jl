@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-using Behavior.Gherkin.Experimental: ParserInput, eofP
+using Behavior.Gherkin.Experimental: ParserInput, eofP, eolP
 
 @testset "eofP                 " begin
 
@@ -37,6 +37,43 @@ end
     # Assert
     @test result isa OKParseResult{Nothing}
     @test result.value === nothing
+end
+
+@testset "eoLP; Input is a single newline; OK" begin
+    # Arrange
+    input = ParserInput("\n")
+
+    # Act
+    result = eolP(input)
+
+    # Assert
+    @test result isa OKParseResult{Nothing}
+    @test result.value === nothing
+end
+
+@testset "eoLP; Input is a and a newline; Not OK" begin
+    # Arrange
+    input = ParserInput("a\n")
+
+    # Act
+    result = eolP(input)
+
+    # Assert
+    @test result isa BadParseResult{Nothing}
+end
+
+@testset "eoLP; Input is newline, then b; Next char is b" begin
+    # Arrange
+    input = ParserInput("a\nb")
+
+    # Act
+    prefixresult = charP(input)
+    result = eolP(prefixresult.newinput)
+    nextresult = charP(result.newinput)
+
+    # Assert
+    @test nextresult isa OKParseResult{Char}
+    @test nextresult.value == 'b'
 end
 
 end # eofP
