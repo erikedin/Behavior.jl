@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-using Behavior.Gherkin.Experimental: charP, ParserInput
+using Behavior.Gherkin.Experimental: charP, ParserInput, manyC, to
 
 @testset "charP                " begin
 
@@ -64,5 +64,51 @@ end
     @test result1.value == 'a'
     @test result2 isa OKParseResult{Char}
     @test result2.value == 'b'
+end
+
+# charP will work on a single line, but will fail on a newline.
+# This is because Gherkin is line based, so the current parser design
+# splits the source into lines on start. This was perhaps not a great
+# decision in hindsight, but here we are. We don't want charP to ignore
+# line endings, which is what happens before this change. We need to be
+# able to determine when the line ends, and stop there. Take a table as
+# an example:
+#   | foo | bar  |
+#   | baz | quux |
+# The charP parser would, before this change, completely ignore the
+# line ending and collect this as a the text
+#   | foo | bar  || baz | quux |
+# Because the newline is implicit in the ParserInput, we can't even make
+# a parser satisfyC(c -> c != '\n', charP).
+# The plan is to introduce this change now, and perhaps later on remove
+# this splitting of lines in ParserInput. Then we can introduce a parser
+# anyP, which is like charP but does not fail on line endings.
+@testset "charP; Input is a\nb; Result is a, then BadParseResult" begin
+    # Arrange
+    # We need to start and end with a non-space character, because the
+    # parser strips leading and trailing whitespace.
+    input = ParserInput("a\nb")
+
+    # Act
+    prefixresult = charP(input)
+    result = charP(prefixresult.newinput)
+
+    # Assert
+    @test result isa BadParseResult{Char}
+end
+
+@testset "manyC of charP; Input is abc\ndef; Result is abc" begin
+    # Arrange
+    # We need to start and end with a non-space character, because the
+    # parser strips leading and trailing whitespace.
+    input = ParserInput("abc\ndef")
+
+    # Act
+    parser = manyC(charP) |> to{String}(join)
+    result = parser(input)
+
+    # Assert
+    @test result isa OKParseResult{String}
+    @test result.value == "abc"
 end
 end # charP

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-using Behavior.Gherkin.Experimental: ParserInput, eofP, eolP
+using Behavior.Gherkin.Experimental: ParserInput, eofP, eolP, charP, ignoreC
 
 @testset "eofP                 " begin
 
@@ -74,6 +74,37 @@ end
     # Assert
     @test nextresult isa OKParseResult{Char}
     @test nextresult.value == 'b'
+end
+
+@testset "charP then eoLP; Input is a\\nb; Next char is P" begin
+    # Arrange
+    input = ParserInput("a\nb")
+
+    # Act
+    parser = charP >> ignoreC(eolP)
+    result = parser(input)
+    nextresult = charP(result.newinput)
+
+    # Assert
+    @test nextresult isa OKParseResult{Char}
+    @test nextresult.value == 'b'
+end
+
+@testset "manyC then eoLP; Input is |a|b|\\n|c|d|; Next char is P" begin
+    # Arrange
+    input = ParserInput("|a|b|\n|c|d|")
+
+    # Act
+    untileolP = manyC(charP) |> to{String}(join)
+    parser = untileolP >> ignoreC(eolP)
+    result = parser(input)
+    nextresult = parser(result.newinput)
+
+    # Assert
+    @test result isa OKParseResult{String}
+    @test result.value == "|a|b|"
+    @test nextresult isa OKParseResult{String}
+    @test nextresult.value == "|c|d|"
 end
 
 end # eofP

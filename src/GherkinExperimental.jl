@@ -46,10 +46,13 @@ iseof(state::ParserState, source::GherkinSource) = ispastlastline(state, source)
 
 
 consume(state::ParserState, nlines::Int) = ParserState(state.nextline + nlines, 1)
+
+nextline(state::ParserState) = ParserState(state.nextline + 1, 1)
+
 function consumechar(initialstate::ParserState, source::GherkinSource) :: Tuple{Char, ParserState}
     state = if isendofline(initialstate, source)
         # Start of next line
-        ParserState(initialstate.nextline + 1, 1)
+        nextline(initialstate)
     else
         initialstate
     end
@@ -114,6 +117,11 @@ end
 
 iseof(input::ParserInput) = iseof(input.state, input.source)
 isendofline(input::ParserInput) = isendofline(input.state, input.source)
+
+function nextline(input::ParserInput) :: ParserInput
+    newstate = nextline(input.state)
+    ParserInput(input, newstate)
+end
 
 """
     Parser{T}
@@ -219,7 +227,7 @@ struct eolC <: Parser{Nothing} end
 
 function (parser::eolC)(input::ParserInput) :: ParseResult{Nothing}
     if isendofline(input)
-        OKParseResult{Nothing}(nothing, input)
+        OKParseResult{Nothing}(nothing, nextline(input))
     else
         BadExpectationParseResult{Nothing}("newline", "not newline", input)
     end
@@ -235,7 +243,7 @@ Consume a single character.
 struct charC <: Parser{Char} end
 
 function (parser::charC)(input::ParserInput)
-    if iseof(input)
+    if iseof(input) || isendofline(input)
         BadUnexpectedEOFParseResult{Char}(input)
     else
         c, newinput = consumechar(input)
