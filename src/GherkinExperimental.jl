@@ -455,6 +455,15 @@ function (parser::manyC{T})(input::ParserInput) :: ParseResult{Vector{T}} where 
 end
 
 """
+    spaceP
+    spacesP
+
+Parsers for spaces.
+"""
+const spaceP = satisfyC(c -> isspace(c), charP)
+const spacesP = manyC(spaceP)
+
+"""
     EscapedChar()
 
 Parse a single character, that is possibly an escape sequence.
@@ -881,10 +890,10 @@ DataTableParser(; usenew::Bool = false) = Transformer{Vector{DataTableRow}, Data
 atleastC(n::Int, p::Parser{T}) where {T} = satisfyC(x -> length(x) >= n, manyC(p))
 const pipeP = satisfyC(c -> c == '|', charP)
 const notpipeP = satisfyC(c -> c != '|', escapeP)
-const untilpipeP = manyC(notpipeP) |> to{String}(join)
-const tablecellP = untilpipeP >> ignoreC(satisfyC(c -> c == '|', charP))
-const tablerowP = ignoreC(pipeP) >> atleastC(1, tablecellP)
-const datatableP = tablerowP |> to{DataTable}(x -> [x])
+const untilpipeP = manyC(notpipeP) |> to{String}(cs -> strip(join(cs)))
+const tablecellP = untilpipeP >> ignoreC(pipeP)
+const tablerowP = ignoreC(pipeP) >> atleastC(1, tablecellP) >> ignoreC(eolP)
+const datatableP = atleastC(1, tablerowP) |> to{DataTable}()
 
 struct AnyLine <: Parser{String} end
 

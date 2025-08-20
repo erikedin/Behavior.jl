@@ -79,16 +79,74 @@ end
     @test result.value == "def"
 end
 
-# @testset "tablecellP; Input has a newline in the cell; BadParseResult" begin
-#     # Arrange
-#     input = ParserInput("abc\ndef|")
-#
-#     # Act
-#     result = tablecellP(input)
-#
-#     # Assert
-#     @test result isa BadParseResult{String}
-# end
+@testset "tablecellP; Input has a newline in the cell; BadParseResult" begin
+    # Arrange
+    input = ParserInput("abc\ndef|")
+
+    # Act
+    result = tablecellP(input)
+
+    # Assert
+    @test result isa BadParseResult{String}
+end
+
+@testset "tablecellP; Input has a single leading space; Space is stripped" begin
+    # Arrange
+    # The leading x is required because ParserInput automatically strips leading and trailing
+    # spaces from the input. Here we need to keep that space, so we prefix it by a character.
+    # The x is parsed, so it's not part of the input to tablecellP.
+    prefixedinput = ParserInput("x abc|")
+    prefixresult = charP(prefixedinput)
+    input = prefixresult.newinput
+
+    # Act
+    result = tablecellP(input)
+
+    # Assert
+    @test result isa OKParseResult{String}
+    @test result.value == "abc"
+end
+
+@testset "tablecellP; Input has leading spaces; Spaces are stripped" begin
+    # Arrange
+    # The leading x is required because ParserInput automatically strips leading and trailing
+    # spaces from the input. Here we need to keep that space, so we prefix it by a character.
+    # The x is parsed, so it's not part of the input to tablecellP.
+    prefixedinput = ParserInput("x  abc|")
+    prefixresult = charP(prefixedinput)
+    input = prefixresult.newinput
+
+    # Act
+    result = tablecellP(input)
+
+    # Assert
+    @test result isa OKParseResult{String}
+    @test result.value == "abc"
+end
+
+@testset "tablecellP; Input has a single trailing space; Space is stripped" begin
+    # Arrange
+    input = ParserInput("abc |")
+
+    # Act
+    result = tablecellP(input)
+
+    # Assert
+    @test result isa OKParseResult{String}
+    @test result.value == "abc"
+end
+
+@testset "tablecellP; Input has trailing spaces; Spaces are stripped" begin
+    # Arrange
+    input = ParserInput("abc  |")
+
+    # Act
+    result = tablecellP(input)
+
+    # Assert
+    @test result isa OKParseResult{String}
+    @test result.value == "abc"
+end
 
 @testset "datatableP; Input is |def|; Table is [[def]]" begin
     # Arrange
@@ -148,16 +206,60 @@ end
     @test result isa BadParseResult{DataTable}
 end
 
-# @testset "datatableP; Input is |abc| then |def|; Table is [[abc], [def]]" begin
-#     # Arrange
-#     input = ParserInput("|abc|\n|def|")
-#
-#     # Act
-#     result = datatableP(input)
-#
-#     # Assert
-#     @test result isa OKParseResult{DataTable}
-#     @test result.value == DataTable([["abc"], ["def"]])
-# end
+@testset "datatableP; Input is |abc| then |def|; Table is [[abc], [def]]" begin
+    # Arrange
+    input = ParserInput("|abc|\n|def|")
+
+    # Act
+    result = datatableP(input)
+
+    # Assert
+    @test result isa OKParseResult{DataTable}
+    @test result.value == DataTable([["abc"], ["def"]])
+end
+
+@testset "datatableP; Input is |abc| then |def| then ghi; Table is [[abc], [def]]" begin
+    # Arrange
+    input = ParserInput("|abc|\n|def|\nghi")
+
+    # Act
+    result = datatableP(input)
+
+    # Assert
+    @test result isa OKParseResult{DataTable}
+    @test result.value == DataTable([["abc"], ["def"]])
+end
+
+@testset "datatableP; Input is |abc| then |def| then ghi; Table is [[abc], [def]]" begin
+    # Arrange
+    table = """
+    |abc|def|ghi|
+    |jkl|mno|pqr|
+    """
+    input = ParserInput(table)
+
+    # Act
+    result = datatableP(input)
+
+    # Assert
+    @test result isa OKParseResult{DataTable}
+    @test result.value == DataTable([["abc", "def", "ghi"], ["jkl", "mno", "pqr"]])
+end
+
+@testset "datatableP; The row has an empty cell |abc||def|; Table is [[abc, , def]]" begin
+    # Arrange
+    table = """
+    |abc||def|
+    """
+    input = ParserInput(table)
+
+    # Act
+    result = datatableP(input)
+
+    # Assert
+    @test result isa OKParseResult{DataTable}
+    @test result.value == DataTable([["abc", "", "def"]])
+end
+
 
 end # datatableP
