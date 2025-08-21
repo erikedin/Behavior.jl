@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-using Behavior.Gherkin.Experimental: ParserInput, tablecellP, escapeP, charP, manyC, satisfyC, datatableP
+using Behavior.Gherkin.Experimental: ParserInput, tablecellP, escapeP, charP, manyC, satisfyC, datatableP, commentP, tablerowP
 using Behavior.Gherkin: DataTable
 
 @testset "datatableP           " begin
@@ -308,12 +308,108 @@ end
     @test result.value == DataTable([["abc", "def", "ghi"], ["jkl", "mno", "pqr"]])
 end
 
-# This requires an optionalC.
-# @testset "datatableP; Table rows have trailing comments; Trailing comments are ignored" begin
+@testset "commentP; Character a followed by comment; Only character a returned" begin
+    # Arrange
+    table = """
+    a# This is a comment
+    """
+    input = ParserInput(table)
+    parser = isC('a', charP) >> -commentP
+
+    # Act
+    result = parser(input)
+
+    # Assert
+    @test result isa OKParseResult{Char}
+    @test result.value == 'a'
+end
+
+@testset "commentP; The comment consumes leading spaces; All input consumed" begin
+    # Arrange
+    table = """
+    a   # This is a comment
+    """
+    input = ParserInput(table)
+    parser = isC('a', charP) >> -optionalC(commentP)
+
+    # Act
+    result = parser(input)
+    nextresult = eofP(result.newinput)
+
+    # Assert
+    @test result isa OKParseResult{Char}
+    @test nextresult isa OKParseResult{Nothing}
+end
+
+@testset "commentP; The row has no comment; All input consumed" begin
+    # Arrange
+    table = "a"
+    input = ParserInput(table)
+    parser = isC('a', charP) >> -optionalC(commentP)
+
+    # Act
+    result = parser(input)
+    nextresult = eofP(result.newinput)
+
+    # Assert
+    @test result isa OKParseResult{Char}
+    @test result.value == 'a'
+    @test nextresult isa OKParseResult{Nothing}
+end
+
+@testset "tablerowP; The table row has a comment; All input consumed" begin
+    # Arrange
+    table = """
+    |a|b| # This is a comment
+    """
+    input = ParserInput(table)
+
+    # Act
+    result = tablerowP(input)
+    nextresult = eofP(result.newinput)
+
+    # Assert
+    @test result isa OKParseResult{Vector{String}}
+    @test result.value == ["a", "b"]
+    @test nextresult isa OKParseResult{Nothing}
+end
+
+@testset "datatableP; Table rows have trailing comments; Trailing comments are ignored" begin
+    # Arrange
+    table = """
+    | abc | def | ghi | # This is a comment
+    | jkl | mno | pqr |
+    """
+    input = ParserInput(table)
+
+    # Act
+    result = datatableP(input)
+
+    # Assert
+    @test result isa OKParseResult{DataTable}
+    @test result.value == DataTable([["abc", "def", "ghi"], ["jkl", "mno", "pqr"]])
+end
+
+@testset "datatableP; A row has an escaped pipe; The escaped pipe is part of the cell" begin
+    # Arrange
+    table = """
+    | abc | \\| | ghi |
+    """
+    input = ParserInput(table)
+
+    # Act
+    result = datatableP(input)
+
+    # Assert
+    @test result isa OKParseResult{DataTable}
+    @test result.value == DataTable([["abc", "|", "ghi"]])
+end
+
+# @testset "datatableP; The rows have different number of cells; BadParseResult" begin
 #     # Arrange
 #     table = """
-#     | abc | def | ghi | # This is a comment
-#     | jkl | mno | pqr |
+#     | abc | def | ghi |
+#     | jkl | mno | pqr | stu |
 #     """
 #     input = ParserInput(table)
 #
@@ -321,8 +417,7 @@ end
 #     result = datatableP(input)
 #
 #     # Assert
-#     @test result isa OKParseResult{DataTable}
-#     @test result.value == DataTable([["abc", "def", "ghi"], ["jkl", "mno", "pqr"]])
+#     @test result isa BadParseResult{DataTable}
 # end
 
 end # datatableP

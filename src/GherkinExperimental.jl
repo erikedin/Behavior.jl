@@ -913,13 +913,15 @@ DataTableParser(; usenew::Bool = false) = Transformer{Vector{DataTableRow}, Data
 
 
 atleastC(n::Int, p::Parser{T}) where {T} = satisfyC(x -> length(x) >= n, manyC(p))
-#const commentP = -isC('#', charP) >> manyC(charP) >> -eolP
+const onlycommentP = -isC('#', charP) >> manyC(charP)
+const commentP = -sP >> onlycommentP
 const trailingpipeP = isC('|', charP) >> -sP
 const leadingpipeP = -sP >> isC('|', charP)
 const notpipeP = satisfyC(c -> c != '|', escapeP)
 const untilpipeP = manyC(notpipeP) |> to{String}(cs -> strip(join(cs)))
 const tablecellP = untilpipeP >> -trailingpipeP
-const tablerowP = -leadingpipeP >> atleastC(1, tablecellP) >> -eolP
+const commenteolP = optionalC(commentP) >> -eolP
+const tablerowP = -leadingpipeP >> atleastC(1, tablecellP) >> -commenteolP
 const datatableP = atleastC(1, tablerowP) |> to{DataTable}()
 
 struct AnyLine <: Parser{String} end
