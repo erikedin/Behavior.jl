@@ -551,6 +551,25 @@ const spacesP = manyC(spaceP)
 const sP = spacesP
 
 """
+    nothingP
+
+A parser that consumes nothing and always returns nothing.
+Useful for optionalC.
+"""
+struct nothingC <: Parser{Nothing} end
+
+(::nothingC)(input::ParserInput) = OKParseResult{Nothing}(nothing, input)
+
+const nothingP = nothingC()
+
+"""
+    optionalC
+
+Parse an optional part of the input. It always succeeds.
+"""
+const optionalC = p -> choiceC(p, nothingP)
+
+"""
     Line(expected::String)
 
 Line is a parser that recognizes when a line is exactly an expected value.
@@ -894,6 +913,7 @@ DataTableParser(; usenew::Bool = false) = Transformer{Vector{DataTableRow}, Data
 
 
 atleastC(n::Int, p::Parser{T}) where {T} = satisfyC(x -> length(x) >= n, manyC(p))
+#const commentP = -isC('#', charP) >> manyC(charP) >> -eolP
 const trailingpipeP = isC('|', charP) >> -sP
 const leadingpipeP = -sP >> isC('|', charP)
 const notpipeP = satisfyC(c -> c != '|', escapeP)

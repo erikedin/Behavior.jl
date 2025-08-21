@@ -308,4 +308,21 @@ end
     @test result.value == DataTable([["abc", "def", "ghi"], ["jkl", "mno", "pqr"]])
 end
 
+# This requires an optionalC.
+# @testset "datatableP; Table rows have trailing comments; Trailing comments are ignored" begin
+#     # Arrange
+#     table = """
+#     | abc | def | ghi | # This is a comment
+#     | jkl | mno | pqr |
+#     """
+#     input = ParserInput(table)
+#
+#     # Act
+#     result = datatableP(input)
+#
+#     # Assert
+#     @test result isa OKParseResult{DataTable}
+#     @test result.value == DataTable([["abc", "def", "ghi"], ["jkl", "mno", "pqr"]])
+# end
+
 end # datatableP
