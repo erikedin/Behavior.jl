@@ -337,6 +337,8 @@ function (parser::satisfyC{T})(input::ParserInput) :: ParseResult{T} where {T}
     parser.inner(input) |> s
 end
 
+isC(t::T, parser::Parser{T}) where {T} = satisfyC(x -> x == t, parser)
+
 """
     EscapeChar
 
@@ -416,7 +418,7 @@ Parse a single character that is definitely an escape character.
 struct escapedC <: Parser{EscapeChar} end
 
 function (::escapedC)(input::ParserInput) :: ParseResult{EscapeChar}
-    parser = satisfyC(c -> c == '\\', charP) |> charP |> to{EscapeChar}()
+    parser = isC('\\', charP) |> charP |> to{EscapeChar}()
     parser(input)
 end
 
@@ -576,7 +578,7 @@ end
 Parse a known literal value, useful for keywords and delimiters.
 """
 const repeatedCharsC = n -> repeatC(charP, n) |> to{String}(join)
-const literalC = s -> satisfyC(x -> x == s, repeatedCharsC(length(s)))
+const literalC = s -> isC(s, repeatedCharsC(length(s)))
 const Literal = literalC
 
 """
@@ -892,8 +894,8 @@ DataTableParser(; usenew::Bool = false) = Transformer{Vector{DataTableRow}, Data
 
 
 atleastC(n::Int, p::Parser{T}) where {T} = satisfyC(x -> length(x) >= n, manyC(p))
-const trailingpipeP = satisfyC(c -> c == '|', charP) >> -sP
-const leadingpipeP = -sP >> satisfyC(c -> c == '|', charP)
+const trailingpipeP = isC('|', charP) >> -sP
+const leadingpipeP = -sP >> isC('|', charP)
 const notpipeP = satisfyC(c -> c != '|', escapeP)
 const untilpipeP = manyC(notpipeP) |> to{String}(cs -> strip(join(cs)))
 const tablecellP = untilpipeP >> -trailingpipeP

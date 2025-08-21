@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-using Behavior.Gherkin.Experimental: ParserInput, charP, satisfyC
+using Behavior.Gherkin.Experimental: ParserInput, charP, satisfyC, isC
 
 @testset "satisfyC             " begin
 
@@ -110,5 +110,33 @@ end
     # Assert
     @test result isa OKParseResult{EscapeChar}
     @test result.value == EscapeChar('a')
+end
+
+# isC(a, charP) is shorthand for
+# satisfyC(c -> c == a, charP)
+@testset "isC, escapedP; Input is \\a; Result is EscapeChar(a)" begin
+    # Arrange
+    input = ParserInput("\\a")
+    parser = isC(EscapeChar('a'), escapedP)
+
+    # Act
+    result = parser(input)
+
+    # Assert
+    @test result isa OKParseResult{EscapeChar}
+    @test result.value == EscapeChar('a')
+end
+
+@testset "isC(a); Input is a; Result is a" begin
+    # Arrange
+    input = ParserInput("a")
+    parser = isC('a', charP)
+
+    # Act
+    result = parser(input)
+
+    # Assert
+    @test result isa OKParseResult{Char}
+    @test result.value == 'a'
 end
 end # satisfyC
