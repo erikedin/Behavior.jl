@@ -203,6 +203,14 @@ struct BadExpectedEOFParseResult{T} <: BadParseResult{T}
     newinput::ParserInput
 end
 
+# A specific bad parse result for when a data table has rows
+# with different number of columns.
+# The 'columns' field contains the length of each column.
+struct BadTableRowsParseResult{T} <: BadParseResult{T}
+    table::DataTable
+    newinput::ParserInput
+end
+
 function Base.show(io::IO, result::BadExpectedEOFParseResult{T}) where {T}
     s, _newinput = line(result.newinput)
     println(io, "Expected EOF but found at line $(result.newinput.state):")
@@ -922,7 +930,30 @@ const untilpipeP = manyC(notpipeP) |> to{String}(cs -> strip(join(cs)))
 const tablecellP = untilpipeP >> -trailingpipeP
 const commenteolP = optionalC(commentP) >> -eolP
 const tablerowP = -leadingpipeP >> atleastC(1, tablecellP) >> -commenteolP
-const datatableP = atleastC(1, tablerowP) |> to{DataTable}()
+const _datatableP = atleastC(1, tablerowP) |> to{DataTable}()
+
+struct datatableC <: Parser{DataTable} end
+
+function _validatecolumns(result::OKParseResult{DataTable}, input::ParserInput) :: ParseResult{DataTable}
+    table = result.value
+    # The table is guaranteed by the _datatableP parser to have at least 1 row.
+    firstrow = table[1]
+    expectedlength = length(firstrow)
+    rest = table[2:end]
+    if all(row -> length(row) == expectedlength, rest)
+        result
+    else
+        BadTableRowsParseResult{DataTable}(table, input)
+    end
+end
+
+_validatecolumns(result::BadParseResult{DataTable}, ::ParserInput) = result
+
+function (parser::datatableC)(input::ParserInput) :: ParseResult{DataTable}
+    result = _datatableP(input)
+    _validatecolumns(result, input)
+end
+const datatableP = datatableC()
 
 struct AnyLine <: Parser{String} end
 

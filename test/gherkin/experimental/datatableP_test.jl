@@ -13,6 +13,7 @@
 # limitations under the License.
 
 using Behavior.Gherkin.Experimental: ParserInput, tablecellP, escapeP, charP, manyC, satisfyC, datatableP, commentP, tablerowP
+using Behavior.Gherkin.Experimental: BadTableRowsParseResult
 using Behavior.Gherkin: DataTable
 
 @testset "datatableP           " begin
@@ -405,19 +406,20 @@ end
     @test result.value == DataTable([["abc", "|", "ghi"]])
 end
 
-# @testset "datatableP; The rows have different number of cells; BadParseResult" begin
-#     # Arrange
-#     table = """
-#     | abc | def | ghi |
-#     | jkl | mno | pqr | stu |
-#     """
-#     input = ParserInput(table)
-#
-#     # Act
-#     result = datatableP(input)
-#
-#     # Assert
-#     @test result isa BadParseResult{DataTable}
-# end
+@testset "datatableP; The rows have different number of cells; BadParseResult" begin
+    # Arrange
+    table = """
+    | abc | def | ghi |
+    | jkl | mno | pqr | stu |
+    """
+    input = ParserInput(table)
+
+    # Act
+    result = datatableP(input)
+
+    # Assert
+    @test result isa BadTableRowsParseResult{DataTable}
+    @test result.table == [["abc", "def", "ghi"], ["jkl", "mno", "pqr", "stu"]]
+end
 
 end # datatableP
