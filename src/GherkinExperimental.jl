@@ -455,15 +455,6 @@ function (parser::manyC{T})(input::ParserInput) :: ParseResult{Vector{T}} where 
 end
 
 """
-    spaceP
-    spacesP
-
-Parsers for spaces.
-"""
-const spaceP = satisfyC(c -> isspace(c), charP)
-const spacesP = manyC(spaceP)
-
-"""
     EscapedChar()
 
 Parse a single character, that is possibly an escape sequence.
@@ -498,6 +489,8 @@ struct ignoreC{T} <: Parser{T}
 end
 
 (parser::ignoreC{T})(input::ParserInput) where {T} = parser.inner(input)
+
+Base.:(-)(parser::Parser{T}) where {T} = ignoreC(parser)
 
 """
     ignoreRC(parser1, parser2)
@@ -543,6 +536,17 @@ _ignoreLC(::ParserInput, ignoredresult::BadParseResult{S}, ::Parser{T}) where {T
 
 (parser::ignoreRC{T, S})(input::ParserInput) where {T, S} = _ignoreRC(input, parser.inner(input), parser.ignoredparser)
 (parser::ignoreLC{S, T})(input::ParserInput) where {S, T} = _ignoreLC(input, parser.ignoredparser(input), parser.inner)
+
+"""
+    spaceP
+    spacesP
+
+Parsers for spaces.
+"""
+const spaceP = satisfyC(c -> isspace(c), charP)
+const spacesP = manyC(spaceP)
+# A short nickname for whitespace.
+const sP = spacesP
 
 """
     Line(expected::String)
@@ -888,12 +892,12 @@ DataTableParser(; usenew::Bool = false) = Transformer{Vector{DataTableRow}, Data
 
 
 atleastC(n::Int, p::Parser{T}) where {T} = satisfyC(x -> length(x) >= n, manyC(p))
-const trailingpipeP = satisfyC(c -> c == '|', charP) >> ignoreC(spacesP)
-const leadingpipeP = ignoreC(spacesP) >> satisfyC(c -> c == '|', charP)
+const trailingpipeP = satisfyC(c -> c == '|', charP) >> -sP
+const leadingpipeP = -sP >> satisfyC(c -> c == '|', charP)
 const notpipeP = satisfyC(c -> c != '|', escapeP)
 const untilpipeP = manyC(notpipeP) |> to{String}(cs -> strip(join(cs)))
-const tablecellP = untilpipeP >> ignoreC(trailingpipeP)
-const tablerowP = ignoreC(leadingpipeP) >> atleastC(1, tablecellP) >> ignoreC(eolP)
+const tablecellP = untilpipeP >> -trailingpipeP
+const tablerowP = -leadingpipeP >> atleastC(1, tablecellP) >> -eolP
 const datatableP = atleastC(1, tablerowP) |> to{DataTable}()
 
 struct AnyLine <: Parser{String} end
