@@ -261,5 +261,51 @@ end
     @test result.value == DataTable([["abc", "", "def"]])
 end
 
+@testset "datatableP; Table cells have leading and trailing spaces; Spaces in table cells are stripped" begin
+    # Arrange
+    table = """
+    | abc | def | ghi |
+    | jkl | mno | pqr |
+    """
+    input = ParserInput(table)
+
+    # Act
+    result = datatableP(input)
+
+    # Assert
+    @test result isa OKParseResult{DataTable}
+    @test result.value == DataTable([["abc", "def", "ghi"], ["jkl", "mno", "pqr"]])
+end
+
+@testset "datatableP; Table rows have leading spaces; Leading spaces are ignored" begin
+    # Arrange
+    table = """
+    | abc | def | ghi |
+       | jkl | mno | pqr |
+    """
+    input = ParserInput(table)
+
+    # Act
+    result = datatableP(input)
+
+    # Assert
+    @test result isa OKParseResult{DataTable}
+    @test result.value == DataTable([["abc", "def", "ghi"], ["jkl", "mno", "pqr"]])
+end
+
+@testset "datatableP; Table rows have trailing spaces; Trailing spaces are ignored" begin
+    # Arrange
+    # Editors often automatically remove trailing spaces on lines, so this table is
+    # on a single line to prevent the spaces from being removed.
+    table = "| abc | def | ghi |   \n| jkl | mno | pqr |"
+    input = ParserInput(table)
+
+    # Act
+    result = datatableP(input)
+
+    # Assert
+    @test result isa OKParseResult{DataTable}
+    @test result.value == DataTable([["abc", "def", "ghi"], ["jkl", "mno", "pqr"]])
+end
 
 end # datatableP

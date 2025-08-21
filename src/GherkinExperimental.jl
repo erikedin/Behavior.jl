@@ -888,11 +888,12 @@ DataTableParser(; usenew::Bool = false) = Transformer{Vector{DataTableRow}, Data
 
 
 atleastC(n::Int, p::Parser{T}) where {T} = satisfyC(x -> length(x) >= n, manyC(p))
-const pipeP = satisfyC(c -> c == '|', charP)
+const trailingpipeP = satisfyC(c -> c == '|', charP) >> ignoreC(spacesP)
+const leadingpipeP = ignoreC(spacesP) >> satisfyC(c -> c == '|', charP)
 const notpipeP = satisfyC(c -> c != '|', escapeP)
 const untilpipeP = manyC(notpipeP) |> to{String}(cs -> strip(join(cs)))
-const tablecellP = untilpipeP >> ignoreC(pipeP)
-const tablerowP = ignoreC(pipeP) >> atleastC(1, tablecellP) >> ignoreC(eolP)
+const tablecellP = untilpipeP >> ignoreC(trailingpipeP)
+const tablerowP = ignoreC(leadingpipeP) >> atleastC(1, tablecellP) >> ignoreC(eolP)
 const datatableP = atleastC(1, tablerowP) |> to{DataTable}()
 
 struct AnyLine <: Parser{String} end
