@@ -39,9 +39,25 @@ end
     @test result.value === nothing
 end
 
-@testset "eoLP; Input is a single newline; OK" begin
+# @testset "eolP; Input is empty; Not OK" begin
+#     # Arrange
+#     input = ParserInput("")
+#
+#     # Act
+#     result = eolP(input)
+#
+#     # Assert
+#     @test result isa BadParseResult{Nothing}
+# end
+
+@testset "eolP; Input is a single newline; OK" begin
     # Arrange
-    input = ParserInput("\n")
+    # The input is automatically stripped, so we have to sandwich the newline
+    # between non-space characters, so it isn't stripped into an empty line.
+    # The first character is just consumed.
+    originalinput = ParserInput("a\nb")
+    originalresult = charP(originalinput)
+    input = originalresult.newinput
 
     # Act
     result = eolP(input)
@@ -51,9 +67,9 @@ end
     @test result.value === nothing
 end
 
-@testset "eoLP; Input is a and a newline; Not OK" begin
+@testset "eolP; Input is a and a newline; Not OK" begin
     # Arrange
-    input = ParserInput("a\n")
+    input = ParserInput("a\nb")
 
     # Act
     result = eolP(input)
@@ -62,7 +78,7 @@ end
     @test result isa BadParseResult{Nothing}
 end
 
-@testset "eoLP; Input is newline, then b; Next char is b" begin
+@testset "eolP; Input is newline, then b; Next char is b" begin
     # Arrange
     input = ParserInput("a\nb")
 
@@ -76,7 +92,7 @@ end
     @test nextresult.value == 'b'
 end
 
-@testset "charP then eoLP; Input is a\\nb; Next char is P" begin
+@testset "charP then eolP; Input is a\\nb; Next char is P" begin
     # Arrange
     input = ParserInput("a\nb")
 
@@ -90,9 +106,9 @@ end
     @test nextresult.value == 'b'
 end
 
-@testset "manyC then eoLP; Input is |a|b|\\n|c|d|; Next char is P" begin
+@testset "manyC then eolP; Input is |a|b|\\n|c|d|; Next char is P" begin
     # Arrange
-    input = ParserInput("|a|b|\n|c|d|")
+    input = ParserInput("|a|b|\n|c|d|\ne")
 
     # Act
     untileolP = manyC(charP) |> to{String}(join)
@@ -106,5 +122,56 @@ end
     @test nextresult isa OKParseResult{String}
     @test nextresult.value == "|c|d|"
 end
+
+# Speculative tests
+# @testset "manyC then eolP; Input is |a|b|\\n|c|d|; Next char is P" begin
+#     # Arrange
+#     input = ParserInput("|a|b|\n|c|d|")
+#
+#     # Act
+#     untileolP = manyC(charP) |> to{String}(join)
+#     parser = untileolP >> ignoreC(eolfP)
+#     result = parser(input)
+#     nextresult = parser(result.newinput)
+#
+#     # Assert
+#     @test result isa OKParseResult{String}
+#     @test result.value == "|a|b|"
+#     @test nextresult isa OKParseResult{String}
+#     @test nextresult.value == "|c|d|"
+# end
+#
+# @testset "eolfP; Input is empty; OK" begin
+#     # Arrange
+#     input = ParserInput("")
+#
+#     # Act
+#     result = eolfP(input)
+#
+#     # Assert
+#     @test result isa OKParseResult{Nothing}
+# end
+#
+# @testset "eolfP; Input is a newline; OK" begin
+#     # Arrange
+#     input = ParserInput("\n")
+#
+#     # Act
+#     result = eolfP(input)
+#
+#     # Assert
+#     @test result isa OKParseResult{Nothing}
+# end
+#
+# @testset "eolfP; Input is a; Not OK" begin
+#     # Arrange
+#     input = ParserInput("a")
+#
+#     # Act
+#     result = eolfP(input)
+#
+#     # Assert
+#     @test result isa BadParseResult{Nothing}
+# end
 
 end # eofP
