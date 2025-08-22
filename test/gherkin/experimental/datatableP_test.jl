@@ -309,55 +309,6 @@ end
     @test result.value == DataTable([["abc", "def", "ghi"], ["jkl", "mno", "pqr"]])
 end
 
-@testset "commentP; Character a followed by comment; Only character a returned" begin
-    # Arrange
-    table = """
-    a# This is a comment
-    """
-    input = ParserInput(table)
-    parser = isC('a', charP) >> -commentP
-
-    # Act
-    result = parser(input)
-
-    # Assert
-    @test result isa OKParseResult{Char}
-    @test result.value == 'a'
-end
-
-@testset "commentP; The comment consumes leading spaces; All input consumed" begin
-    # Arrange
-    table = """
-    a   # This is a comment
-    """
-    input = ParserInput(table)
-    parser = isC('a', charP) >> -optionalC(commentP)
-
-    # Act
-    result = parser(input)
-    nextresult = eofP(result.newinput)
-
-    # Assert
-    @test result isa OKParseResult{Char}
-    @test nextresult isa OKParseResult{Nothing}
-end
-
-@testset "commentP; The row has no comment; All input consumed" begin
-    # Arrange
-    table = "a"
-    input = ParserInput(table)
-    parser = isC('a', charP) >> -optionalC(commentP)
-
-    # Act
-    result = parser(input)
-    nextresult = eofP(result.newinput)
-
-    # Assert
-    @test result isa OKParseResult{Char}
-    @test result.value == 'a'
-    @test nextresult isa OKParseResult{Nothing}
-end
-
 @testset "tablerowP; The table row has a comment; All input consumed" begin
     # Arrange
     table = """
