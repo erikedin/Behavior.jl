@@ -422,4 +422,21 @@ end
     @test result.table == [["abc", "def", "ghi"], ["jkl", "mno", "pqr", "stu"]]
 end
 
+# @testset "datatableP; A whole row is commented out; The row is ignored" begin
+#     # Arrange
+#     table = """
+#     | abc |
+#     #| def |
+#     | jkl |
+#     """
+#     input = ParserInput(table)
+#
+#     # Act
+#     result = datatableP(input)
+#
+#     # Assert
+#     @test result isa OKParseResult{DataTable}
+#     @test result.value == DataTable([["abc"], ["jkl"]])
+# end
+
 end # datatableP

@@ -918,10 +918,6 @@ function (parser::DataTableRowsParser)(input::ParserInput) :: ParseResult{Vector
     OKParseResult{Vector{DataTableRow}}([[s]], input)
 end
 
-DataTableParser(; usenew::Bool = false) = Transformer{Vector{DataTableRow}, DataTable}(
-    if usenew DataTableRowsParser() else Repeating{DataTableRow}(DataTableRowParser(), atleast=1) end,
-    rows -> rows
-)
 
 
 atleastC(n::Int, p::Parser{T}) where {T} = satisfyC(x -> length(x) >= n, manyC(p))
@@ -958,6 +954,11 @@ function (parser::datatableC)(input::ParserInput) :: ParseResult{DataTable}
     _validatecolumns(result, input)
 end
 const datatableP = datatableC()
+
+DataTableParser(; usenew::Bool = true) = Transformer{Vector{DataTableRow}, DataTable}(
+    if usenew datatableP else Repeating{DataTableRow}(DataTableRowParser(), atleast=1) end,
+    rows -> rows
+)
 
 struct AnyLine <: Parser{String} end
 
