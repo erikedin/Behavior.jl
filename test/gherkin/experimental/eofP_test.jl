@@ -39,16 +39,18 @@ end
     @test result.value === nothing
 end
 
-# @testset "eolP; Input is empty; Not OK" begin
-#     # Arrange
-#     input = ParserInput("")
-#
-#     # Act
-#     result = eolP(input)
-#
-#     # Assert
-#     @test result isa BadParseResult{Nothing}
-# end
+# Even though an EOF is not a newline, it still terminates a line,
+# so it's considered an end-of-line.
+@testset "eolP; Input is empty; OK" begin
+    # Arrange
+    input = ParserInput("")
+
+    # Act
+    result = eolP(input)
+
+    # Assert
+    @test result isa OKParseResult{Nothing}
+end
 
 @testset "eolP; Input is a single newline; OK" begin
     # Arrange
@@ -122,56 +124,5 @@ end
     @test nextresult isa OKParseResult{String}
     @test nextresult.value == "|c|d|"
 end
-
-# Speculative tests
-# @testset "manyC then eolP; Input is |a|b|\\n|c|d|; Next char is P" begin
-#     # Arrange
-#     input = ParserInput("|a|b|\n|c|d|")
-#
-#     # Act
-#     untileolP = manyC(charP) |> to{String}(join)
-#     parser = untileolP >> ignoreC(eolfP)
-#     result = parser(input)
-#     nextresult = parser(result.newinput)
-#
-#     # Assert
-#     @test result isa OKParseResult{String}
-#     @test result.value == "|a|b|"
-#     @test nextresult isa OKParseResult{String}
-#     @test nextresult.value == "|c|d|"
-# end
-#
-# @testset "eolfP; Input is empty; OK" begin
-#     # Arrange
-#     input = ParserInput("")
-#
-#     # Act
-#     result = eolfP(input)
-#
-#     # Assert
-#     @test result isa OKParseResult{Nothing}
-# end
-#
-# @testset "eolfP; Input is a newline; OK" begin
-#     # Arrange
-#     input = ParserInput("\n")
-#
-#     # Act
-#     result = eolfP(input)
-#
-#     # Assert
-#     @test result isa OKParseResult{Nothing}
-# end
-#
-# @testset "eolfP; Input is a; Not OK" begin
-#     # Arrange
-#     input = ParserInput("a")
-#
-#     # Act
-#     result = eolfP(input)
-#
-#     # Assert
-#     @test result isa BadParseResult{Nothing}
-# end
 
 end # eofP

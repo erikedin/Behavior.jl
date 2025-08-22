@@ -373,12 +373,30 @@ end
     @test result.table == [["abc", "def", "ghi"], ["jkl", "mno", "pqr", "stu"]]
 end
 
-# @testset "datatableP; A whole row is commented out; The row is ignored" begin
+@testset "datatableP; A whole row is commented out; The row is ignored" begin
+    # Arrange
+    table = """
+    | abc |
+    #| def |
+    | jkl |
+    """
+    input = ParserInput(table)
+
+    # Act
+    result = datatableP(input)
+
+    # Assert
+    @test result isa OKParseResult{DataTable}
+    @test result.value == DataTable([["abc"], ["jkl"]])
+end
+
+# @testset "datatableP; two whole rows are commented out; The rows are ignored" begin
 #     # Arrange
 #     table = """
 #     | abc |
 #     #| def |
-#     | jkl |
+#     #| jkl |
+#     | mno |
 #     """
 #     input = ParserInput(table)
 #
@@ -387,7 +405,7 @@ end
 #
 #     # Assert
 #     @test result isa OKParseResult{DataTable}
-#     @test result.value == DataTable([["abc"], ["jkl"]])
+#     @test result.value == DataTable([["abc"], ["mno"]])
 # end
 
 end # datatableP

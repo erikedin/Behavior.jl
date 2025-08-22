@@ -238,7 +238,7 @@ Recognize the end of a line.
 struct eolC <: Parser{Nothing} end
 
 function (parser::eolC)(input::ParserInput) :: ParseResult{Nothing}
-    if isendofline(input)
+    if iseof(input) || isendofline(input)
         OKParseResult{Nothing}(nothing, nextline(input))
     else
         BadExpectationParseResult{Nothing}("newline", "not newline", input)
@@ -929,7 +929,8 @@ const notpipeP = satisfyC(c -> c != '|', escapeP)
 const untilpipeP = manyC(notpipeP) |> to{String}(cs -> strip(join(cs)))
 const tablecellP = untilpipeP >> -trailingpipeP
 const commenteolP = optionalC(commentP) >> -eolP
-const tablerowP = -leadingpipeP >> atleastC(1, tablecellP) >> -commenteolP
+const skipemptylineP = -optionalC(commenteolP)
+const tablerowP = skipemptylineP >> (-leadingpipeP >> atleastC(1, tablecellP) >> -commenteolP)
 const _datatableP = atleastC(1, tablerowP) |> to{DataTable}()
 
 struct datatableC <: Parser{DataTable} end
