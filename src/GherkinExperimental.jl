@@ -498,11 +498,11 @@ Recognize and consume the inner parser, but discard its result.
 This is useful when parsing things like "(abc)", where the parentheses must
 be present, but ignored after the parse is accepted.
 """
-struct ignoreC{T} <: Parser{T}
+struct ignoreC{T} <: Parser{Nothing}
     inner::Parser{T}
 end
 
-(parser::ignoreC{T})(input::ParserInput) where {T} = parser.inner(input)
+(parser::ignoreC{T})(input::ParserInput) where {T} = parser.inner(input) |> to{Nothing}(x -> nothing)
 
 Base.:(-)(parser::Parser{T}) where {T} = ignoreC(parser)
 

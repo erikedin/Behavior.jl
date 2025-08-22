@@ -123,4 +123,16 @@ end
     @test result.value == "b"
 end
 
+@testset "ignoreC charP; Input is a; Result is nothing" begin
+    # Arrange
+    input = ParserInput("a")
+
+    # Act
+    parser = ignoreC(charP)
+    result = parser(input)
+
+    # Assert
+    @test result isa OKParseResult{Nothing}
+end
+
 end # sequenceC
