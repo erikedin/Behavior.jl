@@ -111,4 +111,20 @@ end
     @test result isa OKParseResult{String}
     @test result.value == "abc"
 end
+
+# This test ensures the correct handling of characters that occupy
+# more than one index in the input string. With these characters, not
+# all string indexes are valid.
+@testset "charP; Non-ascii é followed by b; Next character is b" begin
+    # Arrange
+    input = ParserInput("éb")
+
+    # Act
+    result = charP(input)
+    nextresult = charP(result.newinput)
+
+    # Assert
+    @test nextresult isa OKParseResult{Char}
+    @test nextresult.value == 'b'
+end
 end # charP

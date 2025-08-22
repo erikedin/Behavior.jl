@@ -57,7 +57,10 @@ function consumechar(initialstate::ParserState, source::GherkinSource) :: Tuple{
         initialstate
     end
     c = source.lines[state.nextline][state.nextchar]
-    (c, ParserState(state.nextline, state.nextchar + 1))
+    # Because UTF-8 characters may be more than one byte, not all indexes are valid.
+    # This computes the next valid index.
+    nextvalidindex = nextind(source.lines[state.nextline], state.nextchar)
+    (c, ParserState(state.nextline, nextvalidindex))
 end
 
 function consumechars(state::ParserState, source::GherkinSource, n::Int) :: Tuple{String, ParserState}
@@ -72,6 +75,7 @@ function consumechars(state::ParserState, source::GherkinSource, n::Int) :: Tupl
     # Protect against indexing past the end of the string by checking lastindex too.
     thislastindex = min(state.nextchar + n - 1, lastindex(thisline))
     s = thisline[state.nextchar : thislastindex]
+    # FIXME: This may lead to invalid indexes in the case of multiple-byte UTF-8 characters.
     (s, ParserState(state.nextline, state.nextchar + n))
 end
 
