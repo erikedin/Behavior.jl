@@ -876,50 +876,6 @@ struct Keyword
     rest::String
 end
 
-"""
-    DataTableParser()
-
-Consumes a data table in a scenario step.
-
-## Example
-
-    | Header 1 | Header 2 |
-    | Foo      | Bar      |
-    | Baz      | Quux     |
-"""
-struct DataTableRowParser <: Parser{DataTableRow} end
-
-function (parser::DataTableRowParser)(input::ParserInput) :: ParseResult{DataTableRow}
-    s, newinput = line(input)
-    if s === nothing
-        return BadUnexpectedEOFParseResult{DataTableRow}(input)
-    end
-    parts = split(s, "|")
-
-    if length(parts) >= 3
-        columns = collect([strip(p) for p in parts if strip(p) != ""])
-        OKParseResult{DataTableRow}(columns, newinput)
-    else
-        BadExpectationParseResult{DataTableRow}("| column 1 | column 2 | ... | column n |", s, input)
-    end
-end
-
-struct DataTableRowsParser <: Parser{Vector{DataTableRow}}
-end
-
-function (parser::DataTableRowsParser)(input::ParserInput) :: ParseResult{Vector{DataTableRow}}
-    rowparser = Sequence{String}(
-        Literal("|"),
-        EscapedStringParser("|"),
-        Literal("|"),
-    )
-    result = rowparser(input)
-    s = strip(result.value[2])
-    OKParseResult{Vector{DataTableRow}}([[s]], input)
-end
-
-
-
 atleastC(n::Int, p::Parser{T}) where {T} = satisfyC(x -> length(x) >= n, manyC(p))
 const onlycommentP = -isC('#', charP) >> manyC(charP)
 const commentP = -sP >> onlycommentP
@@ -956,11 +912,6 @@ function (parser::datatableC)(input::ParserInput) :: ParseResult{DataTable}
     _validatecolumns(result, input)
 end
 const datatableP = datatableC()
-
-DataTableParser(; usenew::Bool = true) = Transformer{Vector{DataTableRow}, DataTable}(
-    if usenew datatableP else Repeating{DataTableRow}(DataTableRowParser(), atleast=1) end,
-    rows -> rows
-)
 
 struct AnyLine <: Parser{String} end
 
@@ -1025,10 +976,10 @@ KeywordParser(word::String) = Transformer{String, Keyword}(
 
 const TableOrBlockTextTypes = Union{String, DataTable}
 const DataTableOrBlockText = (
-    Sequence{TableOrBlockTextTypes}(DataTableParser(), BlockText()) |
-    Sequence{TableOrBlockTextTypes}(BlockText(), DataTableParser()) |
+    Sequence{TableOrBlockTextTypes}(datatableP, BlockText()) |
+    Sequence{TableOrBlockTextTypes}(BlockText(), datatableP) |
     Sequence{TableOrBlockTextTypes}(BlockText()) |
-    Sequence{TableOrBlockTextTypes}(DataTableParser())
+    Sequence{TableOrBlockTextTypes}(datatableP)
 )
 const StepPieces = Union{Keyword, Union{Nothing, Vector{TableOrBlockTextTypes}}}
 
@@ -1147,7 +1098,7 @@ ScenarioOutlineParser() = Transformer{Vector{ScenarioOutlineBits}, ScenarioOutli
         Optionally(LongDescription),
         StepsParser(),
         Line("Examples:") | Line("Scenarios:"),
-        DataTableParser()
+        datatableP
     ),
     sequence -> begin
         tags = optionalordefault(sequence[1], [])
@@ -1155,7 +1106,7 @@ ScenarioOutlineParser() = Transformer{Vector{ScenarioOutlineBits}, ScenarioOutli
         longdescription = optionalordefault(sequence[3], "")
         steps = sequence[4]
         examples = sequence[6]
-        # The DataTableParser guarantees at least 1 row.
+        # The datatableP parser guarantees at least 1 row.
         placeholders = examples[1]
         ScenarioOutline(
             keyword.rest,
@@ -1269,7 +1220,7 @@ export Joined, Repeating, LineIfNot, StartsWith, EOFParser
 export BlockText, KeywordParser
 export StepsParser, GivenParser, WhenParser, ThenParser
 export ScenarioParser, RuleParser, FeatureParser, FeatureFileParser, BackgroundParser
-export DataTableParser, TagParser, TagLinesParser, ScenarioOutlineParser
+export TagParser, TagLinesParser, ScenarioOutlineParser
 
 # Data carrier types
 export Keyword, Rule
