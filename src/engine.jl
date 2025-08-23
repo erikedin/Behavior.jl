@@ -103,7 +103,7 @@ function readfeature(driver::Driver, featurefile::String, parseoptions::ParseOpt
     featuretext = readfile(driver.os, featurefile)
     if parseoptions.use_experimental
         input = Gherkin.Experimental.ParserInput(featuretext)
-        parser = Gherkin.Experimental.FeatureFileParser()
+        parser = Gherkin.Experimental.featurefileP
         parser(input)
     else
         parsefeature(featuretext, options=parseoptions)

@@ -223,7 +223,7 @@ end
                     Scenario: Check the feature description
                         Then the current feature has description "This is a feature description"
             """)
-            parser = Experimental.FeatureFileParser()
+            parser = Experimental.featurefileP
             parserresult = parser(input)
             feature = parserresult.value
 
@@ -267,7 +267,7 @@ end
                     Scenario: Afterfeature adds the feature to a list
                         Then the feature has not been added to the list
             """)
-            parser = Experimental.FeatureFileParser()
+            parser = Experimental.featurefileP
             parserresult = parser(input)
             feature = parserresult.value
 
@@ -311,7 +311,7 @@ end
                     Scenario: Afterfeature adds the feature to a list
                         Then the feature has not been added to the list
             """)
-            parser = Experimental.FeatureFileParser()
+            parser = Experimental.featurefileP
             parserresult = parser(input)
             feature = parserresult.value
 

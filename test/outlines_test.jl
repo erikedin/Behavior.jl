@@ -200,7 +200,7 @@ using Behavior: transformoutline
                     | 17 |
                     | 42 |
         """)
-        parser = FeatureFileParser()
+        parser = featurefileP
         parseresult = parser(source)
         feature = parseresult.value
 
@@ -224,7 +224,7 @@ using Behavior: transformoutline
                     |  v |
                     | \\| |
         """)
-        parser = FeatureFileParser()
+        parser = featurefileP
         result = parser(source)
 
         # Act and Assert
@@ -262,7 +262,7 @@ using Behavior: transformoutline
                     |  v  |
                     | \\| |
         """)
-        parser = FeatureFileParser()
+        parser = featurefileP
         parseresult = parser(source)
         feature = parseresult.value
 
@@ -299,7 +299,7 @@ using Behavior: transformoutline
                         | 17 |
                         | 42 |
             """)
-            parser = FeatureFileParser()
+            parser = featurefileP
             parseresult = parser(source)
             feature = parseresult.value
 

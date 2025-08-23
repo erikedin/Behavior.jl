@@ -241,7 +241,7 @@ using Behavior:
     @testset "Accumulate results; One feature (experimental) with syntax error; Total result is failure" begin
         feature = ""
         input = Gherkin.Experimental.ParserInput(feature)
-        parser = Gherkin.Experimental.FeatureFileParser()
+        parser = Gherkin.Experimental.featurefileP
         parseresult = parser(input)
 
         accumulator = ResultAccumulator()

@@ -1200,13 +1200,6 @@ FeatureParser() = Transformer{Vector{FeatureBits}, Feature}(
     end
 )
 
-const FeatureFileBits = Union{Feature, Nothing}
-FeatureFileParser() = Transformer{Vector{FeatureFileBits}, Feature}(
-    Sequence{FeatureFileBits}(FeatureParser(), eofP),
-    takeelement(1)
-)
-
-# TODO: This will replace FeatureFileParser above
 const featurefileP = FeatureParser() >> -skipemptylinesP >> -(optionalC(commentP) >> -eofP)
 
 ##

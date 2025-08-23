@@ -27,7 +27,7 @@ using Behavior: addmatcher!, runfeature!, finish, issuccess
                 Scenario: This will not run with keepgoing=false
                     Given ok step
         """)
-        parser = FeatureFileParser()
+        parser = featurefileP
         parseresult = parser(source)
         feature = parseresult.value
 
@@ -65,7 +65,7 @@ using Behavior: addmatcher!, runfeature!, finish, issuccess
                 Scenario: This will not run with keepgoing=true
                     Given ok step
         """)
-        parser = FeatureFileParser()
+        parser = featurefileP
         parseresult = parser(source)
         feature = parseresult.value
 

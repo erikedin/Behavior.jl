@@ -55,7 +55,7 @@ function parseonly(featurepath::String; parseoptions::ParseOptions=ParseOptions(
         if parseoptions.use_experimental
             try
                 input = Experimental.ParserInput(read(featurefile, String))
-                featureparser = Experimental.FeatureFileParser()
+                featureparser = Experimental.featurefileP
                 result = featureparser(input)
                 if Experimental.isparseok(result)
                     push!(results, (filename = featurefile, success = true, result = result.value))
@@ -225,7 +225,7 @@ function suggestmissingsteps(
 
     parseresult = if parseoptions.use_experimental
         input = ParserInput(read(featurepath, String))
-        parser = Experimental.FeatureFileParser()
+        parser = Experimental.featurefileP
         parser(input)
     else
         println("WARNING: suggestmissingsteps is using the old Gherkin parser")
