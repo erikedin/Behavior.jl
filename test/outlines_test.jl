@@ -274,6 +274,46 @@ using Behavior: transformoutline
         @test issuccess(result)
     end
 
+    # Issue #121
+    # The <> in the block text should not be recognized as a placeholder.
+    # The <v> should be recognized, still.
+    @testset "Scenario Outline interpolation; <> present in block text; Success" begin
+        # Arrange
+        engine = ExecutorEngine(QuietRealTimePresenter())
+        matcher = FromMacroStepDefinitionMatcher("""
+            using Behavior
+
+            @given("value foo") do context
+            end
+        """)
+        addmatcher!(engine, matcher)
+
+        source = ParserInput("""
+            Feature: Scenario Outline with new parser
+
+                Scenario Outline: The block text has an empty placeholder
+                    Given value <v>
+                        \"\"\"
+                        Text: <v>
+                        Not a placeholder: <>
+                        \"\"\"
+
+                Examples:
+                    | v   |
+                    | foo |
+        """)
+        parser = featurefileP
+        parseresult = parser(source)
+        feature = parseresult.value
+
+        # Act and Assert
+        # The test passes if executing the scenario does not
+        # throw an exception.
+        runfeature!(engine, feature; keepgoing=true)
+        result = engine.accumulator
+        @test issuccess(result)
+    end
+
     # TODO: Mismatching placeholders
 
     @testset "Issue 117: Scenario Outlines with new parser" begin

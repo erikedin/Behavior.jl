@@ -359,4 +359,4 @@ interpolatestep(step::And, fromplaceholders::Function) = And(interpolatesteptext
                                                                block_text=interpolatesteptext(step.block_text, fromplaceholders),
                                                                datatable=step.datatable)
 
-interpolatesteptext(text::String, fromplaceholders::Function) = replace(text, r"<[^>]*>" => fromplaceholders)
+interpolatesteptext(text::String, fromplaceholders::Function) = replace(text, r"<[^>]+>" => fromplaceholders)
