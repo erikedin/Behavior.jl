@@ -930,8 +930,8 @@ const untilpipeP = manyC(notpipeP) |> to{String}(cs -> strip(join(cs)))
 const tablecellP = untilpipeP >> -trailingpipeP
 const commenteolP = optionalC(commentP) >> -eolP
 const commenteolfP = optionalC(commentP) >> -choiceC(eolP, eofP)
-const skipemptylineP = -optionalC(commenteolP)
-const tablerowP = skipemptylineP >> (-leadingpipeP >> atleastC(1, tablecellP) >> -commenteolfP)
+const skipemptylinesP = manyC(commenteolP)
+const tablerowP = -skipemptylinesP >> (-leadingpipeP >> atleastC(1, tablecellP) >> -commenteolfP)
 const _datatableP = atleastC(1, tablerowP) |> to{DataTable}()
 
 struct datatableC <: Parser{DataTable} end
