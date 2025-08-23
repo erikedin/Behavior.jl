@@ -441,4 +441,19 @@ end
     @test result.value == DataTable([["abc"], ["mno"]])
 end
 
+@testset "datatableP; Input is a single pipe; Result is a single row with zero columns" begin
+    # Arrange
+    table = """
+    |
+    """
+    input = ParserInput(table)
+
+    # Act
+    result = datatableP(input)
+
+    # Assert
+    @test result isa OKParseResult{DataTable}
+    @test result.value == DataTable([[]])
+end
+
 end # datatableP
