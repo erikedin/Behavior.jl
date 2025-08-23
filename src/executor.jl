@@ -359,4 +359,16 @@ interpolatestep(step::And, fromplaceholders::Function) = And(interpolatesteptext
                                                                block_text=interpolatesteptext(step.block_text, fromplaceholders),
                                                                datatable=step.datatable)
 
-interpolatesteptext(text::String, fromplaceholders::Function) = replace(text, r"<[^>]+>" => fromplaceholders)
+# Placeholders look like
+# <foo>
+# They may not start or end with a space:
+# - < foo>: NOT OK
+# - <foo >: NOT OK
+# Spaces may be present inside the placeholder
+# - <foo bar>: OK
+#
+# The regular expression works like this:
+#
+#   <[^> ]>: Recognizes single character placeholders, like <v>
+#   <[^> ][^>]*[^> ]>: Recognizes placeholders with at least two characters like <f b> or <foo>
+interpolatesteptext(text::String, fromplaceholders::Function) = replace(text, r"<[^> ]>|<[^> ][^>]*[^> ]>" => fromplaceholders)
