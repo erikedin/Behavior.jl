@@ -238,7 +238,7 @@ Recognize the end of a line.
 struct eolC <: Parser{Nothing} end
 
 function (parser::eolC)(input::ParserInput) :: ParseResult{Nothing}
-    if iseof(input) || isendofline(input)
+    if !iseof(input) && isendofline(input)
         OKParseResult{Nothing}(nothing, nextline(input))
     else
         BadExpectationParseResult{Nothing}("newline", "not newline", input)

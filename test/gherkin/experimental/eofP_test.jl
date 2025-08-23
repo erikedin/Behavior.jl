@@ -39,9 +39,13 @@ end
     @test result.value === nothing
 end
 
-# Even though an EOF is not a newline, it still terminates a line,
-# so it's considered an end-of-line.
-@testset "eolP; Input is empty; OK" begin
+# While an end-of-file could be considered to terminate a line, it will not be
+# accepted as an end-of-line here. The eolP cannot recognize end of input as an
+# end of line, because it must consume some input. If it does not consume input, then
+# it cannot be used by the manyC parser to parser multiple repetitions of an end-of-line.
+# The only parser that does not consume any input is the eofP parser, and then it's
+# a known limitation that it cannot be used with manyC.
+@testset "eolP; Input is empty; Not OK" begin
     # Arrange
     input = ParserInput("")
 
@@ -49,7 +53,7 @@ end
     result = eolP(input)
 
     # Assert
-    @test result isa OKParseResult{Nothing}
+    @test result isa BadParseResult{Nothing}
 end
 
 @testset "eolP; Input is a single newline; OK" begin
@@ -82,9 +86,12 @@ end
 
 @testset "eolP; Input is newline, then b; Next char is b" begin
     # Arrange
+    # The newline is sandwiched between to non-space characters so it
+    # isn't stripped.
     input = ParserInput("a\nb")
 
     # Act
+    # Consume the initial a to get to the newline.
     prefixresult = charP(input)
     result = eolP(prefixresult.newinput)
     nextresult = charP(result.newinput)
@@ -94,7 +101,7 @@ end
     @test nextresult.value == 'b'
 end
 
-@testset "charP then eolP; Input is a\\nb; Next char is P" begin
+@testset "charP then eolP; Input is a\\nb; Next char is b" begin
     # Arrange
     input = ParserInput("a\nb")
 
@@ -108,7 +115,7 @@ end
     @test nextresult.value == 'b'
 end
 
-@testset "manyC then eolP; Input is |a|b|\\n|c|d|; Next char is P" begin
+@testset "manyC then eolP; Input is |a|b|\\n|c|d|\n; Result is |a|b|, |c|d|" begin
     # Arrange
     input = ParserInput("|a|b|\n|c|d|\ne")
 
