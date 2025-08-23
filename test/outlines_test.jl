@@ -212,39 +212,67 @@ using Behavior: transformoutline
         @test issuccess(result)
     end
 
+    @testset "Scenario Outline interpolation; Escaped | in an example; Feature file is parsed OK" begin
+        # Arrange
+        source = ParserInput("""
+            Feature: Scenario Outline with new parser
+
+                Scenario Outline: The examples table has an escaped pipe
+                    Given value <v>
+
+                Examples:
+                    |  v |
+                    | \\| |
+        """)
+        parser = FeatureFileParser()
+        result = parser(source)
+
+        # Act and Assert
+        # Parse is OK, the important thing
+        @test result isa OKParseResult{Feature}
+
+        # Ensure that there is a single scenario in the feature
+        feature = result.value
+        @test length(feature.scenarios) == 1
+
+        # Ensure that the only scenario is a scenario outline
+        scenario = only(feature.scenarios)
+        @test scenario isa ScenarioOutline
+    end
+
     # Issue #119: This reproduces the issue. It is commented out until the issue is fixed.
-    #@testset "Scenario Outline interpolation; Escaped | in an example; Scenario is successful" begin
-    #    # Arrange
-    #    engine = ExecutorEngine(QuietRealTimePresenter())
-    #    matcher = FromMacroStepDefinitionMatcher("""
-    #        using Behavior
+    @testset "Scenario Outline interpolation; Escaped | in an example; Scenario is successful" begin
+        # Arrange
+        engine = ExecutorEngine(QuietRealTimePresenter())
+        matcher = FromMacroStepDefinitionMatcher("""
+            using Behavior
 
-    #        @given("value |") do context, v
-    #        end
-    #    """)
-    #    addmatcher!(engine, matcher)
+            @given("value |") do context
+            end
+        """)
+        addmatcher!(engine, matcher)
 
-    #    source = ParserInput("""
-    #        Feature: Scenario Outline with new parser
+        source = ParserInput("""
+            Feature: Scenario Outline with new parser
 
-    #            Scenario Outline: This will not run with keepgoing=true
-    #                Given value <v>
+                Scenario Outline: The examples table has an escaped pipe
+                    Given value <v>
 
-    #            Examples:
-    #                |  v |
-    #                | (\\|) |
-    #    """)
-    #    parser = FeatureFileParser()
-    #    parseresult = parser(source)
-    #    feature = parseresult.value
+                Examples:
+                    |  v  |
+                    | \\| |
+        """)
+        parser = FeatureFileParser()
+        parseresult = parser(source)
+        feature = parseresult.value
 
-    #    # Act and Assert
-    #    # The test passes if executing the scenario does not
-    #    # throw an exception.
-    #    runfeature!(engine, feature; keepgoing=true)
-    #    result = engine.accumulator
-    #    @test issuccess(result)
-    #end
+        # Act and Assert
+        # The test passes if executing the scenario does not
+        # throw an exception.
+        runfeature!(engine, feature; keepgoing=true)
+        result = engine.accumulator
+        @test issuccess(result)
+    end
 
     # TODO: Mismatching placeholders
 
