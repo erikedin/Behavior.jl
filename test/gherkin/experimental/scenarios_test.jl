@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+using Behavior.Gherkin.Experimental: eofP
+
 @testset "Gherkin Scenarios    " begin
     @testset "Scenario parser" begin
         @testset "Empty Scenario, no description; OK" begin
@@ -403,7 +405,7 @@
             # Act
             parser = Sequence{Union{ScenarioOutline, Nothing}}(
                         ScenarioOutlineParser(),
-                        EOFParser())
+                        eofP)
             result = parser(input)
 
             # Assert

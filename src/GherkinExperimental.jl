@@ -929,8 +929,9 @@ const notpipeP = satisfyC(c -> c != '|', escapeP)
 const untilpipeP = manyC(notpipeP) |> to{String}(cs -> strip(join(cs)))
 const tablecellP = untilpipeP >> -trailingpipeP
 const commenteolP = optionalC(commentP) >> -eolP
+const commenteolfP = optionalC(commentP) >> -choiceC(eolP, eofP)
 const skipemptylineP = -optionalC(commenteolP)
-const tablerowP = skipemptylineP >> (-leadingpipeP >> atleastC(1, tablecellP) >> -commenteolP)
+const tablerowP = skipemptylineP >> (-leadingpipeP >> atleastC(1, tablecellP) >> -commenteolfP)
 const _datatableP = atleastC(1, tablerowP) |> to{DataTable}()
 
 struct datatableC <: Parser{DataTable} end
@@ -1250,7 +1251,7 @@ FeatureParser() = Transformer{Vector{FeatureBits}, Feature}(
 
 const FeatureFileBits = Union{Feature, Nothing}
 FeatureFileParser() = Transformer{Vector{FeatureFileBits}, Feature}(
-    Sequence{FeatureFileBits}(FeatureParser(), EOFParser()),
+    Sequence{FeatureFileBits}(FeatureParser(), eofP),
     takeelement(1)
 )
 

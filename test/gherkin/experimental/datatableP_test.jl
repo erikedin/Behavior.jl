@@ -149,6 +149,19 @@ end
     @test result.value == "abc"
 end
 
+@testset "datatableP; Input is |def|\\n; Table is [[def]]" begin
+    # Arrange
+    # The x is just to prevent the newline from being stripped.
+    input = ParserInput("|def|\nx")
+
+    # Act
+    result = datatableP(input)
+
+    # Assert
+    @test result isa OKParseResult{DataTable}
+    @test result.value == DataTable([["def"]])
+end
+
 @testset "datatableP; Input is |def|; Table is [[def]]" begin
     # Arrange
     input = ParserInput("|def|")
@@ -307,6 +320,26 @@ end
     # Assert
     @test result isa OKParseResult{DataTable}
     @test result.value == DataTable([["abc", "def", "ghi"], ["jkl", "mno", "pqr"]])
+end
+
+@testset "tablerowP; The table row has a comment; All input consumed" begin
+    # Arrange
+    # Adding an x at the end to ensure that the newline isn't stripped by ParserInput.
+    table = """
+    |a|b| # This is a comment\nx
+    """
+    input = ParserInput(table)
+
+    # Act
+    result = tablerowP(input)
+    # We need to remove the x before checking for EOF.
+    shouldbeeofresult = isC('x', charP)(result.newinput)
+    nextresult = eofP(shouldbeeofresult.newinput)
+
+    # Assert
+    @test result isa OKParseResult{Vector{String}}
+    @test result.value == ["a", "b"]
+    @test nextresult isa OKParseResult{Nothing}
 end
 
 @testset "tablerowP; The table row has a comment; All input consumed" begin
