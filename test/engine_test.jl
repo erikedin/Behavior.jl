@@ -113,6 +113,8 @@ addmatcher!(engine::FakeEngine, m::StepDefinitionMatcher) = push!(engine.matcher
 runfeature!(engine::FakeEngine, feature::Feature, _keepgoing::Bool) = push!(engine.features, feature)
 runfeature!(engine::FakeEngine, result::Gherkin.OKParseResult{Feature}, featurefile::String, keepgoing::Bool) = runfeature!(engine, result.value, keepgoing)
 runfeature!(engine::FakeEngine, result::Gherkin.BadParseResult{Feature}, featurefile::String, _keepgoing::Bool) = push!(engine.errors, result)
+runfeature!(engine::FakeEngine, result::Gherkin.Experimental.OKParseResult{Feature}, featurefile::String, keepgoing::Bool) = runfeature!(engine, result.value, keepgoing)
+runfeature!(engine::FakeEngine, result::Gherkin.Experimental.BadParseResult{Feature}, featurefile::String, _keepgoing::Bool) = push!(engine.errors, result)
 
 finish(engine::FakeEngine) = engine.accumulator
 executionenvironment(::FakeEngine) = Behavior.NoExecutionEnvironment()

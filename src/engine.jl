@@ -100,12 +100,13 @@ function readstepdefinitions!(driver::Driver, path::String)
 end
 
 function readfeature(driver::Driver, featurefile::String, parseoptions::ParseOptions)
+    featuretext = readfile(driver.os, featurefile)
     if parseoptions.use_experimental
-        input = Gherkin.Experimental.ParserInput(read(featurefile, String))
+        input = Gherkin.Experimental.ParserInput(featuretext)
         parser = Gherkin.Experimental.FeatureFileParser()
         parser(input)
     else
-        parsefeature(readfile(driver.os, featurefile), options=parseoptions)
+        parsefeature(featuretext, options=parseoptions)
     end
 end
 
