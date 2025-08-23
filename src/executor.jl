@@ -279,6 +279,9 @@ end
 stepimplementationsuggestion(given::Given) :: String = stepimplementationsuggestion("@given", given.text)
 stepimplementationsuggestion(when::When) :: String = stepimplementationsuggestion("@when", when.text)
 stepimplementationsuggestion(then::Then) :: String = stepimplementationsuggestion("@then", then.text)
+# For now, just default missing And steps to Given, because we don't keep track of what the previous
+# actual step was.
+stepimplementationsuggestion(then::And) :: String = stepimplementationsuggestion("@given", then.text)
 
 function suggestmissingsteps(executor::Executor, feature::Feature) :: String
     missingsteps = findmissingsteps(executor, feature)
@@ -290,11 +293,15 @@ function suggestmissingsteps(executor::Executor, feature::Feature) :: String
 
     missingstepcode = join(missingstepimpls, "\n\n")
 
-    """
-    using Behavior
+    if isempty(missingstepimpls)
+        ""
+    else
+        """
+        using Behavior
 
-    $(missingstepcode)
-    """
+        $(missingstepcode)
+        """
+    end
 end
 
 #

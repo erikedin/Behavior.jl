@@ -240,5 +240,8 @@ function suggestmissingsteps(
     feature = parseresult.value
 
     suggestedcode = suggestmissingsteps(driver.engine.executor, feature)
-    println(suggestedcode)
+    if !isempty(suggestedcode)
+        println("# Missing steps in $(featurepath)")
+        print(suggestedcode)
+    end
 end
