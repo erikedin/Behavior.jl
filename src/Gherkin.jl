@@ -169,6 +169,9 @@ end
 
 """
 ParseOptions lets the user control certain behavior of the parser, making it more lenient towards errors.
+
+The "experimental" Gherkin parser in GherkinExperimental.jl is now the default parser, as it
+surpassed the older parser in many ways.
 """
 struct ParseOptions
     allow_any_step_order::Bool
@@ -176,7 +179,7 @@ struct ParseOptions
 
     function ParseOptions(;
         allow_any_step_order::Bool = false,
-        use_experimental::Bool = false)
+        use_experimental::Bool = true)
 
         new(allow_any_step_order, use_experimental)
     end

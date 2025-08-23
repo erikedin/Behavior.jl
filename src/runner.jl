@@ -137,8 +137,8 @@ function runspec(
         NoExecutionEnvironment()
     end
 
-    if parseoptions.use_experimental
-        println("WARNING: Experimental parser used for feature files!")
+    if !parseoptions.use_experimental
+        println("WARNING: The old parser is deprecated! Set use_experimental=true (default) to use the new.")
         println()
     end
 
@@ -224,11 +224,11 @@ function suggestmissingsteps(
     BadParseResultTypes = Union{Gherkin.BadParseResult{Feature}, Experimental.BadParseResult{Feature}}
 
     parseresult = if parseoptions.use_experimental
-        println("WARNING: suggestmissingsteps is using the experimental Gherkin parser")
         input = ParserInput(read(featurepath, String))
         parser = Experimental.FeatureFileParser()
         parser(input)
     else
+        println("WARNING: suggestmissingsteps is using the old Gherkin parser")
         parsefeature(read(featurepath, String), options=parseoptions)
     end
     if parseresult isa BadParseResultTypes
