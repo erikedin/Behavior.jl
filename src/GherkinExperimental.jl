@@ -1206,6 +1206,9 @@ FeatureFileParser() = Transformer{Vector{FeatureFileBits}, Feature}(
     takeelement(1)
 )
 
+# TODO: This will replace FeatureFileParser above
+const featurefileP = FeatureParser() >> -skipemptylinesP >> -(optionalC(commentP) >> -eofP)
+
 ##
 ## Exports
 ##
