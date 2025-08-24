@@ -774,17 +774,6 @@ function (parser::StartsWith)(input::ParserInput) :: ParseResult{String}
     end
 end
 
-struct EOFParser <: Parser{Nothing} end
-
-function (parser::EOFParser)(input::ParserInput) :: ParseResult{Nothing}
-    s, newinput = line(input)
-    if s === nothing
-        OKParseResult{Nothing}(nothing, newinput)
-    else
-        BadExpectedEOFParseResult{Nothing}(input)
-    end
-end
-
 ##
 ## Gherkin-specific parser
 ##
@@ -1144,7 +1133,7 @@ export ParserInput, OKParseResult, BadParseResult, isparseok
 
 # Basic combinators
 export Line, Or, Transformer, Sequence
-export Joined, Repeating, LineIfNot, StartsWith, EOFParser
+export Joined, Repeating, LineIfNot, StartsWith
 
 # Gherkin combinators
 export BlockText, KeywordParser
