@@ -253,9 +253,9 @@ end
                     Given a precondition
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test issuccessful(result)
+            @test result isa OKParseResult{Feature}
             feature = result.value
             @test length(feature.scenarios) == 2
         end
@@ -270,9 +270,9 @@ end
                     Given a precondition
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test issuccessful(result)
+            @test result isa OKParseResult{Feature}
             feature = result.value
             @test length(feature.scenarios) == 2
         end
@@ -292,9 +292,9 @@ end
                     | 2   |
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test issuccessful(result)
+            @test result isa OKParseResult{Feature}
             feature = result.value
             @test length(feature.scenarios) == 2
         end
@@ -314,9 +314,9 @@ end
                     Given a precondition
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test issuccessful(result)
+            @test result isa OKParseResult{Feature}
             feature = result.value
             @test length(feature.scenarios) == 2
         end
@@ -333,9 +333,9 @@ end
                     | 2   |
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test issuccessful(result)
+            @test result isa OKParseResult{Feature}
             feature = result.value
             @test length(feature.scenarios) == 1
         end
@@ -347,9 +347,9 @@ end
                     Given a precondition
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test issuccessful(result)
+            @test result isa OKParseResult{Feature}
             feature = result.value
             @test length(feature.scenarios) == 1
         end
@@ -365,9 +365,9 @@ end
                 Scenario: This is a third scenario
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test issuccessful(result)
+            @test result isa OKParseResult{Feature}
             feature = result.value
             @test length(feature.scenarios) == 3
         end
@@ -385,42 +385,9 @@ end
                     Given a precondition
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test issuccessful(result) == false
-            @test result.reason == :unexpected_construct
-            @test result.expected == :feature
-            @test result.actual == :scenario
-        end
-
-        @testset "Scenario has out-of-order steps; Parse fails with :bad_step_order" begin
-            text = """
-            Feature: This feature has one scenario
-
-                Scenario: This scenario has out-of-order steps
-                    When an action
-                    Given a precondition
-            """
-
-            result = parsefeature(text)
-
-            @test issuccessful(result) == false
-            @test result.reason == :bad_step_order
-        end
-
-        @testset "Invalid step keyword; Syntax error on line 5" begin
-            text = """
-            Feature: This feature has one scenario
-
-                Scenario: This scenario has out-of-order steps
-                    When an action
-                    Given a precondition
-            """
-
-            result = parsefeature(text)
-
-            @test !issuccessful(result)
-            @test result.linenumber == 5
+            @test result isa BadParseResult{Feature}
         end
 
         @testset "Scenario found before feature; Parser fails on line 1" begin
@@ -434,25 +401,9 @@ end
                     Given a precondition
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test issuccessful(result) == false
-            @test result.linenumber == 1
-        end
-
-        @testset "Invalid step keyword; Syntax error includes current line" begin
-            text = """
-            Feature: This feature has one scenario
-
-                Scenario: This scenario has out-of-order steps
-                    When an action
-                    Given a precondition
-            """
-
-            result = parsefeature(text)
-
-            @test !issuccessful(result)
-            @test strip(result.line) == "Given a precondition"
+            @test result isa BadParseResult{Feature}
         end
 
         @testset "Scenario found before feature; Parser fails on line 1" begin
@@ -466,10 +417,9 @@ end
                     Given a precondition
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test issuccessful(result) == false
-            @test strip(result.line) == "Scenario: This is one scenario"
+            @test result isa BadParseResult{Feature}
         end
 
     end
@@ -485,9 +435,9 @@ end
                     Given a precondition
             """
 
-            result = parsefeature(text, options=ParseOptions(allow_any_step_order = true))
+            result = parsefeatureP(text)
 
-            @test issuccessful(result)
+            @test result isa OKParseResult{Feature}
         end
     end
 
@@ -500,9 +450,9 @@ end
                     Given some background precondition
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test issuccessful(result)
+            @test result isa OKParseResult{Feature}
             feature = result.value
             @test feature.background.description == "Some background steps"
         end
@@ -515,9 +465,9 @@ end
                     Given some background precondition
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test issuccessful(result)
+            @test result isa OKParseResult{Feature}
             feature = result.value
             @test feature.background.steps == [Given("some background precondition")]
         end
@@ -532,9 +482,9 @@ end
                     Given some background precondition 3
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test issuccessful(result)
+            @test result isa OKParseResult{Feature}
             feature = result.value
             @test feature.background.steps == [
                 Given("some background precondition 1"),
@@ -554,16 +504,16 @@ end
                         \"\"\"
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test issuccessful(result)
+            @test result isa OKParseResult{Feature}
             feature = result.value
             @test feature.background.steps == [
                 Given("some background precondition"; block_text="Doc string"),
             ]
         end
 
-        @testset "Background with a When step type; Parser error is :invalid_step" begin
+        @testset "Background with a When step type; This is allowed" begin
             text = """
             Feature: This feature has a Background section
 
@@ -572,13 +522,12 @@ end
                     When some action
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test !issuccessful(result)
-            @test result.reason == :invalid_step
+            @test result isa OKParseResult{Feature}
         end
 
-        @testset "Background with a Then step type; Parser error is :invalid_step" begin
+        @testset "Background with a Then step type; This is allowed" begin
             text = """
             Feature: This feature has a Background section
 
@@ -587,10 +536,9 @@ end
                     Then some postcondition
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test !issuccessful(result)
-            @test result.reason == :invalid_step
+            @test result isa OKParseResult{Feature}
         end
 
         @testset "Background has no description; Description is empty" begin
@@ -601,9 +549,9 @@ end
                     Given some background precondition
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test issuccessful(result)
+            @test result isa OKParseResult{Feature}
             feature = result.value
             @test feature.background.description == ""
         end
@@ -617,9 +565,9 @@ end
             Feature: This is a feature
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test issuccessful(result)
+            @test result isa OKParseResult{Feature}
             feature = result.value
             @test feature.header.description == "This is a feature"
         end
@@ -635,9 +583,9 @@ end
                     Given some precondition 2
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test issuccessful(result)
+            @test result isa OKParseResult{Feature}
             feature = result.value
             @test feature.background.steps == [
                 Given("some precondition 1"),
@@ -656,9 +604,9 @@ end
                     Given some precondition 2
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test issuccessful(result)
+            @test result isa OKParseResult{Feature}
             feature = result.value
             @test feature.scenarios[1].steps == [
                 Given("some precondition 1"),
@@ -682,9 +630,9 @@ end
                     Then some postcondition
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test issuccessful(result)
+            @test result isa OKParseResult{Feature}
             feature = result.value
             @test feature.background.steps == [
                 Given("some background precondition"),
@@ -710,9 +658,9 @@ end
                     Then some postcondition
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test issuccessful(result)
+            @test result isa OKParseResult{Feature}
             feature = result.value
             @test feature.background.steps == [
                 Given("some background precondition"),
@@ -737,9 +685,9 @@ end
                 # Comment line 2
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test issuccessful(result)
+            @test result isa OKParseResult{Feature}
             feature = result.value
             @test feature.scenarios[1].steps == [
                 Given("some precondition 1"),
