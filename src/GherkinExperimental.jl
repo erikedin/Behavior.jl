@@ -589,25 +589,6 @@ const repeatedCharsC = n -> repeatC(charP, n) |> to{String}(join)
 const literalC = s -> isC(s, repeatedCharsC(length(s)))
 
 """
-    Optionally{T}
-
-Optionally{T} parses a value of type T if the inner parser succeeds, or nothing
-if the inner parser fails. It always succeeds.
-"""
-struct Optionally{T} <: Parser{Union{Nothing, T}}
-    inner::Parser{T}
-end
-
-function (parser::Optionally{T})(input::ParserInput) :: ParseResult{Union{Nothing, T}} where {T}
-    result = parser.inner(input)
-    if isparseok(result)
-        OKParseResult{Union{Nothing, T}}(result.value, result.newinput)
-    else
-        OKParseResult{Union{Nothing, T}}(nothing, input)
-    end
-end
-
-"""
     optionalordefault(value, default)
 
 Return `value` if it is not nothing, default otherwise.
@@ -954,7 +935,7 @@ buildstep(sb::StepBuilder{T}) where {T} = sb.steptype(sb.keyword.rest, block_tex
 
 function StepParser(steptype::Type{T}, keyword::String) :: Parser{T} where {T}
     Transformer{Vector{StepPieces}, T}(
-        Sequence{StepPieces}(KeywordParser(keyword), Optionally(DataTableOrBlockText)),
+        Sequence{StepPieces}(KeywordParser(keyword), optionalC(DataTableOrBlockText)),
         sequence -> begin
             keyword = sequence[1]
             stepbuilder = StepBuilder{T}(steptype, keyword)
@@ -1026,9 +1007,9 @@ Consumes a Scenario.
 """
 ScenarioParser() = Transformer{Vector{ScenarioBits}, Scenario}(
     Sequence{ScenarioBits}(
-        Optionally(TagLinesParser()),
+        optionalC(TagLinesParser()),
         KeywordParser("Scenario:"),
-        Optionally(LongDescription),
+        optionalC(LongDescription),
         StepsParser()),
     sequence -> begin
         tags = optionalordefault(sequence[1], [])
@@ -1046,9 +1027,9 @@ Consumes a Scenario Outline.
 """
 ScenarioOutlineParser() = Transformer{Vector{ScenarioOutlineBits}, ScenarioOutline}(
     Sequence{ScenarioOutlineBits}(
-        Optionally(TagLinesParser()),
+        optionalC(TagLinesParser()),
         KeywordParser("Scenario Outline:"),
-        Optionally(LongDescription),
+        optionalC(LongDescription),
         StepsParser(),
         Line("Examples:") | Line("Scenarios:"),
         datatableP
@@ -1081,7 +1062,7 @@ Consume a Background.
 BackgroundParser() = Transformer{Vector{BackgroundBits}, Background}(
     Sequence{BackgroundBits}(
         KeywordParser("Background:"),
-        Optionally(LongDescription),
+        optionalC(LongDescription),
         StepsParser()
     ),
     sequence -> begin
@@ -1108,9 +1089,9 @@ Consumes a Rule and its child scenarios.
 """
 RuleParser() = Transformer{Vector{RuleBits}, Rule}(
     Sequence{RuleBits}(
-        Optionally(TagLinesParser()),
+        optionalC(TagLinesParser()),
         KeywordParser("Rule:"),
-        Optionally(LongDescription),
+        optionalC(LongDescription),
         Repeating{Scenario}(ScenarioParser())),
     sequence -> begin
         tags = optionalordefault(sequence[1], String[])
@@ -1139,10 +1120,10 @@ const LongFeatureDescription = Joined(Repeating{String}(LineIfNot(ScenarioOrBack
 
 FeatureParser() = Transformer{Vector{FeatureBits}, Feature}(
     Sequence{FeatureBits}(
-        Optionally(TagLinesParser()),
+        optionalC(TagLinesParser()),
         KeywordParser("Feature:"),
-        Optionally(LongFeatureDescription),
-        Optionally(BackgroundParser()),
+        optionalC(LongFeatureDescription),
+        optionalC(BackgroundParser()),
         Repeating{AbstractScenario}(ScenarioOrRule)),
     sequence -> begin
         keyword = sequence[2]
@@ -1162,7 +1143,7 @@ const featurefileP = FeatureParser() >> -skipemptylinesP >> -(optionalC(commentP
 export ParserInput, OKParseResult, BadParseResult, isparseok
 
 # Basic combinators
-export Line, Optionally, Or, Transformer, Sequence
+export Line, Or, Transformer, Sequence
 export Joined, Repeating, LineIfNot, StartsWith, EOFParser
 
 # Gherkin combinators

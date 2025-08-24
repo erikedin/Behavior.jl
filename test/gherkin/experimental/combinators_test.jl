@@ -13,6 +13,7 @@
 # limitations under the License.
 
 using Behavior.Gherkin.Experimental
+using Behavior.Gherkin.Experimental: optionalC
 
 @testset "Combinators          " begin
     @testset "Line" begin
@@ -112,13 +113,13 @@ using Behavior.Gherkin.Experimental
     end
 
 
-    @testset "Optionally" begin
-        @testset "Optionally Foo; Foo; OK" begin
+    @testset "optionalC" begin
+        @testset "optionalC Foo; Foo; OK" begin
             # Arrange
             input = ParserInput("Foo")
 
             # Act
-            parser = Optionally{String}(Line("Foo"))
+            parser = optionalC(Line("Foo"))
             result = parser(input)
 
             # Assert
@@ -126,12 +127,12 @@ using Behavior.Gherkin.Experimental
             @test result.value == "Foo"
         end
 
-        @testset "Optionally Foo; Bar; OK with nothing" begin
+        @testset "optionalC Foo; Bar; OK with nothing" begin
             # Arrange
             input = ParserInput("Bar")
 
             # Act
-            parser = Optionally{String}(Line("Foo"))
+            parser = optionalC(Line("Foo"))
             result = parser(input)
 
             # Assert
@@ -139,12 +140,12 @@ using Behavior.Gherkin.Experimental
             @test result.value === nothing
         end
 
-        @testset "Optionally Bar; Bar; OK" begin
+        @testset "optionalC Bar; Bar; OK" begin
             # Arrange
             input = ParserInput("Bar")
 
             # Act
-            parser = Optionally{String}(Line("Bar"))
+            parser = optionalC(Line("Bar"))
             result = parser(input)
 
             # Assert
@@ -152,7 +153,7 @@ using Behavior.Gherkin.Experimental
             @test result.value == "Bar"
         end
 
-        @testset "Optionally Foo then Bar; Foo Bar; OK" begin
+        @testset "optionalC Foo then Bar; Foo Bar; OK" begin
             # Arrange
             input = ParserInput("""
                 Foo
@@ -160,7 +161,7 @@ using Behavior.Gherkin.Experimental
             """)
 
             # Act
-            parser1 = Optionally{String}(Line("Foo"))
+            parser1 = optionalC(Line("Foo"))
             result1 = parser1(input)
 
             parser2 = Line("Bar")
@@ -173,14 +174,14 @@ using Behavior.Gherkin.Experimental
             @test result2.value == "Bar"
         end
 
-        @testset "Optionally Foo then Bar; Bar; OK" begin
+        @testset "optionalC Foo then Bar; Bar; OK" begin
             # Arrange
             input = ParserInput("""
                 Bar
             """)
 
             # Act
-            parser1 = Optionally{String}(Line("Foo"))
+            parser1 = optionalC(Line("Foo"))
             result1 = parser1(input)
 
             parser2 = Line("Bar")
