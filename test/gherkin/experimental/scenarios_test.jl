@@ -115,12 +115,81 @@ using Behavior.Gherkin.Experimental: eofP
             @test result.value.steps == [Given("some precondition"), Given("some other precondition")]
         end
 
+        @testset "Scenario; Given has leading spaces in the description; The leading spaces are ignored" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario: Some new description
+                    Given     some precondition
+            """)
+
+            # Act
+            parser = ScenarioParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Scenario}
+            @test result.value.description == "Some new description"
+            @test result.value.steps == [Given("some precondition")]
+        end
+
+        # TODO Investigate if the official cucumber allows this.
+        # @testset "Scenario; Given has no description; Not OK" begin
+        #     # Arrange
+        #     input = ParserInput("""
+        #         Scenario: Some new description
+        #             Given
+        #     """)
+
+        #     # Act
+        #     parser = ScenarioParser()
+        #     result = parser(input)
+
+        #     # Assert
+        #     @test result isa BadParseResult{Scenario}
+        # end
+
+        @testset "Scenario; Malformed keyword; Not OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario malform: Some new description
+                    Given some precondition
+            """)
+
+            # Act
+            parser = ScenarioParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa BadParseResult{Scenario}
+        end
+
         @testset "Given/When/Then; OK" begin
             # Arrange
             input = ParserInput("""
                 Scenario: Some new description
                     Given some precondition
                      When some action
+                     Then some precondition
+            """)
+
+            # Act
+            parser = ScenarioParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Scenario}
+            @test result.value.description == "Some new description"
+            @test result.value.steps == [Given("some precondition"), When("some action"), Then("some precondition")]
+        end
+
+        @testset "Scenario; Blank line between steps; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario: Some new description
+                    Given some precondition
+
+                     When some action
+
                      Then some precondition
             """)
 
@@ -190,6 +259,97 @@ using Behavior.Gherkin.Experimental: eofP
             @test result.value.steps == [
                 Given("some precondition"; block_text="Block text line."),
                 Given("some other precondition")]
+        end
+
+        @testset "Scenario: Block text has multiple lines; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario: Some new description
+                    Given some precondition
+                        \"\"\"
+                        Block text line 1.
+                        Block text line 2.
+                        \"\"\"
+            """)
+
+            # Act
+            parser = ScenarioParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Scenario}
+            @test result.value.description == "Some new description"
+            @test result.value.steps == [
+                Given("some precondition"; block_text="Block text line 1.\nBlock text line 2.")
+            ]
+        end
+
+        @testset "Scenario: Block text has a blank line; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario: Some new description
+                    Given some precondition
+                        \"\"\"
+                        Block text line 1.
+
+                        Block text line 2.
+                        \"\"\"
+            """)
+
+            # Act
+            parser = ScenarioParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Scenario}
+            @test result.value.description == "Some new description"
+            @test result.value.steps == [
+                Given("some precondition"; block_text="Block text line 1.\n\nBlock text line 2.")
+            ]
+        end
+
+        @testset "Scenario: Block text on a when step; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario: Some new description
+                    When some action
+                        \"\"\"
+                        Block text line.
+                        \"\"\"
+            """)
+
+            # Act
+            parser = ScenarioParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Scenario}
+            @test result.value.description == "Some new description"
+            @test result.value.steps == [
+                When("some action"; block_text="Block text line.")
+            ]
+        end
+
+        @testset "Scenario: Block text on a then step; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario: Some new description
+                    Then some postcondition
+                        \"\"\"
+                        Block text line.
+                        \"\"\"
+            """)
+
+            # Act
+            parser = ScenarioParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Scenario}
+            @test result.value.description == "Some new description"
+            @test result.value.steps == [
+                Then("some postcondition"; block_text="Block text line.")
+            ]
         end
 
         @testset "A step has a data table; OK" begin
