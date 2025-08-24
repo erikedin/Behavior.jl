@@ -469,29 +469,6 @@ function (parser::manyC{T})(input::ParserInput) :: ParseResult{Vector{T}} where 
 end
 
 """
-    EscapedChar()
-
-Parse a single character, that is possibly an escape sequence.
-"""
-struct EscapedChar <: Parser{Char} end
-
-function (parser::EscapedChar)(input::ParserInput) :: ParseResult{Char}
-    if iseof(input)
-        return BadUnexpectedEOFParseResult{Char}(input)
-    end
-    c, newinput = consumechar(input)
-    if c == '\\'
-        # TODO: Currently, the only escape sequence we need is \|, so we just fetch
-        # the next char and return that. However, other sequences will need to be
-        # converted from one character to another.
-        escape, newinput = consumechar(newinput)
-        OKParseResult{Char}(escape, newinput)
-    else
-        OKParseResult{Char}(c, newinput)
-    end
-end
-
-"""
     ignoreC(::Parser{T})
 
 Recognize and consume the inner parser, but discard its result.
@@ -826,29 +803,6 @@ function (parser::EOFParser)(input::ParserInput) :: ParseResult{Nothing}
     else
         BadExpectedEOFParseResult{Nothing}(input)
     end
-end
-
-"""
-    EscapedStringParser
-
-Parse a string that potentially has escape sequences in it.
-
-:param stopat: Stop when this literal is encountered
-
-# Example
-Parse a column in a markdown table
-
-    | foo | bar |
-
-The delimiter is the pipe character (|) and the EscapedStringParser could be used
-to parse "foo" and "bar", and the parser will stop when discovering the delimiter..
-"""
-function EscapedStringParser(stopat::String) :: Parser{String}
-    # Stop repeating the EscapedChar parser when the current input is the
-    # delimiter literal.
-    # Example: Stop reading when the end of this column is found by the literal |
-    isdelimiterliteral = (input, _result) -> isparseok(Literal(stopat)(input))
-    Transformer{Vector{Char}, String}(Repeating{Char}(EscapedChar(), stopcondition=isdelimiterliteral), join)
 end
 
 ##
