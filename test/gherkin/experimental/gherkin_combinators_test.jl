@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+using Behavior.Gherkin.Experimental: blocktextP
+
 @testset "Gherkin combinators  " begin
     @testset "Block text" begin
         @testset "Empty; OK" begin
@@ -21,7 +23,7 @@
                 \"\"\"
             """)
             # Act
-            p = BlockText()
+            p = blocktextP
             result = p(input)
 
             # Assert
@@ -37,7 +39,7 @@
                 Quux
             """)
             # Act
-            p = Sequence{String}(BlockText(), Line("Quux"))
+            p = Sequence{String}(blocktextP, Line("Quux"))
             result = p(input)
 
             # Assert
@@ -53,7 +55,7 @@
                 \"\"\"
             """)
             # Act
-            p = BlockText()
+            p = blocktextP
             result = p(input)
 
             # Assert
@@ -71,7 +73,7 @@
                 \"\"\"
             """)
             # Act
-            p = BlockText()
+            p = blocktextP
             result = p(input)
 
             # Assert
@@ -91,7 +93,7 @@
             """)
 
             # Act
-            p = Sequence{String}(BlockText(), Line("Quux"))
+            p = Sequence{String}(blocktextP, Line("Quux"))
             result = p(input)
 
             # Assert
@@ -110,7 +112,7 @@
             """)
 
             # Act
-            p = BlockText()
+            p = blocktextP
             result = p(input)
 
             # Assert
@@ -129,7 +131,7 @@
             """)
 
             # Act
-            p = BlockText()
+            p = blocktextP
             result = p(input)
 
             # Assert
@@ -149,7 +151,7 @@
             """)
 
             # Act
-            p = BlockText()
+            p = blocktextP
             result = p(input)
 
             # Assert

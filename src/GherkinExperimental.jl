@@ -780,19 +780,7 @@ end
 
 takeelement(i::Int) = xs -> xs[i]
 
-"""
-    BlockText
-
-Parses a Gherkin block text.
-"""
-BlockText() = Transformer{Vector{String}, String}(
-    Sequence{String}(
-        Line("\"\"\""),
-        Joined(Repeating{String}(LineIfNot(Line("\"\"\""), anyline))),
-        Line("\"\"\""),
-    ),
-    takeelement(2)
-)
+const blocktextP = -Line("\"\"\"") >> Joined(Repeating{String}(LineIfNot(Line("\"\"\""), anyline))) >> -Line("\"\"\"")
 
 struct Keyword
     keyword::String
@@ -899,9 +887,9 @@ KeywordParser(word::String) = Transformer{String, Keyword}(
 
 const TableOrBlockTextTypes = Union{String, DataTable}
 const DataTableOrBlockText = (
-    Sequence{TableOrBlockTextTypes}(datatableP, BlockText()) |
-    Sequence{TableOrBlockTextTypes}(BlockText(), datatableP) |
-    Sequence{TableOrBlockTextTypes}(BlockText()) |
+    Sequence{TableOrBlockTextTypes}(datatableP, blocktextP) |
+    Sequence{TableOrBlockTextTypes}(blocktextP, datatableP) |
+    Sequence{TableOrBlockTextTypes}(blocktextP) |
     Sequence{TableOrBlockTextTypes}(datatableP)
 )
 const StepPieces = Union{Keyword, Union{Nothing, Vector{TableOrBlockTextTypes}}}
@@ -1136,7 +1124,7 @@ export Line, Or, Transformer, Sequence
 export Joined, Repeating, LineIfNot, StartsWith
 
 # Gherkin combinators
-export BlockText, KeywordParser
+export KeywordParser
 export StepsParser, GivenParser, WhenParser, ThenParser
 export ScenarioParser, RuleParser, FeatureParser, FeatureFileParser, BackgroundParser
 export TagParser, TagLinesParser, ScenarioOutlineParser
