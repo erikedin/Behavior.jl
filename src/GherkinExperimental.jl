@@ -778,7 +778,6 @@ end
 ## Gherkin-specific parser
 ##
 
-takeelement(i::Int) = xs -> xs[i]
 
 const blocktextP = -Line("\"\"\"") >> Joined(Repeating{String}(LineIfNot(Line("\"\"\""), anyline))) >> -Line("\"\"\"")
 
