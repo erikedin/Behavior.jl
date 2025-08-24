@@ -71,6 +71,21 @@ julia> runspec()
 
 See "Current state" for limitations.
 
+# Changes in v0.5.0
+There have been a number of fixes between v0.4.0 and v0.5.0, and unfortunately over a 4 year time period.
+The majority of the work has been on improving the Gherkin parser.
+
+- The new Gherkin parser is now the default
+- Some other changes
+
+To change the parser back to the old one, in case of issues, use `ParserOptions` with
+`use_experimental = false`, like this:
+
+```julia
+parseoptions = Behavior.Gherkin.ParseOptions(use_experimental=false)
+runspec(parseoptions=parseoptions)
+```
+
 # Current state
 The package is not feature complete, but is absolutely in a usable state. It is also under active
 development.
