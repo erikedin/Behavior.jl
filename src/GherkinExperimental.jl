@@ -581,13 +581,12 @@ function (parser::Line)(input::ParserInput) :: ParseResult{String}
 end
 
 """
-    Literal
+    literalC
 
 Parse a known literal value, useful for keywords and delimiters.
 """
 const repeatedCharsC = n -> repeatC(charP, n) |> to{String}(join)
 const literalC = s -> isC(s, repeatedCharsC(length(s)))
-const Literal = literalC
 
 """
     Optionally{T}

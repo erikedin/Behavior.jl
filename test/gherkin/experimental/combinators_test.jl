@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-using Behavior.Gherkin.Experimental: BadExpectationParseResult, Literal
+using Behavior.Gherkin.Experimental
 
 @testset "Combinators          " begin
     @testset "Line" begin

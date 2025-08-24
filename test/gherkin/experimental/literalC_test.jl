@@ -12,16 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-using Behavior.Gherkin.Experimental: Literal, ParserInput, line
+using Behavior.Gherkin.Experimental: literalC, ParserInput, line
 
-@testset "Literal              " begin
+@testset "literalC             " begin
 
 @testset "Match Foo; Input is Foo; OK" begin
     # Arrange
     input = ParserInput("Foo")
 
     # Act
-    p = Literal("Foo")
+    p = literalC("Foo")
     result = p(input)
 
     # Assert
@@ -34,7 +34,7 @@ end
     input = ParserInput("Quux")
 
     # Act
-    p = Literal("Quux")
+    p = literalC("Quux")
     result = p(input)
 
     # Assert
@@ -47,7 +47,7 @@ end
     input = ParserInput("Foo")
 
     # Act
-    p = Literal("Bar")
+    p = literalC("Bar")
     result = p(input)
 
     # Assert
@@ -59,8 +59,8 @@ end
     input = ParserInput("QuuxBar")
 
     # Act
-    p1 = Literal("Quux")
-    p2 = Literal("Bar")
+    p1 = literalC("Quux")
+    p2 = literalC("Bar")
     result1 = p1(input)
     result2 = p2(result1.newinput)
 
@@ -76,8 +76,8 @@ end
     input = ParserInput("Bar")
 
     # Act
-    p1 = Literal("Quux")
-    p2 = Literal("Bar")
+    p1 = literalC("Quux")
+    p2 = literalC("Bar")
     result1 = p1(input)
     result2 = p2(result1.newinput)
 
@@ -95,11 +95,11 @@ end
     _value, input = line(initialinput)
 
     # Act
-    p = Literal("Foo")
+    p = literalC("Foo")
     result = p(input)
 
     # Assert
     @test result isa BadParseResult{String}
 end
 
-end # Literal
+end # literalC
