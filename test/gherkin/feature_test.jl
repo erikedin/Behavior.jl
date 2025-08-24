@@ -16,6 +16,13 @@ using Behavior.Gherkin:
     parsefeature, issuccessful, ParseOptions,
     Given, When, Then
 
+using Behavior.Gherkin.Experimental: featurefileP, ParserInput, OKParseResult
+
+function parsefeatureP(text::String)
+    input = ParserInput(text)
+    featurefileP(input)
+end
+
 @testset "Feature              " begin
     @testset "Feature description" begin
         @testset "Read feature description; Description matches input" begin
@@ -23,9 +30,9 @@ using Behavior.Gherkin:
             Feature: This is a feature
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test issuccessful(result)
+            @test result isa OKParseResult{Feature}
             feature = result.value
             @test feature.header.description == "This is a feature"
         end
@@ -35,9 +42,9 @@ using Behavior.Gherkin:
             Feature: This is another feature
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test issuccessful(result)
+            @test result isa OKParseResult{Feature}
             feature = result.value
             @test feature.header.description == "This is another feature"
         end
@@ -49,12 +56,17 @@ using Behavior.Gherkin:
               It contains several lines.
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test issuccessful(result)
+            @test result isa OKParseResult{Feature}
             feature = result.value
-            @test "This is the long description." in feature.header.long_description
-            @test "It contains several lines." in feature.header.long_description
+            # TODO: The FeatureHeader has a vector of lines as the long_description.
+            # This should just be a string, so it needs to be changed. With the new
+            # Gherkin parser it is indeed a string, but is encased in a single-element
+            # Vector just to get it to work. So, just check that one element instead.
+            # When the FeatureHeader is fixed, remove [1] here.
+            @test contains(feature.header.long_description[1], "This is the long description.")
+            @test contains(feature.header.long_description[1], "It contains several lines.")
         end
 
         @testset "Scenarios are not part of the feature description" begin
@@ -67,11 +79,16 @@ using Behavior.Gherkin:
                     Given a precondition
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test issuccessful(result)
+            @test result isa OKParseResult{Feature}
             feature = result.value
-            @test ("Given a precondition" in feature.header.long_description) == false
+            # TODO: The FeatureHeader has a vector of lines as the long_description.
+            # This should just be a string, so it needs to be changed. With the new
+            # Gherkin parser it is indeed a string, but is encased in a single-element
+            # Vector just to get it to work. So, just check that one element instead.
+            # When the FeatureHeader is fixed, remove [1] here.
+            @test !contains(feature.header.long_description[1], "Given a precondition")
         end
     end
 
@@ -84,9 +101,9 @@ using Behavior.Gherkin:
                     Given a precondition
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test issuccessful(result)
+            @test result isa OKParseResult{Feature}
             feature = result.value
             @test length(feature.scenarios) == 1
         end
@@ -102,9 +119,9 @@ using Behavior.Gherkin:
                     Given a precondition
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test issuccessful(result)
+            @test result isa OKParseResult{Feature}
             feature = result.value
             @test length(feature.scenarios) == 2
         end
@@ -117,9 +134,9 @@ using Behavior.Gherkin:
                     Given a precondition
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test issuccessful(result)
+            @test result isa OKParseResult{Feature}
             feature = result.value
             @test feature.scenarios[1].description == "This is one scenario"
         end
@@ -135,9 +152,9 @@ using Behavior.Gherkin:
                     Given a precondition
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test issuccessful(result)
+            @test result isa OKParseResult{Feature}
             feature = result.value
             @test feature.scenarios[1].description == "This is one scenario"
             @test feature.scenarios[2].description == "This is a second scenario"
@@ -153,9 +170,9 @@ using Behavior.Gherkin:
                     Then some postcondition holds
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test issuccessful(result)
+            @test result isa OKParseResult{Feature}
             feature = result.value
             @test length(feature.scenarios[1].steps) == 3
         end
@@ -168,9 +185,9 @@ using Behavior.Gherkin:
                     Given a precondition
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test issuccessful(result)
+            @test result isa OKParseResult{Feature}
             feature = result.value
             @test length(feature.scenarios[1].steps) == 1
         end
@@ -188,12 +205,9 @@ using Behavior.Gherkin:
                     | 2   |
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test issuccessful(result)
-            if !issuccessful(result)
-                println("Error: $(result.reason): $(result.expected) but got $(result.actual)")
-            end
+            @test result isa OKParseResult{Feature}
             feature = result.value
             @test length(feature.scenarios) == 1
         end
@@ -214,12 +228,9 @@ using Behavior.Gherkin:
                     Given some precondition
             """
 
-            result = parsefeature(text)
+            result = parsefeatureP(text)
 
-            @test issuccessful(result)
-            if !issuccessful(result)
-                println("Error: $(result.reason): $(result.expected) but got $(result.actual)")
-            end
+            @test result isa OKParseResult{Feature}
             feature = result.value
             @test length(feature.scenarios) == 2
         end
