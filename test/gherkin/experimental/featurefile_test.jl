@@ -13,6 +13,7 @@
 # limitations under the License.
 
 using Behavior.Gherkin.Experimental: ParserInput, featurefileP
+using Behavior.Gherkin: hastag
 
 @testset "featurefileP         " begin
 
@@ -72,4 +73,138 @@ end
     @test result isa OKParseResult{Feature}
 end
 
+@testset "featurefileP; Scenario has one tag; The parsed scenario has tag1" begin
+    # Arrange
+    input = ParserInput("""
+    Feature: Some description
+
+        @tag1
+        Scenario: Some description
+            Given a precondition
+    """)
+
+    # Act
+    result = featurefileP(input)
+
+    # Assert
+    @test result isa OKParseResult{Feature}
+    feature = result.value
+    @test hastag(feature.scenarios[1], "@tag1")
+end
+
+@testset "featurefileP; Feature has tag @tag1; The scenario does not have @tag1" begin
+    # Arrange
+    input = ParserInput("""
+    @tag1
+    Feature: Some description
+
+        Scenario: Some description
+            Given a precondition
+    """)
+
+    # Act
+    result = featurefileP(input)
+
+    # Assert
+    @test result isa OKParseResult{Feature}
+    feature = result.value
+    @test !hastag(feature.scenarios[1], "@tag1")
+end
+
+@testset "featurefileP; Second scenario has one tag; The second scenario has tag1" begin
+    # Arrange
+    input = ParserInput("""
+    Feature: Some description
+
+        Scenario: No tags here
+            Given a precondition
+
+        @tag1
+        Scenario: Some description
+            Given a precondition
+    """)
+
+    # Act
+    result = featurefileP(input)
+
+    # Assert
+    @test result isa OKParseResult{Feature}
+    feature = result.value
+    @test hastag(feature.scenarios[2], "@tag1")
+end
+
+@testset "featurefileP; Scenario a comment after the tag; The parsed scenario has tag1" begin
+    # Arrange
+    input = ParserInput("""
+    Feature: Some description
+
+        @tag1
+        # Some comment
+        Scenario: Some description
+            Given a precondition
+    """)
+
+    # Act
+    result = featurefileP(input)
+
+    # Assert
+    @test result isa OKParseResult{Feature}
+    feature = result.value
+    @test hastag(feature.scenarios[1], "@tag1")
+end
+
+@testset "featurefileP; Tag has a hypen; The parsed scenario has tag1-a" begin
+    # Arrange
+    input = ParserInput("""
+    Feature: Some description
+
+        @tag1-a
+        Scenario: Some description
+            Given a precondition
+    """)
+
+    # Act
+    result = featurefileP(input)
+
+    # Assert
+    @test result isa OKParseResult{Feature}
+    feature = result.value
+    @test hastag(feature.scenarios[1], "@tag1-a")
+end
+
+@testset "featurefileP; Scenario has a @ in the description; The description is correctly parsed" begin
+    # Arrange
+    input = ParserInput("""
+    Feature: Some description
+
+        Scenario: Some @tag description
+            Given a precondition
+    """)
+
+    # Act
+    result = featurefileP(input)
+
+    # Assert
+    @test result isa OKParseResult{Feature}
+    feature = result.value
+    @test feature.scenarios[1].description == "Some @tag description"
+end
+
+@testset "featurefileP; The last step has a @ ; The step is correctly parsed" begin
+    # Arrange
+    input = ParserInput("""
+    Feature: Some description
+
+        Scenario: Some scenario description
+            Given a @tag precondition
+    """)
+
+    # Act
+    result = featurefileP(input)
+
+    # Assert
+    @test result isa OKParseResult{Feature}
+    feature = result.value
+    @test feature.scenarios[1].steps == [Given("a @tag precondition")]
+end
 end # FeatureFile

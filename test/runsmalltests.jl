@@ -16,7 +16,6 @@ include("selection/tag_expressions_test.jl")
 include("gherkin/experimental/runtests.jl")
 
 include("gherkin/feature_test.jl")
-include("gherkin/tag_test.jl")
 
 include("selection/tag_selection_test.jl")
 
