@@ -17,7 +17,6 @@ include("gherkin/experimental/runtests.jl")
 
 include("gherkin/feature_test.jl")
 include("gherkin/scenario_test.jl")
-include("gherkin/scenario_outline_test.jl")
 include("gherkin/tag_test.jl")
 
 include("selection/tag_selection_test.jl")

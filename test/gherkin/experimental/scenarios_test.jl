@@ -646,6 +646,56 @@ using Behavior.Gherkin.Experimental: eofP
             @test result.value.examples[1] == ["baz", "quux"]
             @test result.value.examples[2] == ["fnord", "quuxbaz"]
         end
+
+        @testset "Scenario Outlines; One placeholder is empty; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario Outline: Some scenario outline
+
+                    Given some value <Foo>
+                     When some action
+                     Then some postcondition
+
+                    Scenarios:
+                        | Foo   | Bar     |
+                        | baz   ||
+                        | fnord | quuxbaz |
+            """)
+
+            # Act
+            parser = ScenarioOutlineParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{ScenarioOutline}
+            @test result.value.examples[1] == ["baz", ""]
+            @test result.value.examples[2] == ["fnord", "quuxbaz"]
+        end
+
+        @testset "Scenario Outlines; The placeholder values are digits; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario Outline: Some scenario outline
+
+                    Given some value <Foo>
+                     When some action
+                     Then some postcondition
+
+                    Scenarios:
+                        | Foo | Bar     |
+                        | 1   | 2       |
+                        | 3   | 4       |
+            """)
+
+            # Act
+            parser = ScenarioOutlineParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{ScenarioOutline}
+            @test result.value.examples[1] == ["1", "2"]
+            @test result.value.examples[2] == ["3", "4"]
+        end
     end
 
     @testset "And/But*" begin
