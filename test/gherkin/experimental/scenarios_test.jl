@@ -48,6 +48,41 @@ using Behavior.Gherkin.Experimental: eofP
             @test result.value.steps == []
         end
 
+        @testset "Scenario; Long  description without a newline before Given; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario: Some description
+                    This is a long description.
+                    Given some precondition
+            """)
+
+            # Act
+            parser = ScenarioParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Scenario}
+            @test result.value.long_description == "This is a long description."
+            @test result.value.steps == [Given("some precondition")]
+        end
+
+        @testset "Scenario; Long description without any steps; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Scenario: Some description
+                    This is a long description.
+            """)
+
+            # Act
+            parser = ScenarioParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Scenario}
+            @test result.value.long_description == "This is a long description."
+            @test result.value.steps == []
+        end
+
         @testset "Scenario Outline:, Not OK" begin
             # Arrange
             input = ParserInput("""
