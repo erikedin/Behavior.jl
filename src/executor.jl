@@ -137,6 +137,15 @@ function executesteps(executor::Executor, context::StepDefinitionContext, steps:
 end
 
 """
+    extendresults!(scenarioresults, result::ScenarioResult)
+    extendresults!(scenarioresults, result::AbstractVector{ScenarioResult})
+
+Push or append results from a feature to a list of scenario results.
+"""
+extendresult!(scenarioresults::AbstractVector{ScenarioResult}, result::ScenarioResult) = push!(scenarioresults, result)
+extendresult!(scenarioresults::AbstractVector{ScenarioResult}, result::AbstractVector{ScenarioResult}) = append!(scenarioresults, result)
+
+"""
     executescenario(::Executor, ::Gherkin.Scenario)
 
 Execute each step in a `Scenario`. Present the results in real time.
@@ -181,20 +190,32 @@ function executescenario(executor::Executor, background::Gherkin.Background, out
      for scenario in scenarios]
 end
 
+"""
+    executescenario(::Executor, ::Gherkin.Experimental.Rule)
+
+Execute all scenarios in the rule.
+
+TODO: Improvements can be made here.
+- No rule is shown to the user.
+- One may want to see if the rule as a whole succeeded or not.
+"""
+function executescenario(executor::Executor, background::Gherkin.Background, rule::Gherkin.Experimental.Rule)
+    scenarioresults = ScenarioResult[]
+
+    results = ScenarioResult[
+        executescenario(executor, background, scenario)
+        for scenario in rule.scenarios
+    ]
+
+    extendresult!(scenarioresults, results)
+    scenarioresults
+end
+
 "The execution result for a feature, containing one or more scenarios."
 struct FeatureResult
     feature::Feature
     scenarioresults::Vector{ScenarioResult}
 end
-
-"""
-    extendresults!(scenarioresults, result::ScenarioResult)
-    extendresults!(scenarioresults, result::AbstractVector{ScenarioResult})
-
-Push or append results from a feature to a list of scenario results.
-"""
-extendresult!(scenarioresults::AbstractVector{ScenarioResult}, result::ScenarioResult) = push!(scenarioresults, result)
-extendresult!(scenarioresults::AbstractVector{ScenarioResult}, result::AbstractVector{ScenarioResult}) = append!(scenarioresults, result)
 
 """
     executefeature(::Executor, ::Gherkin.Feature)
