@@ -985,7 +985,7 @@ Consumes a Scenario.
 ScenarioParser() = Transformer{Vector{ScenarioBits}, Scenario}(
     Sequence{ScenarioBits}(
         optionalC(TagLinesParser()),
-        KeywordParser("Scenario:"),
+        choiceC(KeywordParser("Scenario:"), KeywordParser("Example:")),
         optionalC(LongDescription),
         StepsParser()),
     sequence -> begin
