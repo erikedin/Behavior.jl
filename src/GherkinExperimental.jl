@@ -779,7 +779,8 @@ end
 ##
 
 
-const blocktextP = -Line("\"\"\"") >> Joined(Repeating{String}(LineIfNot(Line("\"\"\""), anyline))) >> -Line("\"\"\"")
+const blocktextC = delimiter -> -Line(delimiter) >> Joined(Repeating{String}(LineIfNot(Line(delimiter), anyline))) >> -Line(delimiter)
+const blocktextP = choiceC(blocktextC("\"\"\""), blocktextC("```"))
 
 struct Keyword
     keyword::String

@@ -14,29 +14,29 @@
 
 using Behavior.Gherkin.Experimental: eofP, scenarioP
 
-@testset "Block text" begin
+@testset "Block text           " begin
 
-# @testset "Scenario; Block text uses ` as delimiter; Block text is read as expected" begin
-#     # Arrange
-#     input = ParserInput("""
-#         Scenario: Some new description
-#             Given some precondition
-#                 ```
-#                 Block text line.
-#                 ```
-#     """)
-#
-#     # Act
-#     parser = scenarioP >> -eofP
-#     result = parser(input)
-#
-#     # Assert
-#     @test result isa OKParseResult{Scenario}
-#     scenario = result.value
-#     # Expecting a single step in that scenario
-#     given = only(scenario.steps)
-#     @test given.block_text == "Block text line."
-# end
+@testset "Scenario; Block text uses ` as delimiter; Block text is read as expected" begin
+    # Arrange
+    input = ParserInput("""
+        Scenario: Some new description
+            Given some precondition
+                ```
+                Block text line.
+                ```
+    """)
+
+    # Act
+    parser = scenarioP >> -eofP
+    result = parser(input)
+
+    # Assert
+    @test result isa OKParseResult{Scenario}
+    scenario = result.value
+    # Expecting a single step in that scenario
+    given = only(scenario.steps)
+    @test given.block_text == "Block text line."
+end
 
 
 end # Block text
