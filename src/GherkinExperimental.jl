@@ -995,6 +995,8 @@ ScenarioParser() = Transformer{Vector{ScenarioBits}, Scenario}(
     end
 )
 
+const scenarioP = ScenarioParser()
+
 const ScenarioOutlineBits = Union{Keyword, String, Vector{ScenarioStep}, MaybeTags, DataTable}
 """
     ScenarioOutlineParser()
