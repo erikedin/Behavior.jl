@@ -13,6 +13,7 @@
 # limitations under the License.
 
 using Behavior.Gherkin.Experimental: eofP, scenarioP
+using Behavior.Gherkin.Experimental: featurefileP, ParserInput, OKParseResult
 
 @testset "Scenario Example     " begin
 
@@ -36,5 +37,21 @@ using Behavior.Gherkin.Experimental: eofP, scenarioP
     @test given == Given("some precondition")
 end
 
+@testset "Example; Example instead of Scenario; Scenario description is OK" begin
+    text = """
+    Feature: This feature has one example
+
+        Example: This is one example
+            Given a precondition
+    """
+
+    input = ParserInput(text)
+    result = featurefileP(input)
+
+    @test result isa OKParseResult{Feature}
+    feature = result.value
+    scenario = only(feature.scenarios)
+    @test scenario.description == "This is one example"
+end
 
 end # Block text
