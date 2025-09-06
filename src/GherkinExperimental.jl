@@ -970,6 +970,7 @@ const AnyKeyword = (
     KeywordParser("Scenario:") |
     KeywordParser("Scenario Outline:") |
     KeywordParser("Background:") |
+    KeywordParser("Example:") |
     KeywordParser("Rule:")
 )
 const MaybeTags = Union{Nothing, Vector{String}}

@@ -54,4 +54,22 @@ end
     @test scenario.description == "This is one example"
 end
 
+@testset "Feature; A Rule with an Example; Parsed OK" begin
+    # Arrange
+    text = """
+    Feature: Some feature
+      Rule: Some rule
+        Example: Some example
+          Given some precondition
+    """
+
+    input = ParserInput(text)
+
+    # Act
+    result = featurefileP(input)
+
+    # Assert
+    @test result isa OKParseResult{Feature}
+end
+
 end # Block text

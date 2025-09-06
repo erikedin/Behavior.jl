@@ -483,6 +483,23 @@ using Behavior.Gherkin.Experimental: eofP
             @test result.value.scenarios[1].description == "Some scenario"
         end
 
+        @testset "Rule with one example; OK" begin
+            # Arrange
+            input = ParserInput("""
+                Rule: Some rule description
+                    Example: Some scenario
+            """)
+
+            # Act
+            parser = RuleParser()
+            result = parser(input)
+
+            # Assert
+            @test result isa OKParseResult{Rule}
+            @test result.value.description == "Some rule description"
+            @test result.value.scenarios[1].description == "Some scenario"
+        end
+
         @testset "Rule with two scenarios; OK" begin
             # Arrange
             input = ParserInput("""
