@@ -100,7 +100,11 @@ end
 
 function present(presenter::ColorConsolePresenter, step::Gherkin.ScenarioStep, result::StepExecutionResult)
     color = stepcolor(presenter, result)
-    printstyled(presenter.io, "\r    $(stepformat(step))\n"; color=color)
+    # Clear the line by moving to the beginning and printing spaces, then move back
+    # This ensures proper behavior on both Unix and Windows systems
+    steptext = "    $(stepformat(step))"
+    print(presenter.io, "\r", " " ^ length(steptext), "\r")
+    printstyled(presenter.io, steptext, "\n"; color=color)
 
     resultmessage = stepresultmessage(result)
     if !isempty(resultmessage)
