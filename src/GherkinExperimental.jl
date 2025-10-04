@@ -230,6 +230,51 @@ function Base.show(io::IO, result::BadExceptionParseResult{T}) where {T}
     show(io, "Exception: $(result.ex)")
 end
 
+function Base.show(io::IO, result::BadExpectationParseResult{T}) where {T}
+    s, _newinput = line(result.newinput)
+    println(io, "Parse error at line $(result.newinput.state):")
+    println(io)
+    println(io, "  Line: $s")
+    println(io)
+    println(io, "  Expected: $(result.expected)")
+    println(io, "    Actual: $(result.actual)")
+end
+
+function Base.show(io::IO, result::BadUnexpectedParseResult{T}) where {T}
+    s, _newinput = line(result.newinput)
+    println(io, "Parse error at line $(result.newinput.state):")
+    println(io)
+    println(io, "  Line: $s")
+    println(io)
+    println(io, "  Unexpected: $(result.unexpected)")
+end
+
+function Base.show(io::IO, result::BadUnexpectedEOFParseResult{T}) where {T}
+    println(io, "Parse error at line $(result.newinput.state):")
+    println(io)
+    println(io, "  Unexpected end of file")
+end
+
+function Base.show(io::IO, result::BadCardinalityParseResult{S, T}) where {S, T}
+    println(io, "Parse error at line $(result.newinput.state):")
+    println(io)
+    println(io, "  Expected at least $(result.atleast) items, but found $(result.actual)")
+    if result.inner isa BadParseResult
+        println(io)
+        println(io, "  Underlying error:")
+        show(io, result.inner)
+    end
+end
+
+function Base.show(io::IO, result::BadTableRowsParseResult{T}) where {T}
+    println(io, "Parse error at line $(result.newinput.state):")
+    println(io)
+    println(io, "  Data table has inconsistent number of columns:")
+    for (i, row) in enumerate(result.table)
+        println(io, "    Row $i: $(length(row)) columns")
+    end
+end
+
 """
     eolP
 
