@@ -23,7 +23,7 @@ using Behavior.Gherkin: ScenarioOutline
 struct GherkinSource
     lines::Vector{String}
 
-    GherkinSource(source::String) = new(split(strip(source), "\n"))
+    GherkinSource(source::String) = new(split(strip(source), r"\r?\n"))
 end
 
 notempty(s) = !isempty(strip(s))
