@@ -1106,7 +1106,7 @@ struct Rule <: AbstractScenario
 end
 
 const ScenarioList = Vector{Scenario}
-const RuleBits = Union{Keyword, MaybeTags, Nothing, String, ScenarioList}
+const RuleBits = Union{Keyword, MaybeTags, Nothing, String, Background, ScenarioList}
 
 """
     RuleParser
@@ -1118,13 +1118,15 @@ RuleParser() = Transformer{Vector{RuleBits}, Rule}(
         optionalC(TagLinesParser()),
         KeywordParser("Rule:"),
         optionalC(LongDescription),
+        optionalC(BackgroundParser()),
         Repeating{Scenario}(ScenarioParser())),
     sequence -> begin
         tags = optionalordefault(sequence[1], String[])
         keyword = sequence[2]
         longdescription = optionalordefault(sequence[3], "")
-        scenarios = sequence[4]
-        Rule(keyword.rest, longdescription, Background(), scenarios, tags)
+        background = optionalordefault(sequence[4], Background())
+        scenarios = sequence[5]
+        Rule(keyword.rest, longdescription, background, scenarios, tags)
     end
 )
 

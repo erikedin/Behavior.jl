@@ -155,4 +155,92 @@
             Given("some third precondition")
         ]
     end
+
+    @testset "Rule; Has a background; Background description is correct" begin
+        # Arrange
+        input = ParserInput("""
+            Rule: With a background
+                Background: Rule-specific background
+        """)
+
+        # Act
+        parser = RuleParser()
+        result = parser(input)
+
+        # Assert
+        @test result isa OKParseResult{Rule}
+        @test result.value.background.description == "Rule-specific background"
+    end
+
+    @testset "Rule; Background is preceded by a long description; Background description is correct" begin
+        # Arrange
+        input = ParserInput("""
+            Rule: With a background
+                This is a long description.
+
+                Background: Rule-specific background
+        """)
+
+        # Act
+        parser = RuleParser()
+        result = parser(input)
+
+        # Assert
+        @test result isa OKParseResult{Rule}
+        @test result.value.background.description == "Rule-specific background"
+    end
+
+    @testset "Rule; Background followed by a scenario; Background and scenario description are correct" begin
+        # Arrange
+        input = ParserInput("""
+            Rule: With a background
+                Background: Rule-specific background
+
+                Scenario: Some scenario
+        """)
+
+        # Act
+        parser = RuleParser()
+        result = parser(input)
+
+        # Assert
+        @test result isa OKParseResult{Rule}
+        @test result.value.background.description == "Rule-specific background"
+        @test result.value.scenarios[1].description == "Some scenario"
+    end
+
+    @testset "Rule; One background, then EOF; OK" begin
+        # Arrange
+        input = ParserInput("""
+            Rule: With one Background
+                Background: 1
+                    Given 1
+        """)
+
+        # Act
+        parser = RuleParser() >> -eofP
+        result = parser(input)
+
+        # Assert
+        @test result isa OKParseResult{Rule}
+    end
+
+    @testset "Rule; Two backgrounds, then EOF; Not OK" begin
+        # Arrange
+        input = ParserInput("""
+            Rule: With two Backgrounds
+                Background: 1
+                    Given 1
+
+                Background: 2
+                    Given 2
+        """)
+
+        # Act
+        parser = RuleParser() >> -eofP
+        result = parser(input)
+
+        # Assert
+        @test result isa BadParseResult{Rule}
+    end
 end
