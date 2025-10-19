@@ -69,12 +69,23 @@ True for successful step executions, and false otherwise.
 issuccess(::SuccessfulStepExecution) = true
 issuccess(::StepExecutionResult) = false
 
+
+#
+# Rules can have backgrounds that apply to only that rule, that runs after the feature level background.
+# Therefore we'll have more than one background in some scenarios.
+# Currently, only two backgrounds are supported, but we could potentially need to implement
+# support for more.
+#
+const Backgrounds = Vector{Gherkin.Background}
+
+const Results = Vector{StepExecutionResult}
+
 "A result for a complete scenario."
 struct ScenarioResult
-    steps::Vector{StepExecutionResult}
+    steps::Results
     scenario::Scenario
-    background::Gherkin.Background
-    backgroundresult::Vector{StepExecutionResult}
+    backgrounds::Backgrounds
+    backgroundresults::Vector{Results}
 end
 
 issuccess(sr::ScenarioResult) = all(x -> issuccess(x), sr.steps)
@@ -145,14 +156,6 @@ Push or append results from a feature to a list of scenario results.
 extendresult!(scenarioresults::AbstractVector{ScenarioResult}, result::ScenarioResult) = push!(scenarioresults, result)
 extendresult!(scenarioresults::AbstractVector{ScenarioResult}, result::AbstractVector{ScenarioResult}) = append!(scenarioresults, result)
 
-#
-# Rules can have backgrounds that apply to only that rule, that runs after the feature level background.
-# Therefore we'll have more than one background in some scenarios.
-# Currently, only two backgrounds are supported, but we could potentially need to implement
-# support for more.
-#
-const Backgrounds = Vector{Gherkin.Background}
-
 """
     executescenario(::Executor, ::Gherkin.Scenario)
 
@@ -171,9 +174,10 @@ function executescenario(executor::Executor, backgrounds::Backgrounds, scenario:
 
     # Execute the Background section
     isfailedyet = false
-    backgroundresults = nothing
+    backgroundresults = Vector{Results}()
     for background in backgrounds
-        backgroundresults, isfailedyet = executesteps(executor, context, background.steps, isfailedyet)
+        backgroundresult, isfailedyet = executesteps(executor, context, background.steps, isfailedyet)
+        push!(backgroundresults, backgroundresult)
     end
 
     # Execute the Scenario
@@ -181,8 +185,7 @@ function executescenario(executor::Executor, backgrounds::Backgrounds, scenario:
 
     afterscenario(executor.executionenv, context, scenario)
 
-    # FIXME 2025-10-19 ScenarioResults should support more than one background
-    scenarioresult = ScenarioResult(results, scenario, backgrounds[1], backgroundresults)
+    scenarioresult = ScenarioResult(results, scenario, backgrounds, backgroundresults)
 
     present(executor.presenter, scenario, scenarioresult)
 

@@ -27,7 +27,7 @@ using Behavior:
         successfulscenario = ScenarioResult(
             [SuccessfulStepExecution()],
             Scenario("Some scenario", String[], ScenarioStep[given]),
-            Background(),
+            [Background()],
             ScenarioStep[])
         featureresult = FeatureResult(feature, [successfulscenario])
 
@@ -44,7 +44,7 @@ using Behavior:
         scenario = ScenarioResult(
             [StepFailed("")],
             Scenario("Some scenario", String[], ScenarioStep[given]),
-            Background(),
+            [Background()],
             ScenarioStep[])
         featureresult = FeatureResult(feature, [scenario])
 
@@ -62,7 +62,7 @@ using Behavior:
         scenario = ScenarioResult(
             [SuccessfulStepExecution(), StepFailed("")],
             Scenario("Some scenario", String[], ScenarioStep[given, when]),
-            Background(),
+            [Background()],
             ScenarioStep[])
         featureresult = FeatureResult(feature, [scenario])
 
@@ -80,12 +80,12 @@ using Behavior:
         successfulscenario = ScenarioResult(
             [SuccessfulStepExecution()],
             Scenario("Some scenario", String[], ScenarioStep[given]),
-            Background(),
+            [Background()],
             ScenarioStep[])
         failingscenario = ScenarioResult(
             [StepFailed("")],
             Scenario("Some other scenario", String[],  ScenarioStep[when]),
-            Background(),
+            [Background()],
             ScenarioStep[])
         featureresult = FeatureResult(feature, [successfulscenario, failingscenario])
 
@@ -102,7 +102,7 @@ using Behavior:
         successfulscenario = ScenarioResult(
             [SuccessfulStepExecution()],
             Scenario("Some scenario", String[], ScenarioStep[given]),
-            Background(),
+            [Background()],
             ScenarioStep[])
         featureresult = FeatureResult(feature, [successfulscenario])
 
@@ -121,12 +121,12 @@ using Behavior:
         successfulscenario = ScenarioResult(
             [SuccessfulStepExecution()],
             Scenario("Some scenario", String[], ScenarioStep[given]),
-            Background(),
+            [Background()],
             ScenarioStep[])
         failingscenario = ScenarioResult(
             [StepFailed("")],
             Scenario("Some other scenario", String[],  ScenarioStep[when]),
-            Background(),
+            [Background()],
             ScenarioStep[])
         featureresult = FeatureResult(feature, [successfulscenario, failingscenario])
 
@@ -145,12 +145,12 @@ using Behavior:
         successfulscenario = ScenarioResult(
             [SuccessfulStepExecution()],
             Scenario("Some scenario", String[], ScenarioStep[given]),
-            Background(),
+            [Background()],
             ScenarioStep[])
         failingscenario = ScenarioResult(
             [StepFailed("")],
             Scenario("Some other scenario", String[],  ScenarioStep[when]),
-            Background(),
+            [Background()],
             ScenarioStep[])
         featureresult = FeatureResult(feature,
             [successfulscenario, successfulscenario, successfulscenario, successfulscenario, successfulscenario,
@@ -171,7 +171,7 @@ using Behavior:
         successfulscenario = ScenarioResult(
             [SuccessfulStepExecution()],
             Scenario("Some scenario", String[], ScenarioStep[given]),
-            Background(),
+            [Background()],
             ScenarioStep[])
         featureresult1 = FeatureResult(feature1, [successfulscenario])
         featureresult2 = FeatureResult(feature1, [successfulscenario])
@@ -193,9 +193,9 @@ using Behavior:
         successfulscenario = ScenarioResult(
             [SuccessfulStepExecution()],
             Scenario("Some scenario", String[], ScenarioStep[given]),
-            Background("Failing background", ScenarioStep[Given("some failing background step")]),
-            StepExecutionResult[
-                StepFailed(""),
+            [Background("Failing background", ScenarioStep[Given("some failing background step")])],
+            [
+                StepExecutionResult[StepFailed("")]
             ])
         featureresult = FeatureResult(feature, [successfulscenario])
 
@@ -213,7 +213,7 @@ using Behavior:
         successfulscenario = ScenarioResult(
             [SuccessfulStepExecution()],
             Scenario("Some scenario", String[], ScenarioStep[given]),
-            Background(),
+            [Background()],
             ScenarioStep[])
         featureresult = FeatureResult(feature, [successfulscenario])
 

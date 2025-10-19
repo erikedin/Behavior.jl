@@ -258,8 +258,11 @@ Behavior.findstepdefinition(matcher::ThrowingStepDefinitionMatcher, ::Behavior.G
             scenario = Scenario("Description", String[], ScenarioStep[Given("some precondition")])
 
             scenarioresult = Behavior.executescenario(executor, [background], scenario)
+            # There is only one background in this test.
+            backgroundresult = scenarioresult.backgroundresults[1]
 
-            @test isa(scenarioresult.backgroundresult[1], Behavior.NoStepDefinitionFound)
+            # Check the first step in the background result.
+            @test isa(backgroundresult[1], Behavior.NoStepDefinitionFound)
         end
 
         @testset "Execute a one-step Background; A successful match found; Background result is Success" begin
@@ -277,8 +280,10 @@ Behavior.findstepdefinition(matcher::ThrowingStepDefinitionMatcher, ::Behavior.G
             scenario = Scenario("Description", String[], ScenarioStep[Given("some precondition")])
 
             scenarioresult = Behavior.executescenario(executor, [background], scenario)
+            # There is only one background in this test.
+            backgroundresult = scenarioresult.backgroundresults[1]
 
-            @test isa(scenarioresult.backgroundresult[1], Behavior.SuccessfulStepExecution)
+            @test isa(backgroundresult[1], Behavior.SuccessfulStepExecution)
         end
 
         @testset "Execute a one-step background; The matching step fails; Result is Failed" begin
@@ -294,8 +299,10 @@ Behavior.findstepdefinition(matcher::ThrowingStepDefinitionMatcher, ::Behavior.G
             background = Background("Background description", ScenarioStep[bgiven])
 
             scenarioresult = Behavior.executescenario(executor, [background], scenario)
+            # There is only one background in this test.
+            backgroundresult = scenarioresult.backgroundresults[1]
 
-            @test isa(scenarioresult.backgroundresult[1], Behavior.StepFailed)
+            @test isa(backgroundresult[1], Behavior.StepFailed)
         end
 
         @testset "Execute a one-step background; The background step fails; The Scenario step is skipped" begin
