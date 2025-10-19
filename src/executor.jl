@@ -14,7 +14,7 @@
 
 using Base.StackTraces
 
-using Behavior.Gherkin.Experimental: And
+using Behavior.Gherkin.Experimental: And, Rule
 
 "Executes a feature or scenario, and presents the results in real time."
 struct Executor
@@ -284,13 +284,29 @@ function findmissingsteps(executor::Executor, steps::Vector{ScenarioStep}) :: Ve
     filter(step -> findstep(step) isa NoStepDefinitionFound, steps)
 end
 
+function findmissingsteps(executor::Executor, scenario::Scenario) :: Vector{ScenarioStep}
+        findmissingsteps(executor, scenario.steps)
+end
+
+function findmissingsteps(executor::Executor, scenario::ScenarioOutline) :: Vector{ScenarioStep}
+        findmissingsteps(executor, scenario.steps)
+end
+
+function findmissingsteps(executor::Executor, rule::Rule) :: Vector{ScenarioStep}
+    missingsteps = Iterators.flatten([
+        findmissingsteps(executor, scenario)
+        for scenario in rule.scenarios
+    ])
+    collect(missingsteps)
+end
+
 function findmissingsteps(executor::Executor, feature::Feature) :: Vector{ScenarioStep}
     backgroundmissingsteps = findmissingsteps(executor, feature.background.steps)
 
     # findmissingstep(executor, scenario.steps) returns a list of missing steps,
     # so we're creating a list of lists here. We flatten it into one list of missing steps.
     missingsteps  = Iterators.flatten([
-        findmissingsteps(executor, scenario.steps)
+        findmissingsteps(executor, scenario)
         for scenario in feature.scenarios
     ])
 
