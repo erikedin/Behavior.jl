@@ -145,13 +145,21 @@ Push or append results from a feature to a list of scenario results.
 extendresult!(scenarioresults::AbstractVector{ScenarioResult}, result::ScenarioResult) = push!(scenarioresults, result)
 extendresult!(scenarioresults::AbstractVector{ScenarioResult}, result::AbstractVector{ScenarioResult}) = append!(scenarioresults, result)
 
+#
+# Rules can have backgrounds that apply to only that rule, that runs after the feature level background.
+# Therefore we'll have more than one background in some scenarios.
+# Currently, only two backgrounds are supported, but we could potentially need to implement
+# support for more.
+#
+const Backgrounds = Vector{Gherkin.Background}
+
 """
     executescenario(::Executor, ::Gherkin.Scenario)
 
 Execute each step in a `Scenario`. Present the results in real time.
 Returns a `ScenarioResult`.
 """
-function executescenario(executor::Executor, background::Gherkin.Background, scenario::Gherkin.Scenario)
+function executescenario(executor::Executor, backgrounds::Backgrounds, scenario::Gherkin.Scenario)
     # Tell the presenter of the start of a scenario execution.
     present(executor.presenter, scenario)
 
@@ -163,14 +171,18 @@ function executescenario(executor::Executor, background::Gherkin.Background, sce
 
     # Execute the Background section
     isfailedyet = false
-    backgroundresults, isfailedyet = executesteps(executor, context, background.steps, isfailedyet)
+    backgroundresults = nothing
+    for background in backgrounds
+        backgroundresults, isfailedyet = executesteps(executor, context, background.steps, isfailedyet)
+    end
 
     # Execute the Scenario
     results, _isfailedyet = executesteps(executor, context, scenario.steps, isfailedyet)
 
     afterscenario(executor.executionenv, context, scenario)
 
-    scenarioresult = ScenarioResult(results, scenario, background, backgroundresults)
+    # FIXME 2025-10-19 ScenarioResults should support more than one background
+    scenarioresult = ScenarioResult(results, scenario, backgrounds[1], backgroundresults)
 
     present(executor.presenter, scenario, scenarioresult)
 
@@ -184,9 +196,9 @@ Execute a `Scenario Outline`, which contains one or more examples. Each example 
 a regular `Scenario`, and it's executed.
 Reeturns a list of `ScenarioResult`s.
 """
-function executescenario(executor::Executor, background::Gherkin.Background, outline::Gherkin.ScenarioOutline)
+function executescenario(executor::Executor, backgrounds::Backgrounds, outline::Gherkin.ScenarioOutline)
     scenarios = transformoutline(outline)
-    [executescenario(executor, background, scenario)
+    [executescenario(executor, backgrounds, scenario)
      for scenario in scenarios]
 end
 
@@ -199,11 +211,12 @@ TODO: Improvements can be made here.
 - No rule is shown to the user.
 - One may want to see if the rule as a whole succeeded or not.
 """
-function executescenario(executor::Executor, background::Gherkin.Background, rule::Gherkin.Experimental.Rule)
+function executescenario(executor::Executor, backgrounds::Backgrounds, rule::Gherkin.Experimental.Rule)
     scenarioresults = ScenarioResult[]
 
+    combinedbackgrounds = [backgrounds..., rule.background]
     results = ScenarioResult[
-        executescenario(executor, background, scenario)
+        executescenario(executor, combinedbackgrounds, scenario)
         for scenario in rule.scenarios
     ]
 
@@ -232,7 +245,7 @@ function executefeature(executor::Executor, feature::Gherkin.Feature; keepgoing:
     # Execute each scenario and scenario outline in the feature.
     scenarioresults = ScenarioResult[]
     for scenario in feature.scenarios
-        scenarioresult = executescenario(executor, feature.background, scenario)
+        scenarioresult = executescenario(executor, Gherkin.Background[feature.background], scenario)
         extendresult!(scenarioresults, scenarioresult)
 
         if !issuccess(scenarioresult) && !keepgoing

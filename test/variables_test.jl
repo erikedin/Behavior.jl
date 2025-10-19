@@ -29,7 +29,7 @@ using Behavior: FromMacroStepDefinitionMatcher, findstepdefinition
 
         @test stepdefinitionmatch.variables == ["bar"]
     end
-    
+
     @testset "Matching against parameters; Definition has one empty String parameter; has value bar" begin
         given = Given("some bar")
         stepdef_matcher = FromMacroStepDefinitionMatcher("""
@@ -82,7 +82,7 @@ using Behavior: FromMacroStepDefinitionMatcher, findstepdefinition
         given = Given("some value bar")
         scenario = Scenario("Description", String[], ScenarioStep[given])
 
-        scenarioresult = Behavior.executescenario(executor, Background(), scenario)
+        scenarioresult = Behavior.executescenario(executor, [Background()], scenario)
 
         @test isa(scenarioresult.steps[1], Behavior.SuccessfulStepExecution)
     end
@@ -101,7 +101,7 @@ using Behavior: FromMacroStepDefinitionMatcher, findstepdefinition
         given = Given("some values bar and fnord")
         scenario = Scenario("Description", String[], ScenarioStep[given])
 
-        scenarioresult = Behavior.executescenario(executor, Background(), scenario)
+        scenarioresult = Behavior.executescenario(executor, [Background()], scenario)
 
         @test isa(scenarioresult.steps[1], Behavior.SuccessfulStepExecution)
     end

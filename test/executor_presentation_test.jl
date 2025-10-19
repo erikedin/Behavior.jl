@@ -45,7 +45,7 @@ stepresult(p::FakeRealTimePresenter, step::ScenarioStep) = p.results[step]
         executor = Executor(matcher, presenter)
 
         scenario = Scenario("Some scenario", String[], ScenarioStep[])
-        Behavior.executescenario(executor,  Background(),scenario)
+        Behavior.executescenario(executor,  [Background()],scenario)
 
         @test presenter.scenarios[1] == scenario
     end
@@ -56,7 +56,7 @@ stepresult(p::FakeRealTimePresenter, step::ScenarioStep) = p.results[step]
         executor = Executor(matcher, presenter)
 
         scenario = Scenario("Some scenario", String[], ScenarioStep[])
-        Behavior.executescenario(executor,  Background(),scenario)
+        Behavior.executescenario(executor,  [Background()],scenario)
 
         @test presenter.scenarioresults[1].scenario == scenario
     end
@@ -68,7 +68,7 @@ stepresult(p::FakeRealTimePresenter, step::ScenarioStep) = p.results[step]
         executor = Executor(matcher, presenter)
 
         scenario = Scenario("Some scenario", String[], ScenarioStep[given])
-        Behavior.executescenario(executor,  Background(),scenario)
+        Behavior.executescenario(executor,  [Background()],scenario)
 
         @test presenter.steps[1] == given
     end
@@ -80,7 +80,7 @@ stepresult(p::FakeRealTimePresenter, step::ScenarioStep) = p.results[step]
         executor = Executor(matcher, presenter)
 
         scenario = Scenario("Some scenario", String[], ScenarioStep[given])
-        Behavior.executescenario(executor,  Background(),scenario)
+        Behavior.executescenario(executor,  [Background()],scenario)
 
         @test stepresult(presenter, given) == Behavior.SuccessfulStepExecution()
     end
@@ -94,7 +94,7 @@ stepresult(p::FakeRealTimePresenter, step::ScenarioStep) = p.results[step]
         executor = Executor(matcher, presenter)
 
         scenario = Scenario("Some scenario", String[], ScenarioStep[given, when])
-        Behavior.executescenario(executor,  Background(),scenario)
+        Behavior.executescenario(executor,  [Background()],scenario)
 
         @test presenter.steps[2] == when
     end
@@ -108,7 +108,7 @@ stepresult(p::FakeRealTimePresenter, step::ScenarioStep) = p.results[step]
         executor = Executor(matcher, presenter)
 
         scenario = Scenario("Some scenario", String[], ScenarioStep[given, when])
-        Behavior.executescenario(executor,  Background(),scenario)
+        Behavior.executescenario(executor,  [Background()],scenario)
 
         @test stepresult(presenter, when) == Behavior.SkippedStep()
     end

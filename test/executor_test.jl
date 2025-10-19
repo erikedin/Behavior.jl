@@ -48,7 +48,7 @@ Behavior.findstepdefinition(matcher::ThrowingStepDefinitionMatcher, ::Behavior.G
         executor = Behavior.Executor(stepdefmatcher)
         scenario = Scenario("Description", String[], ScenarioStep[Given("some precondition")])
 
-        scenarioresult = Behavior.executescenario(executor, Background(), scenario)
+        scenarioresult = Behavior.executescenario(executor, [Background()], scenario)
 
         @test isa(scenarioresult.steps[1], Behavior.NoStepDefinitionFound)
     end
@@ -59,7 +59,7 @@ Behavior.findstepdefinition(matcher::ThrowingStepDefinitionMatcher, ::Behavior.G
         executor = Behavior.Executor(stepdefmatcher)
         scenario = Scenario("Description", String[], ScenarioStep[given])
 
-        scenarioresult = Behavior.executescenario(executor, Background(), scenario)
+        scenarioresult = Behavior.executescenario(executor, [Background()], scenario)
 
         @test isa(scenarioresult.steps[1], Behavior.SuccessfulStepExecution)
     end
@@ -70,7 +70,7 @@ Behavior.findstepdefinition(matcher::ThrowingStepDefinitionMatcher, ::Behavior.G
         executor = Behavior.Executor(stepdefmatcher)
         scenario = Scenario("Description", String[], ScenarioStep[given])
 
-        scenarioresult = Behavior.executescenario(executor, Background(), scenario)
+        scenarioresult = Behavior.executescenario(executor, [Background()], scenario)
 
         @test isa(scenarioresult.steps[1], Behavior.StepFailed)
     end
@@ -81,7 +81,7 @@ Behavior.findstepdefinition(matcher::ThrowingStepDefinitionMatcher, ::Behavior.G
         executor = Behavior.Executor(stepdefmatcher)
         scenario = Scenario("Description", String[], ScenarioStep[given])
 
-        scenarioresult = Behavior.executescenario(executor, Background(), scenario)
+        scenarioresult = Behavior.executescenario(executor, [Background()], scenario)
 
         @test isa(scenarioresult.steps[1], Behavior.UnexpectedStepError)
     end
@@ -94,7 +94,7 @@ Behavior.findstepdefinition(matcher::ThrowingStepDefinitionMatcher, ::Behavior.G
         executor = Behavior.Executor(stepdefmatcher)
         scenario = Scenario("Description", String[], ScenarioStep[given, when])
 
-        scenarioresult = Behavior.executescenario(executor, Background(), scenario)
+        scenarioresult = Behavior.executescenario(executor, [Background()], scenario)
 
         @test isa(scenarioresult.steps[2], Behavior.SkippedStep)
     end
@@ -107,7 +107,7 @@ Behavior.findstepdefinition(matcher::ThrowingStepDefinitionMatcher, ::Behavior.G
         executor = Behavior.Executor(stepdefmatcher)
         scenario = Scenario("Description", String[], ScenarioStep[given, when])
 
-        scenarioresult = Behavior.executescenario(executor, Background(), scenario)
+        scenarioresult = Behavior.executescenario(executor, [Background()], scenario)
 
         @test isa(scenarioresult.steps[2], Behavior.SkippedStep)
     end
@@ -120,7 +120,7 @@ Behavior.findstepdefinition(matcher::ThrowingStepDefinitionMatcher, ::Behavior.G
         executor = Behavior.Executor(stepdefmatcher)
         scenario = Scenario("Description", String[], ScenarioStep[given, when])
 
-        scenarioresult = Behavior.executescenario(executor, Background(), scenario)
+        scenarioresult = Behavior.executescenario(executor, [Background()], scenario)
 
         @test isa(scenarioresult.steps[1], Behavior.SuccessfulStepExecution)
         @test isa(scenarioresult.steps[2], Behavior.SuccessfulStepExecution)
@@ -136,7 +136,7 @@ Behavior.findstepdefinition(matcher::ThrowingStepDefinitionMatcher, ::Behavior.G
         executor = Behavior.Executor(stepdefmatcher)
         scenario = Scenario("Description", String[], ScenarioStep[given, when, then])
 
-        scenarioresult = Behavior.executescenario(executor, Background(), scenario)
+        scenarioresult = Behavior.executescenario(executor, [Background()], scenario)
 
         @test isa(scenarioresult.steps[1], Behavior.SuccessfulStepExecution)
         @test isa(scenarioresult.steps[2], Behavior.SuccessfulStepExecution)
@@ -149,7 +149,7 @@ Behavior.findstepdefinition(matcher::ThrowingStepDefinitionMatcher, ::Behavior.G
         executor = Behavior.Executor(stepdefmatcher)
         scenario = Scenario("This is a scenario", String[], ScenarioStep[given])
 
-        scenarioresult = Behavior.executescenario(executor, Background(), scenario)
+        scenarioresult = Behavior.executescenario(executor, [Background()], scenario)
 
         @test scenarioresult.scenario == scenario
     end
@@ -159,7 +159,7 @@ Behavior.findstepdefinition(matcher::ThrowingStepDefinitionMatcher, ::Behavior.G
         executor = Behavior.Executor(stepdefmatcher)
         scenario = Scenario("Description", String[], ScenarioStep[Given("some precondition")])
 
-        scenarioresult = Behavior.executescenario(executor, Background(), scenario)
+        scenarioresult = Behavior.executescenario(executor, [Background()], scenario)
 
         @test isa(scenarioresult.steps[1], Behavior.NonUniqueMatch)
     end
@@ -172,7 +172,7 @@ Behavior.findstepdefinition(matcher::ThrowingStepDefinitionMatcher, ::Behavior.G
                                                         step2 => successful_step_definition))
         executor = Behavior.Executor(stepdefmatcher)
 
-        outlineresult = Behavior.executescenario(executor, Background(), outline)
+        outlineresult = Behavior.executescenario(executor, [Background()], outline)
 
         @test length(outlineresult) == 2
     end
@@ -185,7 +185,7 @@ Behavior.findstepdefinition(matcher::ThrowingStepDefinitionMatcher, ::Behavior.G
                                                         step2 => failed_step_definition))
         executor = Behavior.Executor(stepdefmatcher)
 
-        outlineresult = Behavior.executescenario(executor, Background(), outline)
+        outlineresult = Behavior.executescenario(executor, [Background()], outline)
 
         @test outlineresult[1].steps[1] isa Behavior.SuccessfulStepExecution
         @test outlineresult[2].steps[1] isa Behavior.StepFailed
@@ -201,7 +201,7 @@ Behavior.findstepdefinition(matcher::ThrowingStepDefinitionMatcher, ::Behavior.G
                                                         step3 => successful_step_definition))
         executor = Behavior.Executor(stepdefmatcher)
 
-        outlineresult = Behavior.executescenario(executor, Background(), outline)
+        outlineresult = Behavior.executescenario(executor, [Background()], outline)
 
         @test length(outlineresult) == 3
     end
@@ -220,7 +220,7 @@ Behavior.findstepdefinition(matcher::ThrowingStepDefinitionMatcher, ::Behavior.G
             executor = Behavior.Executor(stepdefmatcher)
             scenario = Scenario("Description", String[], ScenarioStep[given])
 
-            scenarioresult = Behavior.executescenario(executor, Background(), scenario)
+            scenarioresult = Behavior.executescenario(executor, [Background()], scenario)
 
             @test isa(scenarioresult.steps[1], Behavior.SuccessfulStepExecution)
         end
@@ -241,7 +241,7 @@ Behavior.findstepdefinition(matcher::ThrowingStepDefinitionMatcher, ::Behavior.G
             executor = Behavior.Executor(stepdefmatcher)
             scenario = Scenario("Description", String[], [given, when])
 
-            scenarioresult = Behavior.executescenario(executor, Background(), scenario)
+            scenarioresult = Behavior.executescenario(executor, [Background()], scenario)
 
             @test isa(scenarioresult.steps[2], Behavior.SuccessfulStepExecution)
         end
@@ -257,7 +257,7 @@ Behavior.findstepdefinition(matcher::ThrowingStepDefinitionMatcher, ::Behavior.G
             executor = Behavior.Executor(stepdefmatcher)
             scenario = Scenario("Description", String[], ScenarioStep[Given("some precondition")])
 
-            scenarioresult = Behavior.executescenario(executor, background, scenario)
+            scenarioresult = Behavior.executescenario(executor, [background], scenario)
 
             @test isa(scenarioresult.backgroundresult[1], Behavior.NoStepDefinitionFound)
         end
@@ -276,7 +276,7 @@ Behavior.findstepdefinition(matcher::ThrowingStepDefinitionMatcher, ::Behavior.G
             executor = Behavior.Executor(stepdefmatcher)
             scenario = Scenario("Description", String[], ScenarioStep[Given("some precondition")])
 
-            scenarioresult = Behavior.executescenario(executor, background, scenario)
+            scenarioresult = Behavior.executescenario(executor, [background], scenario)
 
             @test isa(scenarioresult.backgroundresult[1], Behavior.SuccessfulStepExecution)
         end
@@ -293,7 +293,7 @@ Behavior.findstepdefinition(matcher::ThrowingStepDefinitionMatcher, ::Behavior.G
             scenario = Scenario("Description", String[], ScenarioStep[given])
             background = Background("Background description", ScenarioStep[bgiven])
 
-            scenarioresult = Behavior.executescenario(executor, background, scenario)
+            scenarioresult = Behavior.executescenario(executor, [background], scenario)
 
             @test isa(scenarioresult.backgroundresult[1], Behavior.StepFailed)
         end
@@ -310,7 +310,7 @@ Behavior.findstepdefinition(matcher::ThrowingStepDefinitionMatcher, ::Behavior.G
             scenario = Scenario("Description", String[], ScenarioStep[given])
             background = Background("Background description", ScenarioStep[bgiven])
 
-            scenarioresult = Behavior.executescenario(executor, background, scenario)
+            scenarioresult = Behavior.executescenario(executor, [background], scenario)
 
             @test isa(scenarioresult.steps[1], Behavior.SkippedStep)
         end

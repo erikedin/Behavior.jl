@@ -64,7 +64,7 @@ end
             scenario = Scenario("Description", String[], ScenarioStep[Given("")])
 
             # Act
-            result = executescenario(executor, Background(), scenario)
+            result = executescenario(executor, [Background()], scenario)
 
             # Assert
             @test issuccess(result.steps[1])
@@ -77,7 +77,7 @@ end
             scenario = Scenario("Description", String[], ScenarioStep[Given("")])
 
             # Act
-            result = executescenario(executor, Background(), scenario)
+            result = executescenario(executor, [Background()], scenario)
 
             # Assert
             @test issuccess(result.steps[1])
@@ -95,7 +95,7 @@ end
             scenario = Scenario("Description", String[], ScenarioStep[Given("")])
 
             # Act
-            result = executescenario(executor, Background(), scenario)
+            result = executescenario(executor, [Background()], scenario)
 
             # Assert
             @test issuccess(result.steps[1])
@@ -114,7 +114,7 @@ end
             scenario = Scenario("Description", String[], ScenarioStep[Given("")])
 
             # Act
-            result = executescenario(executor, Background(), scenario)
+            result = executescenario(executor, [Background()], scenario)
 
             # Assert
             @test env.afterscenariowasexecuted

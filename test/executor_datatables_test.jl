@@ -43,7 +43,7 @@ using .Gherkin: DataTable, DataTableRow
         executor = Behavior.Executor(stepdefmatcher)
         scenario = Scenario("Description", String[], ScenarioStep[given])
 
-        scenarioresult = Behavior.executescenario(executor, Background(), scenario)
+        scenarioresult = Behavior.executescenario(executor, [Background()], scenario)
 
         @test isa(scenarioresult.steps[1], Behavior.SuccessfulStepExecution)
     end
@@ -61,7 +61,7 @@ using .Gherkin: DataTable, DataTableRow
         executor = Behavior.Executor(stepdefmatcher)
         scenario = Scenario("Description", String[], ScenarioStep[given])
 
-        scenarioresult = Behavior.executescenario(executor, Background(), scenario)
+        scenarioresult = Behavior.executescenario(executor, [Background()], scenario)
 
         @test isa(scenarioresult.steps[1], Behavior.SuccessfulStepExecution)
     end
@@ -83,7 +83,7 @@ using .Gherkin: DataTable, DataTableRow
         executor = Behavior.Executor(stepdefmatcher)
         scenario = Scenario("Description", String[], ScenarioStep[given1, given2])
 
-        scenarioresult = Behavior.executescenario(executor, Background(), scenario)
+        scenarioresult = Behavior.executescenario(executor, [Background()], scenario)
 
         @test isa(scenarioresult.steps[2], Behavior.SuccessfulStepExecution)
     end
@@ -126,7 +126,7 @@ using .Gherkin: DataTable, DataTableRow
             [["1"], ["2"]]                       # Examples
         )
 
-        scenarioresult = Behavior.executescenario(executor, Background(), scenario)
+        scenarioresult = Behavior.executescenario(executor, [Background()], scenario)
 
         @test isa(scenarioresult[1].steps[1], Behavior.SuccessfulStepExecution)
         @test isa(scenarioresult[1].steps[2], Behavior.SuccessfulStepExecution)

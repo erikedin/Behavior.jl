@@ -206,4 +206,100 @@ end
     @test feature.n_failure == 1
 end
 
+@testset "Rule; Backgrounds within Rules; One successful scenario, and one failed" begin
+    # Arrange
+    engine = ExecutorEngine(QuietRealTimePresenter())
+    matcher = FromMacroStepDefinitionMatcher("""
+        using Behavior
+
+        @given("a good precondition") do context
+        end
+
+        @given("a bad precondition") do context
+            @fail "Bad"
+        end
+
+        @when("doing a good action") do context end
+    """)
+    addmatcher!(engine, matcher)
+
+    source = ParserInput("""
+        Feature: Has a rule with a background
+
+            Rule: This rule has a successful background
+
+                Background: Successful background
+                    Given a good precondition
+
+                Scenario: Some value
+                    When doing a good action
+
+            Rule: This rule has an unsuccessful background
+
+                Background: Successful background
+                    Given a bad precondition
+
+                Scenario: Some value
+                    When doing a good action
+    """)
+    parser = featurefileP
+    parseresult = parser(source)
+    feature = parseresult.value
+
+    # Act and Assert
+    # The test passes if executing the scenario does not
+    # throw an exception.
+    runfeature!(engine, feature; keepgoing=true)
+    result = engine.accumulator
+    # There's only one feature here
+    feature = only(result.features)
+    @test feature.n_success == 1
+    @test feature.n_failure == 1
+end
+
+@testset "Rule; Both feature and Rule backgrounds run; One failed scenario" begin
+    # Arrange
+    engine = ExecutorEngine(QuietRealTimePresenter())
+    matcher = FromMacroStepDefinitionMatcher("""
+        using Behavior
+
+        @given("a good precondition") do context
+        end
+
+        @given("a bad precondition") do context
+            @fail "Bad"
+        end
+
+        @when("doing a good action") do context end
+    """)
+    addmatcher!(engine, matcher)
+
+    source = ParserInput("""
+        Feature: Has a rule with a background
+
+            Background: Unsuccessful background
+                Given a bad precondition
+
+            Rule: This rule has a successful background
+
+                Background: Successful background
+                    Given a good precondition
+
+                Scenario: Some value
+                    When doing a good action
+    """)
+    parser = featurefileP
+    parseresult = parser(source)
+    feature = parseresult.value
+
+    # Act and Assert
+    # The test passes if executing the scenario does not
+    # throw an exception.
+    runfeature!(engine, feature; keepgoing=true)
+    result = engine.accumulator
+    # There's only one feature here
+    feature = only(result.features)
+    @test feature.n_success == 0
+    @test feature.n_failure == 1
+end
 end # Rule
