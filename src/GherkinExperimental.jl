@@ -1100,6 +1100,7 @@ BackgroundParser() = Transformer{Vector{BackgroundBits}, Background}(
 struct Rule <: AbstractScenario
     description::String
     longdescription::String
+    background::Background
     scenarios::Vector{AbstractScenario}
     tags::Vector{String}
 end
@@ -1123,7 +1124,7 @@ RuleParser() = Transformer{Vector{RuleBits}, Rule}(
         keyword = sequence[2]
         longdescription = optionalordefault(sequence[3], "")
         scenarios = sequence[4]
-        Rule(keyword.rest, longdescription, scenarios, tags)
+        Rule(keyword.rest, longdescription, Background(), scenarios, tags)
     end
 )
 
