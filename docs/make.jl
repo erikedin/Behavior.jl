@@ -9,3 +9,9 @@ makedocs(
         "Functions" => "functions.md",
         "Gherkin Experimental" => "gherkin_experimental.md"
     ])
+
+deploydocs(
+    repo = "github.com/erikedin/Behavior.jl.git",
+    devbranch = "master",
+    push_preview = true,
+)

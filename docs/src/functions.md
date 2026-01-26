@@ -6,6 +6,7 @@ CurrentModule = Behavior
 
 ```@docs
 runspec
+Gherkin.ParseOptions
 ```
 
 ## Index
