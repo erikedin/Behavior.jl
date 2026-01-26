@@ -1,12 +1,17 @@
 # Behavior
 
 ![CI](https://github.com/erikedin/Behavior.jl/actions/workflows/ci.yml/badge.svg)
+[![Documentation](https://img.shields.io/badge/docs-stable-blue.svg)](https://erikedin.github.io/Behavior.jl/stable/)
+[![Documentation](https://img.shields.io/badge/docs-dev-blue.svg)](https://erikedin.github.io/Behavior.jl/dev/)
 
 BDD is an acronym for _Behaviour Driven Development_. It is a process for creating and verifying
 requirements, written in such a way that they can be executed as code. This package aims to be a
 tool for executing such requirements, and creating reports.
 
 # Usage
+
+**[Full Documentation](https://erikedin.github.io/Behavior.jl/stable/)**
+
 See [docs/src/usage.md](docs/src/usage.md) for more detailed usage.
 
 See [docs/src/tutorial.md](docs/src/tutorial.md) for a step-by-step introduction to this package.
