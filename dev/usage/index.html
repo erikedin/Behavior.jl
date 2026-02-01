@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Usage · Behavior</title><meta name="title" content="Usage · Behavior"/><meta property="og:title" content="Usage · Behavior"/><meta property="twitter:title" content="Usage · Behavior"/><meta name="description" content="Documentation for Behavior."/><meta property="og:description" content="Documentation for Behavior."/><meta property="twitter:description" content="Documentation for Behavior."/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">Behavior</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li class="is-active"><a class="tocitem" href>Usage</a><ul class="internal"><li><a class="tocitem" href="#Package-layout"><span>Package layout</span></a></li><li><a class="tocitem" href="#Making-assertions"><span>Making assertions</span></a></li><li><a class="tocitem" href="#Parameters"><span>Parameters</span></a></li><li><a class="tocitem" href="#Data-tables"><span>Data tables</span></a></li><li><a class="tocitem" href="#Strictness-of-Gherkin-syntax"><span>Strictness of Gherkin syntax</span></a></li><li><a class="tocitem" href="#Step-implementation-suggestions"><span>Step implementation suggestions</span></a></li><li><a class="tocitem" href="#Selecting-scenarios-by-tags"><span>Selecting scenarios by tags</span></a></li><li><a class="tocitem" href="#Before/after-hooks"><span>Before/after hooks</span></a></li><li><a class="tocitem" href="#Breaking-on-failure,-or-keep-going"><span>Breaking on failure, or keep going</span></a></li></ul></li><li><a class="tocitem" href="../tutorial/">Tutorial</a></li><li><a class="tocitem" href="../functions/">Functions</a></li><li><a class="tocitem" href="../gherkin_experimental/">Gherkin Experimental</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Usage</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Usage</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/erikedin/Behavior.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/erikedin/Behavior.jl/blob/master/docs/src/usage.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Usage"><a class="docs-heading-anchor" href="#Usage">Usage</a><a id="Usage-1"></a><a class="docs-heading-anchor-permalink" href="#Usage" title="Permalink"></a></h1><h2 id="Package-layout"><a class="docs-heading-anchor" href="#Package-layout">Package layout</a><a id="Package-layout-1"></a><a class="docs-heading-anchor-permalink" href="#Package-layout" title="Permalink"></a></h2><p>A Julia package commonly has the following files and directories:</p><pre><code class="nohighlight hljs">ExamplePackage/
+├── Manifest.toml
+├── Project.toml
+├── src
+│   └── ExamplePackage.jl
+└── test
+    └── runtests.jl</code></pre><p>To use Behavior.jl, add inside the package</p><ul><li><p>a directory <code>features</code></p><p>This directory will contain the Gherkin feature files.</p></li><li><p>a directory <code>features/steps</code></p><p>This directory will contain the code that runs the actual   test steps.</p></li></ul><pre><code class="nohighlight hljs">ExamplePackage/
+├── features
+│   ├── Example.feature
+│   └── steps
+│       └── ExampleSteps.jl
+├── Manifest.toml
+├── Project.toml
+├── src
+│   └── ExamplePackage.jl
+└── test
+    └── runtests.jl</code></pre><p>Above you will see a single Gherkin feature file <code>features/Example.feature</code> and a single step definition file <code>features/steps/ExampleSteps.jl</code>.</p><h3 id="Test-organization"><a class="docs-heading-anchor" href="#Test-organization">Test organization</a><a id="Test-organization-1"></a><a class="docs-heading-anchor-permalink" href="#Test-organization" title="Permalink"></a></h3><p>Behavior searches for both feature files and step files recursively. You may place them in any subdirectory structure that you like. For instance,</p><pre><code class="nohighlight hljs">ExamplePackage/
+├── features
+│   ├── steps
+│   │   ├── ExampleSteps.jl
+│   │   └── substeps
+│   │       └── MoreSteps.jl
+│   ├── subfeature1
+│   │   └── Example.feature
+│   └── subfeature2
+│       └── Other.feature
+├── Manifest.toml
+├── Project.toml
+├── src
+│   └── ExamplePackage.jl
+└── test
+    └── runtests.jl</code></pre><h2 id="Making-assertions"><a class="docs-heading-anchor" href="#Making-assertions">Making assertions</a><a id="Making-assertions-1"></a><a class="docs-heading-anchor-permalink" href="#Making-assertions" title="Permalink"></a></h2><p>There are currently two ways of making assertions in a step:</p><ul><li><p><code>@expect &lt;expression&gt;</code></p><p>Checks that some boolean expression is true, and fails if it is not.</p></li><li><p><code>@fail &lt;string&gt;</code></p><p>Unconditionally fails a step, with an explanatory string.</p></li></ul><p>Both these macros are exported from the <code>Behavior</code> module. The <code>@expect</code> macro should be the primary method used for testing the actual vs. expected values of your code. The <code>@fail</code> macro can be used when the <code>@expect</code> macro is not appropriate, or for checking preconditions in the tests.</p><p>Examples:</p><pre><code class="language-julia hljs">using Behavior
+
+@then(&quot;one plus one equals two&quot;) do context
+    @expect 1+1 == 2
+end</code></pre><pre><code class="language-julia hljs">using Behavior
+
+@given(&quot;some precondition&quot;) do context
+    if !someprecondition()
+        # This may not be part of the test, but a precondition to performing the
+        # actual test you want.
+        @fail &quot;The tests required this particular precondition to be fulfilled&quot;
+    end
+end</code></pre><h2 id="Parameters"><a class="docs-heading-anchor" href="#Parameters">Parameters</a><a id="Parameters-1"></a><a class="docs-heading-anchor-permalink" href="#Parameters" title="Permalink"></a></h2><p>NOTE: This is a work in progress, and will see improvement.</p><p>A step in Gherkin is matched against step definitions in Julia code. These step definitions may have parameters, which match against many values. For instance, the Gherkin</p><pre><code class="language-Gherkin hljs">Feature: Demonstrating parameters
+
+  Scenario: Value forty-two
+      Given some value 42
+
+  Scenario: Value seventeen
+      Given some value 17</code></pre><p>we have two steps. Both of these steps will match the step definition</p><pre><code class="language-julia hljs">using Behavior
+
+@given(&quot;value {String}&quot;) do context, value
+    @expect value in [&quot;42&quot;, &quot;17&quot;]
+end</code></pre><p>The step definition above has a parameter <code>{String}</code>, which matches any string following the text <code>value</code>. The additional argument <code>value</code> in the do-block will have the value <code>&quot;42&quot;</code> in the first scenario above, and <code>&quot;17&quot;</code> in the second.</p><p>In the parameter above we specify the type <code>String</code>. One can also use an empty parameter <code>{}</code> which is an alias for <code>{String}</code>. The type of the argument <code>value</code> will naturally be <code>String</code>.</p><p>One can have several parameters in the step definition. For instance, the step definition</p><pre><code class="language-julia hljs">using Behavior
+
+@given(&quot;{} {}&quot;) do context, key, value
+    @expect key == &quot;value&quot;
+    @expect value in [&quot;42&quot;, &quot;17&quot;]
+end</code></pre><p>This step definition will also match the above <code>Given</code> step, and the first argument <code>key</code> will have the value <code>&quot;value&quot;</code> in both the scenarios.</p><p>Future work: In the near future, other types will be supported, such as <code>Int</code> and <code>Float</code>.</p><h3 id="Obsolete"><a class="docs-heading-anchor" href="#Obsolete">Obsolete</a><a id="Obsolete-1"></a><a class="docs-heading-anchor-permalink" href="#Obsolete" title="Permalink"></a></h3><p>Earlier, parameters were accessible in an object <code>args</code> that was provided to all step implementations, like so</p><pre><code class="language-julia hljs">@given(&quot;value {foo}&quot;) do context
+    @expect args[:foo] in [&quot;42&quot;, &quot;17&quot;]
+end</code></pre><p>This is no longer supported, and the <code>args</code> variable is no longer present.</p><h2 id="Data-tables"><a class="docs-heading-anchor" href="#Data-tables">Data tables</a><a id="Data-tables-1"></a><a class="docs-heading-anchor-permalink" href="#Data-tables" title="Permalink"></a></h2><p>Gherkin supports tabular data associated with each step. For instance, the scenario</p><pre><code class="language-Gherkin hljs">Feature: Demonstrating data tables
+
+    Scenario: Has a table
+        Given some users
+            | user id | name                |
+            | 17      | Henry Case          |
+            | 42      | Ainsley Lowbeer     |
+            | 59      | Chevette Washington |
+         When a search for &quot;Henry Case&quot; is made
+         Then user id 17 is found</code></pre><p>The <code>Given</code> step above has a data table associated with it. To access the data table in a step definition, use the <code>datatable</code> field on the <code>context</code> object:</p><pre><code class="language-julia hljs">using Behavior
+
+@given(&quot;some users&quot;) do context
+    users = context.datatable
+    println(users[1]) # Prints [&quot;user id&quot;, &quot;name&quot;]
+    println(users[2]) # Prints [&quot;17&quot;, &quot;Henry Case&quot;]
+    println(users[3]) # Prints [&quot;42&quot;, &quot;Ainsley Lowbeer&quot;]
+    println(users[4]) # Prints [&quot;59&quot;, &quot;Chevette Washington&quot;]
+end</code></pre><h2 id="Strictness-of-Gherkin-syntax"><a class="docs-heading-anchor" href="#Strictness-of-Gherkin-syntax">Strictness of Gherkin syntax</a><a id="Strictness-of-Gherkin-syntax-1"></a><a class="docs-heading-anchor-permalink" href="#Strictness-of-Gherkin-syntax" title="Permalink"></a></h2><p>There are some ways to configure how strict we wish the Gherkin parser to be, when reading a feature file. For instance, Behavior by default requires you to only have steps in the order <code>Given-When-Then</code>. It fails if it finds, for instance, a <code>Given</code> step after a <code>When</code> step in a Scenario. This reflects the intended use of these steps, but may not be to everyones liking. Therefore, we can control the strictness of the parser and allow such steps.</p><pre><code class="language-Gherkin hljs">Feature: Demonstrating step order
+
+  Scenario: This scenario requires a more lenient parser
+      Given some precondition
+       When some action
+       Then some postcondition
+      Given some other precondition
+       When some other action
+       Then some other postcondition</code></pre><p>The above feature file will by default fail, as the steps are not strictly in the order <code>Given-When-Then</code>. The error message will look something like</p><pre><code class="nohighlight hljs">ERROR: ./features/DemonstratingStepOrder.feature:7
+      Line:     Given some other precondition
+    Reason: bad_step_order
+  Expected: NotGiven
+    Actual: Given</code></pre><p>To allow this, create a <code>Behavior.Gherkin.ParseOptions</code> struct, with the keyword <code>allow_any_step_order = true</code>.</p><pre><code class="language-julia-repl hljs">julia&gt; using Behavior
+julia&gt; using Behavior.Gherkin
+
+julia&gt; p = ParseOptions(allow_any_step_order = true)
+
+julia&gt; runspec(parseoptions=p)</code></pre><p>Note that at the time of writing, the step order is the only option available for configuration Gherkin parsing.</p><h2 id="Step-implementation-suggestions"><a class="docs-heading-anchor" href="#Step-implementation-suggestions">Step implementation suggestions</a><a id="Step-implementation-suggestions-1"></a><a class="docs-heading-anchor-permalink" href="#Step-implementation-suggestions" title="Permalink"></a></h2><p>Behavior can find scenario steps that do not have a corresponding step implementation, and suggest one. For instance, if you have the feature</p><pre><code class="language-Gherkin hljs"># features/SomeFeature.feature
+Feature: Suggestions example
+
+    Scenario: Some scenario
+        Given an existing step
+         When a step is missing</code></pre><p>and the step implementation</p><pre><code class="language-julia hljs"># features/steps/somesteps.jl
+using Behavior
+
+@given(&quot;an existing step&quot;) do context
+    # Some  test
+end</code></pre><p>then we can see that the step <code>When a step is missing</code> does not have a corresponding step implementation, like the <code>Given</code> step does. To get a suggestion for missing step implementations in a given feature file, you can run</p><pre><code class="language-julia-repl hljs">julia&gt; using Behavior
+
+julia&gt; suggestmissingsteps(&quot;features/SomeFeature.feature&quot;, &quot;features/steps&quot;)
+using Behavior
+
+@when(&quot;a step is missing&quot;) do context
+    @fail &quot;Implement me&quot;
+end</code></pre><p>In the code above, we provide <code>suggestmissingsteps</code> with a feature file path, and the path where the step implementations are found. It will find that then <code>When</code> step above is missing and provide you with a sample step implementation. The sample will always initially fail, using the <code>@fail</code> macro, so that it is not accidentally left unimplemented.</p><p>Note that <code>suggestmissingsteps</code> can also take a <code>Behavior.Gherkin.ParseOptions</code> as an optional argument, which allows you to configure how strict or lenient the parser should be when reading the feature file.</p><pre><code class="language-julia-repl hljs">julia&gt; using Behavior
+julia&gt; using Behavior.Gherkin
+
+julia&gt; suggestmissingsteps(&quot;features/SomeFeature.feature&quot;, &quot;features/steps&quot;,
+                           parseoptions=ParseOptions(allow_any_step_order = true))
+using Behavior
+
+@when(&quot;a step is missing&quot;) do context
+    @fail &quot;Implement me&quot;
+end</code></pre><p>Also note that currently, <code>suggestmissingsteps</code> takes only a single feature file. It would of course be possible to have <code>suggestmissingsteps</code> find <em>all</em> feature files in the project, but this could potentially list too many missing steps to be of use.</p><h3 id="Known-limitations"><a class="docs-heading-anchor" href="#Known-limitations">Known limitations</a><a id="Known-limitations-1"></a><a class="docs-heading-anchor-permalink" href="#Known-limitations" title="Permalink"></a></h3><p>The suggestion method above does not currently generate any step implementations with variables. This is because the variables are undergoing changes at the time of writing, so generating such implementations would not be stable for the user.</p><h3 id="Caution"><a class="docs-heading-anchor" href="#Caution">Caution</a><a id="Caution-1"></a><a class="docs-heading-anchor-permalink" href="#Caution" title="Permalink"></a></h3><p>While it&#39;s tempting to use this as a means of automatically generating all missing step implementations, it&#39;s important to note that Behavior cannot know how to organize the step implementations. Oftentimes, many feature files will share common step implementations, so there will not be a one-to-one correspondence between feature files and the step implementation files. Furthermore, step implementations with variables will often match many steps for different values of the variables, but the suggestion method will not be able to determine which steps you want to use variables for. As an example, in the below feature file, it&#39;s quite obvious to a user that a variable step implementation can be used to match all <code>Given some value {Int}</code>, but the suggestion method will not be able to detect this.</p><pre><code class="language-Gherkin hljs">Feature: Demonstrate suggestion limitations
+
+    Scenario: Some scenario
+        Given some value 17
+
+    Scenario: Other scenario
+        Given some value 42</code></pre><h2 id="Selecting-scenarios-by-tags"><a class="docs-heading-anchor" href="#Selecting-scenarios-by-tags">Selecting scenarios by tags</a><a id="Selecting-scenarios-by-tags-1"></a><a class="docs-heading-anchor-permalink" href="#Selecting-scenarios-by-tags" title="Permalink"></a></h2><p>WARNING: At the time of writing the only supported way of selecting tags is a single tag or a comma-separated list of tags, with an optional &quot;not&quot; expression:</p><ul><li><code>@tag</code>,</li><li><code>@tag,@othertag,@thirdtag</code> matches any of the tags</li><li><code>not @tag</code></li><li><code>not @tag,@othertag</code> will not match either <code>@tag</code> or <code>@othertag</code></li></ul><p>The tag selection is a work in progress.</p><p>You can select which scenarios to run using the tags specified in the Gherkin files. For example, a feature file can look like this</p><pre><code class="language-Gherkin hljs">@foo
+Feature: Describing tags
+
+    @bar @baz
+    Scenario: Some scenario
+        Given some step
+
+    @ignore
+    Scenario: Ignore this scenario
+        Given some step</code></pre><p>Here we have applied the tag <code>@foo</code> to the entire feature file. That is, the <code>@foo</code> tag is inherited by all scenarios in the feature file. One scenario has the <code>@bar</code> and <code>@baz</code> tags, and another has the tag <code>@ignore</code>.</p><p>You can select to run only the scenarios marked with <code>@foo</code> by running</p><pre><code class="language-julia-repl hljs">julia&gt; using Behavior
+julia&gt; runspec(tags = &quot;@foo&quot;)</code></pre><p>This will run both scenarios above, as they both inherit the <code>@foo</code> tag from the feature level.</p><p>You can run only the scenario marked with <code>@bar</code> by running</p><pre><code class="language-julia-repl hljs">julia&gt; using Behavior
+julia&gt; runspec(tags = &quot;@bar&quot;)</code></pre><p>This will run only the first scenario <code>Scenario: Some scenario</code> above, as the second scenario does not have the <code>@bar</code> tag.</p><p>You can also choose to run scenarios that <em>do not</em> have a given tag, such as <code>@ignore</code>.</p><pre><code class="language-julia-repl hljs">julia&gt; using Behavior
+julia&gt; runspec(tags = &quot;not @ignore&quot;)</code></pre><p>This will also run only the first scenario, as it does not have the <code>@ignore</code> tag, but not the second.</p><p>If a feature does not have any matching scenarios, then that feature will be excluded from the results, as it had no bearing on the result.</p><h3 id="Tag-selection-syntax"><a class="docs-heading-anchor" href="#Tag-selection-syntax">Tag selection syntax</a><a id="Tag-selection-syntax-1"></a><a class="docs-heading-anchor-permalink" href="#Tag-selection-syntax" title="Permalink"></a></h3><p>NOTE: The tag selection syntax is a work in progress.</p><ul><li><p><code>@tag</code></p><p>Select scenarios with the tag <code>@tag</code>.</p></li><li><p><code>not @tag</code></p><p>Select scenarios that <em>do not</em> have the tag <code>@tag</code>.</p></li><li><p><code>@tag,@othertag,@thirdtag</code></p><p>Select scenarios that have one or several of the tags <code>@tag</code>, <code>@othertag</code>, <code>@thirdtag</code>.</p></li><li><p><code>not @tag,@othertag,@thirdtag</code></p><p>Select scenarios that <em>do not</em> have any of the tags <code>@tag</code>, <code>@othertag</code>, <code>@thirdtag</code>.</p></li></ul><h3 id="Future-syntax"><a class="docs-heading-anchor" href="#Future-syntax">Future syntax</a><a id="Future-syntax-1"></a><a class="docs-heading-anchor-permalink" href="#Future-syntax" title="Permalink"></a></h3><p>In the future, you will be able to write a more complex expression using <code>and</code>, <code>or</code>, and parentheses, like</p><pre><code class="nohighlight hljs">@foo and (not @ignore)</code></pre><p>which will run all scenarios with the <code>@foo</code> tag that do not also have the <code>@ignore</code> tag.</p><h2 id="Before/after-hooks"><a class="docs-heading-anchor" href="#Before/after-hooks">Before/after hooks</a><a id="Before/after-hooks-1"></a><a class="docs-heading-anchor-permalink" href="#Before/after-hooks" title="Permalink"></a></h2><p>You can create hooks that execute before and after each scenario, for set up and tear down of test resources. These must be placed in a file <code>features/environment.jl</code> (or some custom features directory you specify). Note that this is <em>not</em> the <code>features/steps</code> directory, where all step definitions are found, but in the <code>features</code> directory.</p><p>These are the available hooks:</p><ul><li><code>@beforescenario</code> and <code>@afterscenario</code></li><li><code>@beforefeature</code> and <code>@afterfeature</code></li><li><code>@beforeall</code> and <code>@afterall</code></li></ul><h3 id="Scenario"><a class="docs-heading-anchor" href="#Scenario">Scenario</a><a id="Scenario-1"></a><a class="docs-heading-anchor-permalink" href="#Scenario" title="Permalink"></a></h3><p>The <code>@beforescenario</code> and <code>@afterscenario</code> definitions run before and after each scenario.</p><pre><code class="language-julia hljs">@beforescenario() do context, scenario
+    # Some code here
+end
+
+@afterscenario() do context, scenario
+    # Some code here
+end</code></pre><p>The intention is that one can place test resources in the <code>context</code> object. This is the same object that the scenario steps will receive as their <code>context</code> parameter, so any modifications to it will be visible in the scenario steps. The <code>scenario</code> parameter allows one to see which scenario is being executed, so test resources can customized for each scenario.</p><h3 id="Feature"><a class="docs-heading-anchor" href="#Feature">Feature</a><a id="Feature-1"></a><a class="docs-heading-anchor-permalink" href="#Feature" title="Permalink"></a></h3><p>The <code>@beforefeature</code> and <code>@afterfeature</code> definitions run before and after each feature, respectively.</p><pre><code class="language-julia hljs">@beforefeature() do feature
+    # Some code here
+end
+
+@afterfeature() do feature
+    # Some code here
+end</code></pre><p>Note that these definitions to not take a <code>context</code> parameter. This is because the context is specific to each scenario. Outside of a scenario, there is no context object defined. The <code>feature</code> parameter contains the feature that is about to/was just executed. One can look at which tags are available on it, for instance.</p><p>Note that today there are no publicly defined methods on the <code>Behavior.Gherkin.Feature</code> type. To determine what can be done with it, you have to consult the source code. This can obviously be improved.</p><h3 id="All"><a class="docs-heading-anchor" href="#All">All</a><a id="All-1"></a><a class="docs-heading-anchor-permalink" href="#All" title="Permalink"></a></h3><p>The <code>@beforeall</code> and <code>@afterall</code> runs before the first feature, and after the last feature, respectively.</p><pre><code class="language-julia hljs">@beforeall() do
+    # Some code here
+end
+
+@afterall() do
+    # Some code here
+end</code></pre><p>The hooks take no arguments. As of today, these hooks can only create global resources, as no context or feature object is available.</p><h3 id="Module-scope"><a class="docs-heading-anchor" href="#Module-scope">Module scope</a><a id="Module-scope-1"></a><a class="docs-heading-anchor-permalink" href="#Module-scope" title="Permalink"></a></h3><p>The above hooks are evaluated in the <code>Main</code> module scope. If you define some function <code>myfunction</code> in the <code>environment.jl</code> file, then you can access it by explicitly using <code>Main.myfunction</code>.</p><p>Here is an <code>environment.jl</code> file that stores some data used by the all-hooks.</p><pre><code class="language-julia hljs">using Behavior
+
+myfeatures = []
+
+@beforefeature() do feature
+    push!(myfeatures, feature)
+end</code></pre><p>In a step definition, you can access the <code>myfeatures</code> list by using the <code>Main</code> module</p><pre><code class="language-julia hljs">using Behavior
+
+@then(&quot;some description&quot;) do
+    latestfeature = Main.myfeatures[end]
+    @expect latestfeature.header.description == &quot;Some feature description&quot;
+end</code></pre><h2 id="Breaking-on-failure,-or-keep-going"><a class="docs-heading-anchor" href="#Breaking-on-failure,-or-keep-going">Breaking on failure, or keep going</a><a id="Breaking-on-failure,-or-keep-going-1"></a><a class="docs-heading-anchor-permalink" href="#Breaking-on-failure,-or-keep-going" title="Permalink"></a></h2><p>During development of a package, it may be advantageous to break on the first failure, if the execution of all features takes a long time. This can be achieved by running the <code>runspec</code> call with the keyword option <code>keepgoing=false</code>. This means that the execution of features will stop at the first failure. No more scenarios or features will execute.</p><p>For example,</p><pre><code class="language-julia hljs">@test runspec(pkgdir(MyPackage); keepgoing=false)</code></pre><p>The <code>keepgoing</code> flag defaults to true, meaning that all features are executed.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../tutorial/">Tutorial »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Sunday 1 February 2026 20:44">Sunday 1 February 2026</span>. Using Julia version 1.12.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Tutorial · Behavior</title><meta name="title" content="Tutorial · Behavior"/><meta property="og:title" content="Tutorial · Behavior"/><meta property="twitter:title" content="Tutorial · Behavior"/><meta name="description" content="Documentation for Behavior."/><meta property="og:description" content="Documentation for Behavior."/><meta property="twitter:description" content="Documentation for Behavior."/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">Behavior</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><a class="tocitem" href="../usage/">Usage</a></li><li class="is-active"><a class="tocitem" href>Tutorial</a><ul class="internal"><li><a class="tocitem" href="#Step-1:-Create-a-new-package"><span>Step 1: Create a new package</span></a></li><li><a class="tocitem" href="#Step-2:-Add-some-code"><span>Step 2: Add some code</span></a></li><li><a class="tocitem" href="#Step-3:-Add-Behavior-as-a-dependency"><span>Step 3: Add Behavior as a dependency</span></a></li><li><a class="tocitem" href="#Step-4:-Write-a-Gherkin-feature"><span>Step 4: Write a Gherkin feature</span></a></li><li><a class="tocitem" href="#Step-5:-Implement-the-steps-in-the-feature"><span>Step 5: Implement the steps in the feature</span></a></li><li><a class="tocitem" href="#Step-6:-Test-the-Gherkin-feature"><span>Step 6: Test the Gherkin feature</span></a></li><li><a class="tocitem" href="#Step-7:-Add-further-scenarios"><span>Step 7: Add further scenarios</span></a></li><li><a class="tocitem" href="#Step-8:-Scenario-Outlines"><span>Step 8: Scenario Outlines</span></a></li><li><a class="tocitem" href="#Step-9:-Parameters"><span>Step 9: Parameters</span></a></li></ul></li><li><a class="tocitem" href="../functions/">Functions</a></li><li><a class="tocitem" href="../gherkin_experimental/">Gherkin Experimental</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Tutorial</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Tutorial</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/erikedin/Behavior.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/erikedin/Behavior.jl/blob/master/docs/src/tutorial.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Tutorial"><a class="docs-heading-anchor" href="#Tutorial">Tutorial</a><a id="Tutorial-1"></a><a class="docs-heading-anchor-permalink" href="#Tutorial" title="Permalink"></a></h1><p>This is a tutorial style introduction to how Behavior.jl works. It is not intended as a complete introduction to Behavior Driven Development, but rather as an introduction to how to start with this package.</p><p>This tutorial assumes that you have Julia 1.0 or later installed. It also assumes you&#39;re using Linux, or something similar, but the instructions can be adapted to Windows.</p><p>Here is an overview of the steps we&#39;ll take:</p><ol><li>Create a new package</li><li>Add some code to test</li><li>Add Behavior.jl as a dependency</li><li>Write a Gherkin feature</li><li>Implement the steps in the feature</li><li>Test the Gherkin feature</li><li>Add further scenarios</li><li>Scenario Outlines</li><li>Parameters</li></ol><p>If you have an existing package you wish to use, skip to step 3, and mentally replace the package name <code>CoffeeMachine</code> with your package name.</p><h2 id="Step-1:-Create-a-new-package"><a class="docs-heading-anchor" href="#Step-1:-Create-a-new-package">Step 1: Create a new package</a><a id="Step-1:-Create-a-new-package-1"></a><a class="docs-heading-anchor-permalink" href="#Step-1:-Create-a-new-package" title="Permalink"></a></h2><p>Go to a path where you want to create your new package, commonly <code>~/.julia/dev</code>, and start Julia there.</p><pre><code class="nohighlight hljs">$ cd ~/.julia/dev
+$ julia
+               _
+   _       _ _(_)_     |  Documentation: https://docs.julialang.org
+  (_)     | (_) (_)    |
+   _ _   _| |_  __ _   |  Type &quot;?&quot; for help, &quot;]?&quot; for Pkg help.
+  | | | | | | |/ _` |  |
+  | | |_| | | | (_| |  |  Version 1.6.0 (2021-03-24)
+ _/ |\__&#39;_|_|_|\__&#39;_|  |  Official https://julialang.org/ release
+|__/                   |
+
+julia&gt;
+</code></pre><p>To create a new package <code>CoffeeMachine</code>, first enter the Pkg mode by pressing the <code>]</code> key.</p><pre><code class="language-julia-repl hljs">julia&gt; ]
+# The Julia REPL prompt changes to
+(@v1.6) pkg&gt;</code></pre><p>Create the package by running</p><pre><code class="language-julia-repl hljs">(@v1.6) pkg&gt; generate CoffeeMachine
+  Generating  project CoffeeMachine:
+    CoffeeMachine/Project.toml
+    CoffeeMachine/src/CoffeeMachine.jl
+
+(@v1.6) pkg&gt;</code></pre><p>You now have a brand new package in <code>~/.julia/dev/CoffeeMachine</code>.</p><h2 id="Step-2:-Add-some-code"><a class="docs-heading-anchor" href="#Step-2:-Add-some-code">Step 2: Add some code</a><a id="Step-2:-Add-some-code-1"></a><a class="docs-heading-anchor-permalink" href="#Step-2:-Add-some-code" title="Permalink"></a></h2><p>Open the file <code>~/.julia/dev/CoffeeMachine/src/CoffeeMachine.jl</code> and add code so that the <code>CoffeeMachine</code> module looks like this (you can remove the default <code>greet</code> function):</p><pre><code class="language-julia hljs">module CoffeeMachine
+
+export Machine, Cup, makecoffee!, fillwith!, readdisplay
+
+mutable struct Machine
+    coffee::Float64
+    milk::Float64
+    message::String
+
+    Machine(; coffee=0.0, milk=0.0) = new(coffee, milk, &quot;&quot;)
+end
+
+struct Cup
+    coffee::Float64
+    milk::Float64
+end
+
+function fillwith!(m::Machine; coffee=0.0, milk=0.0)
+    m.coffee += coffee
+    m.milk += milk
+end
+
+function makecoffee!(m::Machine; withmilk=false) :: Union{Cup, Nothing}
+    if m.coffee &lt;= 0.0
+        display!(m, &quot;Out of coffee&quot;)
+        return nothing
+    end
+
+    if withmilk &amp;&amp; m.milk &lt;= 0.0
+        display!(m, &quot;Out of milk&quot;)
+        return nothing
+    end
+
+    milkincup = if withmilk
+        1.0
+    else
+        0.0
+    end
+
+    m.coffee -= 1.0
+    m.milk -= milkincup
+
+    display!(m, &quot;Enjoy&quot;)
+
+    Cup(1.0, milkincup)
+end
+
+readdisplay(m::Machine) = m.message
+display!(m::Machine, msg::String) = m.message = msg
+
+end # module</code></pre><p>This is a model of a coffee machine, solely for demonstration purposes. It allows you to make a cup of coffee, optionally with milk. It also has a display that shows messages to the user.</p><p>In later steps, we&#39;ll create a Gherkin feature that exercises this code.</p><h2 id="Step-3:-Add-Behavior-as-a-dependency"><a class="docs-heading-anchor" href="#Step-3:-Add-Behavior-as-a-dependency">Step 3: Add Behavior as a dependency</a><a id="Step-3:-Add-Behavior-as-a-dependency-1"></a><a class="docs-heading-anchor-permalink" href="#Step-3:-Add-Behavior-as-a-dependency" title="Permalink"></a></h2><p>NOTE: Behavior is not yet registered as a package, therefore this tutorial will manually clone the repository from GitHub and add it as a local development dependency.</p><p>In a terminal in <code>~/.julia/dev</code>, run</p><pre><code class="language-bash hljs">$ git clone https://github.com/erikedin/Behavior.jl Behavior</code></pre><p>Note that we&#39;re cloning it into a repo without the <code>.jl</code> prefix, for consistency with the newly generated package.</p><p>Start Julia in <code>~/.julia/dev</code> and activate the CoffeeMachine package, by</p><pre><code class="nohighlight hljs">$ julia
+               _
+   _       _ _(_)_     |  Documentation: https://docs.julialang.org
+  (_)     | (_) (_)    |
+   _ _   _| |_  __ _   |  Type &quot;?&quot; for help, &quot;]?&quot; for Pkg help.
+  | | | | | | |/ _` |  |
+  | | |_| | | | (_| |  |  Version 1.6.0 (2021-03-24)
+ _/ |\__&#39;_|_|_|\__&#39;_|  |  Official https://julialang.org/ release
+|__/                   |
+
+julia&gt;</code></pre><p>Go into the package mode and activate CoffeeMachine</p><pre><code class="language-julia-repl hljs">julia&gt; ]
+(@v1.6) pkg&gt; activate CoffeeMachine
+  Activating environment at `~/.julia/dev/CoffeeMachine/Project.toml`
+
+(CoffeeMachine) pkg&gt;</code></pre><p>To add Behavior as a local development dependency, run</p><pre><code class="language-julia-repl hljs">(CoffeeMachine) pkg&gt; dev Behavior
+[ Info: Resolving package identifier `Behavior` as a directory at `~/.julia/dev/Behavior`.
+Path `Behavior` exists and looks like the correct package. Using existing path.
+   Resolving package versions...
+    Updating `~/.julia/dev/CoffeeMachine/Project.toml`
+  [7a129280] + Behavior v0.1.0 `../Behavior`
+    Updating `~/.julia/dev/CoffeeMachine/Manifest.toml`
+  [7a129280] + Behavior v0.1.0 `../Behavior`
+  [c27321d9] + Glob v1.3.0
+  [2a0f44e3] + Base64
+  [b77e0a4c] + InteractiveUtils
+  [56ddb016] + Logging
+  [d6f4376e] + Markdown
+  [9a3f8284] + Random
+  [9e88b42a] + Serialization
+  [8dfed614] + Test</code></pre><p>We additionally require the standard <code>Test</code> module as a dependency, because we&#39;ll use the <code>@test</code> macro in the <code>CoffeeMachine/test/runtests.jl</code> test file later on.</p><pre><code class="language-julia-repl hljs">(CoffeeMachine) pkg&gt; add Test
+[ .. output not shown for brevity .. ]</code></pre><h2 id="Step-4:-Write-a-Gherkin-feature"><a class="docs-heading-anchor" href="#Step-4:-Write-a-Gherkin-feature">Step 4: Write a Gherkin feature</a><a id="Step-4:-Write-a-Gherkin-feature-1"></a><a class="docs-heading-anchor-permalink" href="#Step-4:-Write-a-Gherkin-feature" title="Permalink"></a></h2><p>Create a directory <code>CoffeeMachine/features</code>.</p><pre><code class="language-bash hljs">$ cd ~/.julia/dev/CoffeeMachine
+$ mkdir features</code></pre><p>Add the following Gherkin feature into the file <code>CoffeeMachine/features/MakingCoffee.feature</code>:</p><pre><code class="language-Gherkin hljs">Feature: Making Coffee
+
+    Scenario: Making a regular coffee
+        Given a machine filled with coffee beans
+         When a user makes a cup of coffee
+         Then the cup contains coffee</code></pre><p>This file is a simple Gherkin file that contains a requirement that the <code>CoffeeMachine</code> should fulfill.</p><p>The file starts by defining a <code>Feature</code>, with a short description of what this feature is about. A feature file contains one or more <code>Scenario</code>s, and each <code>Scenario</code> has steps on the form <code>Given</code>, <code>When</code>, or <code>Then</code>. In this example, there is one <code>Scenario</code>, with three steps.</p><p>The above requirement simply states that the machine should dispense coffee into the cup, under the assumption that there&#39;s enough coffee in the machine.</p><p>To actually run these requirements as code, we need to add implementations for each step above.</p><h2 id="Step-5:-Implement-the-steps-in-the-feature"><a class="docs-heading-anchor" href="#Step-5:-Implement-the-steps-in-the-feature">Step 5: Implement the steps in the feature</a><a id="Step-5:-Implement-the-steps-in-the-feature-1"></a><a class="docs-heading-anchor-permalink" href="#Step-5:-Implement-the-steps-in-the-feature" title="Permalink"></a></h2><p>Create a directory <code>CoffeeMachine/features/steps</code>.</p><pre><code class="language-bash hljs">$ cd ~/.julia/dev/CoffeeMachine
+$ mkdir -p features/steps</code></pre><p>Add a file <code>CoffeeMachine/features/steps/makingcoffee.jl</code>:</p><pre><code class="language-julia hljs">using Behavior
+using CoffeeMachine
+
+@given(&quot;a machine filled with coffee beans&quot;) do context
+    context[:machine] = Machine(coffee=5.0)
+end
+
+@when(&quot;a user makes a cup of coffee&quot;) do context
+    m = context[:machine]
+    cup = makecoffee!(m)
+    context[:cup] = cup
+end
+
+@then(&quot;the cup contains coffee&quot;) do context
+    cup = context[:cup]
+
+    @expect cup.coffee &gt; 0.0
+end</code></pre><p>This file begins by <code>using</code> the <code>CoffeeMachine</code> module, which is the thing we wish to test, and the <code>Behavior</code> module, which provides the test functions.</p><p>The first step implementation is</p><pre><code class="language-julia hljs">@given(&quot;a machine filled with coffee beans&quot;) do context
+    context[:machine] = Machine(coffee=5.0)
+end</code></pre><p>This is a Julia implementation of the <code>Scenario</code> step</p><pre><code class="language-Gherkin hljs">Given a machine filled with coffee beans</code></pre><p>Note that the string provided to the <code>@given</code> macro matches that of the <code>Given</code> step. This is how Behavior connects the steps in the Gherkin <code>.feature</code> file with actual code.</p><p>The <code>do context ... end</code> is the test function that will run for this step.</p><p>This snippet of code creates a coffee machine using the <code>Machine</code> constructor from the <code>CoffeeMachine</code> module, and provides the coffee machine with 5.0 units of coffee. It then stores this struct in the <code>context</code> dictionary, using the key <code>:machine</code>. The <code>context</code> is a dictionary-like object that stores objects between steps. In this case, the next step will fetch the <code>Machine</code> struct from the <code>context</code> and perform operations on it.</p><p>The second step implementation is</p><pre><code class="language-julia hljs">@when(&quot;a user makes a cup of coffee&quot;) do context
+    m = context[:machine]
+    cup = makecoffee!(m)
+    context[:cup] = cup
+end</code></pre><p>This corresponds to the <code>Scenario</code> step</p><pre><code class="language-Gherkin hljs">When a user makes a cup of coffee</code></pre><p>This step retrieves the <code>Machine</code> struct from the <code>context</code>. The <code>Machine</code> struct was created in the step before this one. Then we call the <code>makecoffee!</code> function, provided by the <code>CoffeeMachine</code> module, on this machine. We store the returned cup in the context, under the key <code>:cup</code>.</p><p>Note that each step ought to perform a single well-defined action. For instance, this step does not make any assumption above <em>what</em> the returned cup actually is. In some cases it will be a <code>Cup</code> struct, and in some cases it will be a <code>Nothing</code>. This step does not care about that, but leaves that to later steps.</p><p>The third and final step checks that the result is what we expect:</p><pre><code class="language-julia hljs">@then(&quot;the cup contains coffee&quot;) do context
+    cup = context[:cup]
+
+    @expect cup.coffee &gt; 0.0
+end</code></pre><p>This step retrieves the cup, which was stored in the <code>context</code> by the previous step. We use the <code>@expect</code> macro to check that the cup does indeed contain coffee. The <code>@expect</code> macro is provided by <code>Behavior</code>, and checks that the provided expression is true. It is very similar to the <code>@test</code> macro in the standard <code>Test</code> module.</p><p>If the above expression was false, say that the returned <code>Cup</code> struct had <code>0.0</code> in its coffee field, then the <code>@expect</code> macro would record a failure, and <code>Behavior</code> would show this step as failed.</p><h2 id="Step-6:-Test-the-Gherkin-feature"><a class="docs-heading-anchor" href="#Step-6:-Test-the-Gherkin-feature">Step 6: Test the Gherkin feature</a><a id="Step-6:-Test-the-Gherkin-feature-1"></a><a class="docs-heading-anchor-permalink" href="#Step-6:-Test-the-Gherkin-feature" title="Permalink"></a></h2><p>The above steps have created a Gherkin feature file, and a step implementation file, but we need to tell <code>Behavior</code> to run them.</p><p>Julias standard location for tests is in the <code>test/runtests.jl</code> file. Add a file <code>CoffeeMachine/test/runtests.jl</code>:</p><pre><code class="language-julia hljs">using Behavior
+using CoffeeMachine
+using Test
+
+@test runspec(pkgdir(CoffeeMachine))</code></pre><p>This code calls the <code>Behavior.runspec</code> function, which finds all the feature files and step implementations, and runs all <code>Scenarios</code>. For this example, if will find the <code>Scenario</code> &quot;Making a regular coffee&quot;, and for each <code>Given</code>/<code>When</code>/<code>Then</code> step, find the matching step implementation in <code>CoffeeMachine/features/steps/makingcoffee.jl</code>, and run it.</p><p>The argument <code>pkgdir(CofeeMachine)</code> simply passes <code>runspec</code> the path to the root of the <code>CoffeeMachine</code> package. From there, it will find the <code>features</code> and <code>features/steps</code> paths.</p><p>Finally, the <code>@test</code> macro is used here to ensure that <code>runspec</code> returns true, which it does when all tests pass. If any tests fail, then <code>runspec</code> returns false, and the <code>@test</code> macro records a failure, so that Julia knows it failed. Without the <code>@test</code> macro here, <code>Behavior</code> will still run all tests, and display them, but the standard Julia testrunner will not know that any tests failed.</p><p>To run the tests, enter the package mode for the <code>CoffeeMachine</code> package, and run the <code>test</code> command.</p><pre><code class="language-julia hljs">julia&gt; ]
+(CoffeeMachine) pkg&gt; test
+     Testing CoffeeMachine
+     [ .. some Julia output, ignored for brevity .. ]
+     Testing Running tests...
+
+Feature: Making Coffee
+  Scenario: Making a regular coffee
+    Given a machine filled with coffee beans
+     When a user makes a cup of coffee
+     Then the cup contains coffee
+
+                         | Success | Failure
+  Feature: Making Coffee | 1       | 0
+
+
+SUCCESS
+     Testing CoffeeMachine tests passed</code></pre><p><code>Behavior</code> will by default print each <code>Feature</code>, <code>Scenario</code>, and step as they are being executed, and show a final result of how many scenarios succeeded, and how many failed as part of each <code>Feature</code>. Finally, it says <code>SUCCESS</code> to indicate that no errors were found.</p><h3 id="Optional:-Introduce-an-error-to-see-failures"><a class="docs-heading-anchor" href="#Optional:-Introduce-an-error-to-see-failures">Optional: Introduce an error to see failures</a><a id="Optional:-Introduce-an-error-to-see-failures-1"></a><a class="docs-heading-anchor-permalink" href="#Optional:-Introduce-an-error-to-see-failures" title="Permalink"></a></h3><p>To see what failures look like, we can intentionally introduce an error into <code>CoffeeMachine</code>.</p><p>In the file <code>CoffeeMachine/src/CoffeeMachine.jl</code>, find the function</p><pre><code class="language-julia hljs">function makecoffee!(m::Machine; withmilk=false) :: Union{Cup, Nothing}
+    if m.coffee &lt;= 0.0
+        display!(m, &quot;Out of coffee&quot;)
+        return nothing
+    end
+
+    if withmilk &amp;&amp; m.milk &lt;= 0.0
+        display!(m, &quot;Out of milk&quot;)
+        return nothing
+    end
+
+    milkincup = if withmilk
+        1.0
+    else
+        0.0
+    end
+
+    m.coffee -= 1.0
+    m.milk -= milkincup
+
+    display!(m, &quot;Enjoy&quot;)
+
+    Cup(1.0, milkincup)
+end</code></pre><p>At the end of this function, change that last line to</p><pre><code class="language-julia hljs">function makecoffee!(m::Machine; withmilk=false) :: Union{Cup, Nothing}
+    .. keep the rest of the function as is
+
+    Cup(0.0, milkincup)
+end</code></pre><p>This ensures that the cup will <em>not</em> contain any coffee.</p><p>From the package mode in the <code>CoffeeMachine</code> package, run <code>test</code> again.</p><pre><code class="language-julia-repl hljs">(CoffeeMachine) pkg&gt; test
+     Testing CoffeeMachine
+     [ .. output removed for brevity .. ]
+     Testing Running tests...
+
+Feature: Making Coffee
+  Scenario: Making a regular coffee
+    Given a machine filled with coffee beans
+     When a user makes a cup of coffee
+     Then the cup contains coffee
+
+        FAILED: cup.coffee &gt; 0.0
+
+
+                         | Success | Failure
+  Feature: Making Coffee | 0       | 1
+
+
+FAILURE
+Test Failed at /home/erik/.julia/dev/CoffeeMachine/test/runtests.jl:5
+  Expression: runspec(pkgdir(CoffeeMachine))
+ERROR: LoadError: There was an error during testing
+in expression starting at /home/erik/.julia/dev/CoffeeMachine/test/runtests.jl:5
+ERROR: Package CoffeeMachine errored during testing</code></pre><p>You will see above that while the <code>Given</code> and <code>When</code> steps were successful, the <code>Then</code> step failed, and it shows the expression that failed <code>cup.coffee &gt; 0.0</code>.</p><p>Furthermore, the entire feature is marked as failed, and we see that <code>1</code> scenario failed in that feature.</p><p>To continue, ensure that you undo the intentional error, so that the tests pass again.</p><h2 id="Step-7:-Add-further-scenarios"><a class="docs-heading-anchor" href="#Step-7:-Add-further-scenarios">Step 7: Add further scenarios</a><a id="Step-7:-Add-further-scenarios-1"></a><a class="docs-heading-anchor-permalink" href="#Step-7:-Add-further-scenarios" title="Permalink"></a></h2><p>Add the following <code>Scenario</code> to <code>CoffeeMachine/features/MakingCoffee.feature</code>:</p><pre><code class="language-Gherkin hljs">Scenario: Making coffee with milk
+    Given a machine filled with coffee beans
+      And that the machine also has milk
+     When a user makes a cup of coffee with milk
+     Then the cup contains coffee
+      And the cup contains milk</code></pre><p>Note that some of the steps are the same as the previous <code>Scenario</code>, while others are new.</p><p>If you run the tests again, you will get a failure saying</p><pre><code class="nohighlight hljs">Scenario: Making coffee with milk
+  Given a machine filled with coffee beans
+  Given that the machine also has milk
+
+      No match for &#39;Given that the machine also has milk&#39;</code></pre><p>This error occurs because we haven&#39;t added any step definition for the step <code>And that the machine also has milk</code> yet. The Gherking step type <code>And</code> means that the step type will be whatever came before it, which is a <code>Given</code> in this situation. So, add a step implementation in <code>CoffeeMachine/features/steps/makingcoffee.jl</code>:</p><pre><code class="language-julia hljs">@given(&quot;that the machine also has milk&quot;) do context
+    m = context[:machine]
+    fillwith!(m, milk=5.0)
+end</code></pre><p>This expects that a machine has already been constructed, and simply fills it with milk.</p><p>Also add step implementations for the other new steps:</p><pre><code class="language-julia hljs">@when(&quot;a user makes a cup of coffee with milk&quot;) do context
+    m = context[:machine]
+    cup = makecoffee!(m, withmilk=true)
+    context[:cup] = cup
+end
+
+@then(&quot;the cup contains milk&quot;) do context
+    cup = context[:cup]
+
+    @expect cup.milk &gt; 0.0
+end</code></pre><p>The first one calls <code>makecoffee!</code>, but this time with the keyword argument <code>withmilk=true</code>, indicating that we want milk in the coffee.</p><p>The second step definition checks that there is milk in the cup.</p><p>Runing the tests shows that both scenarios now pass.</p><pre><code class="language-julia-repl hljs">(CoffeeMachine) pkg&gt; test
+     Testing CoffeeMachine
+     [ .. removed output for brevity .. ]
+     Testing Running tests...
+
+Feature: Making Coffee
+  Scenario: Making a regular coffee
+    Given a machine filled with coffee beans
+     When a user makes a cup of coffee
+     Then the cup contains coffee
+
+  Scenario: Making coffee with milk
+    Given a machine filled with coffee beans
+    Given that the machine also has milk
+     When a user makes a cup of coffee with milk
+     Then the cup contains coffee
+     Then the cup contains milk
+
+                         | Success | Failure
+  Feature: Making Coffee | 2       | 0
+
+
+SUCCESS
+     Testing CoffeeMachine tests passed</code></pre><p>Note that step</p><pre><code class="language-Gherkin hljs">Then the cup contains coffee</code></pre><p>is reused, as is the initial <code>Given</code> that constructs the coffee machine. It is expected that many, if not most, step definitions will be shared by many scenarios.</p><h2 id="Step-8:-Scenario-Outlines"><a class="docs-heading-anchor" href="#Step-8:-Scenario-Outlines">Step 8: Scenario Outlines</a><a id="Step-8:-Scenario-Outlines-1"></a><a class="docs-heading-anchor-permalink" href="#Step-8:-Scenario-Outlines" title="Permalink"></a></h2><p><code>Scenario Outline</code>s in Gherkin is a way to run one scenario for many similar values. For instance, say that we want to test the machine&#39;s error messages when it is out of an ingredient. We could write two different scenarios, one for when the machine is out of coffee, and one for when it is out of milk.</p><pre><code class="language-Gherkin hljs">Feature: Displaying messages
+
+    Scenario: Out of coffee
+        Given a machine without coffee
+         When a user makes a cup of coffee with milk
+         Then the machine displays Out of coffee
+
+    Scenario: Out of milk
+        Given a machine without milk
+         When a user makes a cup of coffee with milk
+         Then the machine displays Out of milk</code></pre><p>However, note that the two scenarios above are nearly identical, only differing in specific values. The sequence of steps are the same, and the type of situation tested is the same. The only differences are which ingredient is missing and which error message we expect. This is a situation where you can use a single <code>Scenario Outline</code> to express more than one <code>Scenario</code>.</p><p>Create a new feature file <code>CoffeeMachine/features/Display.feature</code>:</p><pre><code class="language-Gherkin hljs">Feature: Displaying messages
+
+    Scenario Outline: Errors
+        Given a machine without &lt;ingredient&gt;
+         When a user makes a cup of coffee with milk
+         Then the machine displays &lt;message&gt;
+
+        Examples:
+            | ingredient | message       |
+            | coffee     | Out of coffee |
+            | milk       | Out of milk   |</code></pre><p>The above <code>Scenario Outline</code> looks like the above <code>Scenario</code>s, but introduces two placeholders, <code>&lt;ingredient&gt;</code> and <code>&lt;message&gt;</code> instead of specific values. In the <code>Examples:</code> section we have a table that lists which error message we expect for a given missing ingredient. The first line in the table has the two placeholders <code>ingredient</code> and <code>message</code> as column headers.</p><p>This <code>Scenario Outline</code> is exactly equivalent to the two <code>Scenario</code>s above. To run it, create a new step definition file <code>CoffeeMachine/features/steps/display.jl</code>:</p><pre><code class="language-julia hljs">using Behavior
+using CoffeeMachine
+
+@given(&quot;a machine without coffee&quot;) do context
+    context[:machine] = Machine(coffee=0.0, milk=5.0)
+end
+
+@given(&quot;a machine without milk&quot;) do context
+    context[:machine] = Machine(coffee=5.0, milk=0.0)
+end
+
+@then(&quot;the machine displays Out of coffee&quot;) do context
+    m = context[:machine]
+    @expect readdisplay(m) == &quot;Out of coffee&quot;
+end
+
+@then(&quot;the machine displays Out of milk&quot;) do context
+    m = context[:machine]
+    @expect readdisplay(m) == &quot;Out of milk&quot;
+end</code></pre><p>You can run the tests to ensure that they pass.</p><h2 id="Step-9:-Parameters"><a class="docs-heading-anchor" href="#Step-9:-Parameters">Step 9: Parameters</a><a id="Step-9:-Parameters-1"></a><a class="docs-heading-anchor-permalink" href="#Step-9:-Parameters" title="Permalink"></a></h2><p>In the above step, we saw how <code>Scenario Outline</code>s can be utilized to reduce otherwise repetitive <code>Scenario</code>s, and improve readability. In the step definition file above, also note that we have two repetitive steps</p><pre><code class="language-julia hljs">@then(&quot;the machine displays Out of coffee&quot;) do context
+    m = context[:machine]
+    @expect readdisplay(m) == &quot;Out of coffee&quot;
+end
+
+@then(&quot;the machine displays Out of milk&quot;) do context
+    m = context[:machine]
+    @expect readdisplay(m) == &quot;Out of milk&quot;
+end</code></pre><p>These two steps check the same aspect of the coffee machine, but for two different values. While <code>Scenario Outline</code>s can be used to reduce repetition in <code>.feature</code> files, parameters can be used to reduce repetition in the step definition <code>.jl</code> files.</p><p>Both steps above can be reduced to a single step</p><pre><code class="language-julia hljs">@then(&quot;the machine displays {String}&quot;) do context, message
+    m = context[:machine]
+    @expect readdisplay(m) == message
+end</code></pre><p>There are two differences here:</p><ol><li>The step string has a parameter <code>{String}</code> which matches any text.</li><li>The do-block function now takes two parameters, <code>context</code> and <code>message</code>.</li></ol><p>The value of the <code>message</code> argument to the do-block is whatever text is matched by <code>{String}</code>. So, for the first example above</p><pre><code class="nohighlight hljs">Then the machine displays Out of coffee</code></pre><p>this step will match the step definition <code>&quot;the machine displays {String}&quot;</code>, and the variable <code>message</code> will take on the value <code>Out of coffee</code>.</p><p>In this way, we can write a single step definition to match many <code>Scenario</code> steps.</p><p>Note that while the above example uses a <code>Scenario Outline</code> to demonstrate parameters in the step definition <code>.jl</code> file, these are two separate concepts. A step definition with a parameter like <code>{String}</code> can be used for <code>Scenario</code>s as well.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../usage/">« Usage</a><a class="docs-footer-nextpage" href="../functions/">Functions »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Sunday 1 February 2026 20:44">Sunday 1 February 2026</span>. Using Julia version 1.12.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
