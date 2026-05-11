@@ -222,7 +222,7 @@ julia> converttypes(:Int, "123")
 ```
 """
 function converttypes(typesymbol::Symbol, value) :: Any
-    t = eval(typesymbol)
+    t = getfield(Main, typesymbol)
     if t <: Number
         parse(t, value)
     else

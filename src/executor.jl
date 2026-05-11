@@ -114,7 +114,7 @@ function executesteps(executor::Executor, context::StepDefinitionContext, steps:
 
         results[i] = try
             # Find a step definition matching the step text.
-            stepdefinitionmatch = findstepdefinition(executor.stepdefmatcher, step)
+            stepdefinitionmatch = invokelatest(findstepdefinition, executor.stepdefmatcher, step)
 
             # The block text is provided to the step definition via the context.
             context[:block_text] = step.block_text
